@@ -9,11 +9,9 @@ interface ProgramProps<Model,Msg> {
     update: (msg: Msg, model: Model) => [Model, Cmd<Msg>]
 }
 
-
 interface ProgramState<Model> {
     currentModel?: Model
 }
-
 
 
 export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, ProgramState<Model>> {

@@ -1,10 +1,10 @@
 import React, {Component, ReactNode} from 'react';
 // import './App.css';
-import {Program} from './Tea'
-import {Dispatcher} from "./Dispatcher";
-import {Cmd, noCmd} from "./Cmd";
-import {random} from "./Random";
-import {Task} from "./Task";
+import {Program} from './Tea/Program'
+import {Dispatcher} from "./Tea/Dispatcher";
+import {Cmd, noCmd} from "./Tea/Cmd";
+import {random} from "./Tea/Random";
+import {Task} from "./Tea/Task";
 import {number} from "prop-types";
 
 
