@@ -1,32 +1,60 @@
 import React, {Component, ReactNode} from 'react';
 // import './App.css';
-import {Dispatcher, Program} from './Tea'
+import {Cmd, Dispatcher, noCmd, Program} from './Tea'
+import {RandomCmd} from "./RandomCmd";
+import {timeout} from "q";
 
 
-type Model = number
+interface Model {
+    value: number
+    enabled: boolean
+}
 
 
 function init(): Model  {
-    return 0;
+    return {
+        value: 0,
+        enabled: true
+    }
 }
 
 
 function view(dispatch: Dispatcher<Msg>, model:Model) : ReactNode {
     return (
         <div>
-            Value = {model.toString()}
+            Value = {model.value}
             <button
+                disabled={!model.enabled}
                 onClick={() => dispatch({ type: "inc" }) }>
                 +
             </button>
             <button
-                onClick={() => dispatch({ type: "dec"}) }>-</button>
+                disabled={!model.enabled}
+                onClick={() => dispatch({ type: "dec"}) }>
+                -
+            </button>
+            <button
+                disabled={!model.enabled}
+                onClick={() => dispatch({ type: "rand"}) }>
+                random
+            </button>
+            <button
+                disabled={!model.enabled}
+                onClick={() => dispatch({ type: "timeout"}) }>
+                timeout
+            </button>
         </div>
     );
 }
 
 
-type Msg = Increment | Decrement
+type Msg
+    = Increment
+    | Decrement
+    | Randomize
+    | RandomReceived
+    | Timeout
+    | TimeoutReceived
 
 
 interface Increment {
@@ -39,12 +67,75 @@ interface Decrement {
 }
 
 
-function update(msg: Msg, model: Model): Model {
+interface Randomize {
+    type: "rand"
+}
+
+
+interface RandomReceived {
+    type: "random_received"
+    value: number
+}
+
+
+interface Timeout {
+    type: "timeout"
+}
+
+
+interface TimeoutReceived {
+    type: "timeout_received"
+    value: number
+}
+
+
+
+
+function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     switch (msg.type) {
         case "inc":
-            return model + 1;
+            return noCmd({ ...model, value: model.value + 1 });
         case "dec":
-            return model - 1;
+            return noCmd({...model, value: model.value - 1});
+        case "rand":
+            return [
+                model,
+                new RandomCmd<Msg>(i => {
+                    return {
+                        type: "random_received",
+                        value: i
+                    }
+                })
+            ];
+        case "random_received":
+            return noCmd({...model, value: msg.value});
+        case "timeout":
+            return [
+                {...model, enabled: false},
+                new MyTimeout(1000)
+            ];
+        case "timeout_received":
+            return noCmd({...model, value: msg.value, enabled: true});
+    }
+}
+
+
+class MyTimeout extends Cmd<TimeoutReceived> {
+
+    readonly timeoutMs: number;
+
+    constructor(timeoutMs: number) {
+        super();
+        this.timeoutMs = timeoutMs;
+    }
+
+    run(dispatch: Dispatcher<TimeoutReceived>): void {
+        setTimeout(() => {
+            dispatch({
+                type:"timeout_received",
+                value: new Date().getTime()
+            })
+        }, this.timeoutMs)
     }
 }
 
