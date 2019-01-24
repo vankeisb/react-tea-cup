@@ -1,8 +1,11 @@
 import React, {Component, ReactNode} from 'react';
 // import './App.css';
-import {Cmd, Dispatcher, noCmd, Program} from './Tea'
-import {RandomCmd} from "./RandomCmd";
-import {timeout} from "q";
+import {Program} from './Tea'
+import {Dispatcher} from "./Dispatcher";
+import {Cmd, noCmd} from "./Cmd";
+import {random} from "./Random";
+import {Task} from "./Task";
+import {number} from "prop-types";
 
 
 interface Model {
@@ -11,7 +14,7 @@ interface Model {
 }
 
 
-function init(): Model  {
+function init() {
     return {
         value: 0,
         enabled: true
@@ -19,7 +22,7 @@ function init(): Model  {
 }
 
 
-function view(dispatch: Dispatcher<Msg>, model:Model) : ReactNode {
+function view(dispatch: Dispatcher<Msg>, model:Model) {
     return (
         <div>
             Value = {model.value}
@@ -89,8 +92,6 @@ interface TimeoutReceived {
 }
 
 
-
-
 function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     switch (msg.type) {
         case "inc":
@@ -98,14 +99,16 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         case "dec":
             return noCmd({...model, value: model.value - 1});
         case "rand":
+            const rndTask = random(0, 100);
+            const cmd = Task.perform(rndTask, i => {
+                return {
+                    type: "random_received",
+                    value: i
+                } as Msg
+            });
             return [
                 model,
-                new RandomCmd<Msg>(i => {
-                    return {
-                        type: "random_received",
-                        value: i
-                    }
-                })
+                cmd
             ];
         case "random_received":
             return noCmd({...model, value: msg.value});
@@ -129,7 +132,7 @@ class MyTimeout extends Cmd<TimeoutReceived> {
         this.timeoutMs = timeoutMs;
     }
 
-    run(dispatch: Dispatcher<TimeoutReceived>): void {
+    run(dispatch: Dispatcher<TimeoutReceived>): void{
         setTimeout(() => {
             dispatch({
                 type:"timeout_received",

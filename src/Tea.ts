@@ -1,7 +1,6 @@
 import React, {Component, ReactNode} from 'react';
-
-
-export type Dispatcher<Msg> = (m:Msg) => void;
+import {Dispatcher} from "./Dispatcher";
+import {Cmd} from "./Cmd";
 
 
 interface ProgramProps<Model,Msg> {
@@ -15,23 +14,6 @@ interface ProgramState<Model> {
     currentModel?: Model
 }
 
-
-export abstract class Cmd<Msg> {
-
-    static none<Msg>(): Cmd<Msg> {
-        return new CmdNone();
-    }
-
-    abstract run(dispatch: Dispatcher<Msg>): void;
-
-}
-
-
-class CmdNone<Msg> extends Cmd<Msg> {
-    run(dispatch: Dispatcher<Msg>): void {
-        // it's a noop !
-    }
-}
 
 
 export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, ProgramState<Model>> {
@@ -73,8 +55,4 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
     }
 
 
-}
-
-export function noCmd<Model,Msg>(model:Model): [Model, Cmd<Msg>] {
-    return [ model, Cmd.none() ]
 }
