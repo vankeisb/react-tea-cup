@@ -1,11 +1,10 @@
-import React, {Component, ReactNode} from 'react';
+import React, {Component} from 'react';
 // import './App.css';
 import {Program} from './TeaCup/Program'
 import {Dispatcher} from "./TeaCup/Dispatcher";
 import {Cmd, noCmd} from "./TeaCup/Cmd";
 import {random} from "./TeaCup/Random";
 import {Task} from "./TeaCup/Task";
-import {number} from "prop-types";
 
 
 interface Model {
