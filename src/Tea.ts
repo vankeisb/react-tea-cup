@@ -1,4 +1,4 @@
-    import React, {Component, ReactNode} from 'react';
+import React, {Component, ReactNode} from 'react';
 
 
 export type Dispatcher<Msg> = (m:Msg) => void;
