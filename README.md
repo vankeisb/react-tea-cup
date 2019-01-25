@@ -1,8 +1,6 @@
 Want some TEA in your React ?
 
-# What ?
-
-`react-tea-cup` is a very thin library that helps following The Elm Architecture pattern, in React. 
+`react-tea-cup` is a very thin library that helps following The Elm Architecture, in React. 
 
 # Why ?
 
