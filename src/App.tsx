@@ -5,6 +5,7 @@ import {Dispatcher} from "./TeaCup/Dispatcher";
 import {Cmd, noCmd} from "./TeaCup/Cmd";
 import {random} from "./TeaCup/Random";
 import {Task} from "./TeaCup/Task";
+import {MyStatefulComponent} from "./MyStatefulComponent";
 
 
 interface Model {
@@ -24,7 +25,8 @@ function init() {
 function view(dispatch: Dispatcher<Msg>, model:Model) {
     return (
         <div>
-            Value = {model.value}
+            <h1>This is TEA with React...</h1>
+            <span>Value = {model.value}</span>
             <button
                 disabled={!model.enabled}
                 onClick={() => dispatch({ type: "inc" }) }>
@@ -45,6 +47,7 @@ function view(dispatch: Dispatcher<Msg>, model:Model) {
                 onClick={() => dispatch({ type: "timeout"}) }>
                 timeout
             </button>
+            <MyStatefulComponent foo={"yalla"}/>
         </div>
     );
 }
