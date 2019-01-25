@@ -1,44 +1,54 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Want some TEA in your React ?
 
-## Available Scripts
+# What ?
 
-In the project directory, you can run:
+`react-tea-cup` is a very thin library that helps following The Elm Architecture pattern, in React. 
 
-### `npm start`
+# Why ?
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Elm and React follow different paths. One tries to advocate for a single stack (Elm), whereas the other 
+is very open and already has several "flavors".
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+Also, all the React "TEA-alternatives" (ie Redux et al) seem very complex, overkill at best, and sometimes just bad.
 
-### `npm test`
+This makes it hard for people to choose what flavor best fits them. Choice is good. Too much choice ? Maybe not so good...
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+So this is an attempt to implement our beloved TEA pattern, with React (and TypeScript).
 
-### `npm run build`
+## Features
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Has to be :
+* Simple
+    * Very easy to understand for TEA-friendly people
+    * Easy for people with some Redux knowledge
+* As close to TEA as possible
+    * Model, Msg, init, view, update, subs, fx managers
+* As safe as we can 
+    * hey, TS isn't Elm...
+* Integrable with other "styles" of React
+    * Redux, Stateful components etc
+    
+    
+# Pros & Cons (so far)    
+    
+## What's cool    
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+* Really TEA-like (minus everything else that's good in Elm, but still better than nothing)
+* Simple to implement (so far)
+* Interop at the `Component` level
+    
+## What sucks
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* Boilerplate/Uglyness in "tagged types"
+    * Discriminated Unions with "switch/cast" looks so ugly vs. real tags + pattern matching
+* Compiler often needs some help 
+    * declare args, vars, use "as"...
+    * pain with tagged types
+* Compilation messages are ugly
+* I miss my partials
+* Exceptions !!! Exceptions !!!
+* Open doors for crap everywhere (state, side effects, mutations...)
 
-### `npm run eject`
+# TODOs
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Subs and Effect Managers...
