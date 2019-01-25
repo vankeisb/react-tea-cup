@@ -22,9 +22,8 @@ export class MyStatefulComponent extends Component<MyProps, MyState> {
     render() {
         return (
             <div>
-                <h3>I am stateful</h3>
                 <p>
-                Yo: {this.props.foo + " " + this.state.i}
+                    Yo: {this.props.foo + " " + this.state.i}
                 </p>
                 <button onClick={() =>
                     this.setState({...this.state, i: this.state.i + 1 })
