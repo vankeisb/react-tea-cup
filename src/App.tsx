@@ -54,38 +54,12 @@ function view(dispatch: Dispatcher<Msg>, model:Model) {
 
 
 type Msg
-    = Increment
-    | Decrement
-    | Randomize
-    | RandomReceived
-    | Timeout
+    = { type: "inc" }
+    | { type: "dec" }
+    | { type: "rand" }
+    | { type: "random_received", value: number }
+    | { type: "timeout" }
     | TimeoutReceived
-
-
-interface Increment {
-    type: "inc"
-}
-
-
-interface Decrement {
-    type: "dec"
-}
-
-
-interface Randomize {
-    type: "rand"
-}
-
-
-interface RandomReceived {
-    type: "random_received"
-    value: number
-}
-
-
-interface Timeout {
-    type: "timeout"
-}
 
 
 interface TimeoutReceived {
@@ -97,7 +71,7 @@ interface TimeoutReceived {
 function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     switch (msg.type) {
         case "inc":
-            return noCmd({ ...model, value: model.value + 1 });
+            return noCmd({...model, value: model.value + 1 });
         case "dec":
             return noCmd({...model, value: model.value - 1});
         case "rand":
