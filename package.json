@@ -2,6 +2,8 @@
   "name": "react-tea-cup",
   "version": "0.0.1",
   "description": "Blah",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "compile": "rimraf dist && tsc"
   },
@@ -10,6 +12,7 @@
     "typescript": "^3.2.4"
   },
   "dependencies": {
-    "@types/react": "^16.7.22"
+    "@types/react": "^16.7.22",
+    "react": "^16.7.0"
   }
 }
