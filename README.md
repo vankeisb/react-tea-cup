@@ -29,6 +29,8 @@ Has to be :
 * "pure" view/update 
 * `Cmd` for side effects 
 * `Html.program` equivalent (turns your `view`, `update`, etc. into a React `Component`)
+* Support for parent/child (`Cmd.map`, `Html.map`)
+* `Html.lazy` equivalent (memoization) for performance
     
     
 # Pros & Cons (so far)    
