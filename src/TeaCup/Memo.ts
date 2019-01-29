@@ -1,18 +1,24 @@
 import {Dispatcher} from "./Dispatcher";
 
-export function memo<M,T,R>(f:(d:Dispatcher<M>, t:T) => R):((d:Dispatcher<M>, t:T) => R) {
 
-    return function (this: Cache<T,R>, d:Dispatcher<M>, x: T) {
-        if (this.input === x) {
-            if (this.result === null) {
-                this.result = f(d, x);
+type F<M,T,R> = (d:Dispatcher<M>) => (t:T) => R
+
+export function memo<M,T,R>(f:F<M,T,R>):(F<M,T,R>) {
+
+    return function (this: Cache<T,R>, d:Dispatcher<M>) {
+        const that: Cache<T,R> = this;
+        return (t:T) => {
+            if (that.input === t) {
+                if (that.result === null) {
+                    that.result = f(d)(t);
+                }
+                return that.result;
+            } else {
+                that.input = t;
+                that.result = f(d)(t);
             }
-            return this.result;
-        } else {
-            this.input = x;
-            this.result = f(d, x);
+            return that.result;
         }
-        return this.result;
     }.bind({
         input: null,
         result: null

@@ -69,18 +69,13 @@ const Counter = React.memo<CounterProps>((props) => {
 }));
 
 
-function view(dispatch: Dispatcher<Msg>, model: Model) {
+export const view = (dispatch: Dispatcher<Msg>) => (model: Model) => {
     console.log("App.view");
     return (
         <div>
             <Counter dispatch={dispatch} enabled={model.enabled} value={model.value}/>
             <h2>Some parent-child</h2>
-            {
-                childView(
-                    map(dispatch, toMsg),
-                    model.childModel
-                )
-            }
+            {childView(map(dispatch, toMsg))(model.childModel)}
         </div>
     );
 }

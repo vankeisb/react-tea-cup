@@ -5,7 +5,7 @@ import {Cmd} from "./Cmd";
 
 interface ProgramProps<Model,Msg> {
     init: () => Model
-    view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode
+    view: (dispatch: Dispatcher<Msg>) => (model: Model) => ReactNode
     update: (msg: Msg, model: Model) => [Model, Cmd<Msg>]
 }
 
@@ -49,7 +49,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         }
         const model = this.state.currentModel;
         // console.log("render : calling view");
-        return this.props.view(this.dispatch.bind(this), model);
+        return this.props.view(this.dispatch.bind(this))(model);
     }
 
 
