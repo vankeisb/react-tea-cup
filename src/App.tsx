@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-// import './App.css';
+import './App.css';
 import {Program} from './TeaCup/Program'
 import {Dispatcher, map} from "./TeaCup/Dispatcher";
 import {Cmd, noCmd} from "./TeaCup/Cmd";
@@ -29,34 +29,50 @@ function init() {
     }
 }
 
+interface CounterProps {
+    dispatch: Dispatcher<Msg>,
+    value: number,
+    enabled: boolean
+}
 
-function view(dispatch: Dispatcher<Msg>, model:Model) {
+const Counter = React.memo<CounterProps>((props) => {
+    console.log("Counter render");
     return (
         <div>
             <h1>This is TEA with React...</h1>
-            <span>Value = {model.value}</span>
+            <span>Value = {props.value}</span>
             <button
-                disabled={!model.enabled}
-                onClick={() => dispatch({ type: "inc" }) }>
+                disabled={!props.enabled}
+                onClick={() => props.dispatch({type: "inc"})}>
                 +
             </button>
             <button
-                disabled={!model.enabled}
-                onClick={() => dispatch({ type: "dec"}) }>
+                disabled={!props.enabled}
+                onClick={() => props.dispatch({type: "dec"})}>
                 -
             </button>
             <button
-                disabled={!model.enabled}
-                onClick={() => dispatch({ type: "rand"}) }>
+                disabled={!props.enabled}
+                onClick={() => props.dispatch({type: "rand"})}>
                 random
             </button>
             <button
-                disabled={!model.enabled}
-                onClick={() => dispatch({ type: "timeout"}) }>
+                disabled={!props.enabled}
+                onClick={() => props.dispatch({type: "timeout"})}>
                 timeout
             </button>
-            <h2>React.Component in <code>view</code> !</h2>
-            <MyStatefulComponent foo={"yalla"}/>
+        </div>
+    )
+}, ((prevProps, nextProps) => {
+    return prevProps.value === nextProps.value
+        && prevProps.enabled === nextProps.enabled
+}));
+
+
+function view(dispatch: Dispatcher<Msg>, model: Model) {
+    return (
+        <div>
+            <Counter dispatch={dispatch} enabled={model.enabled} value={model.value}/>
             <h2>Some parent-child</h2>
             {
                 childView(
@@ -96,7 +112,7 @@ interface TimeoutReceived {
 function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     switch (msg.type) {
         case "inc":
-            return noCmd({...model, value: model.value + 1 });
+            return noCmd({...model, value: model.value + 1});
         case "dec":
             return noCmd({...model, value: model.value - 1});
         case "rand":
@@ -122,7 +138,7 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
             return noCmd({...model, value: msg.value, enabled: true});
 
         case "child_msg":
-            const [m,c] = childUpdate(msg.m, model.childModel);
+            const [m, c] = childUpdate(msg.m, model.childModel);
             return [
                 {...model, childModel: m},
                 c.map(toMsg)
@@ -140,10 +156,10 @@ class MyTimeout extends Cmd<TimeoutReceived> {
         this.timeoutMs = timeoutMs;
     }
 
-    run(dispatch: Dispatcher<TimeoutReceived>): void{
+    run(dispatch: Dispatcher<TimeoutReceived>): void {
         setTimeout(() => {
             dispatch({
-                type:"timeout_received",
+                type: "timeout_received",
                 value: new Date().getTime()
             })
         }, this.timeoutMs)
@@ -152,13 +168,13 @@ class MyTimeout extends Cmd<TimeoutReceived> {
 
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <Program init={init} view={view} update={update}/>
-      </div>
-    );
-  }
+    render() {
+        return (
+            <div className="App">
+                <Program init={init} view={view} update={update}/>
+            </div>
+        );
+    }
 }
 
 export default App;

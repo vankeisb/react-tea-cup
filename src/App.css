@@ -1,3 +1,13 @@
 .App {
 
 }
+
+
+.tree-node__row {
+    display: flex;
+}
+
+.tree-node__spacer {
+    min-width: 16px;
+    max-width: 16px;
+}
