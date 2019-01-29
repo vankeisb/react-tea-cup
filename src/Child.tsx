@@ -19,24 +19,25 @@ export function init(): Model {
 }
 
 
-export const view = Memo.memo((dispatch:Dispatcher<Msg>) => (model: Model) => {
-    console.log("Child.view");
-    return (
-        <div>
-            <button
-                disabled={model.value.length == 0}
-                onClick={() => dispatch({type: "remove"})}>
-                Remove char
-            </button>
-            <p>Text: <em>{model.value}</em></p>
-            <button
-                disabled={model.value.length == 0}
-                onClick={() => dispatch({type: "add"})}>
-                Add char
-            </button>
-        </div>
-    )
-});
+export const view = (dispatch:Dispatcher<Msg>) => (model: Model) => {
+    return Memo.memo(model)((model) => {
+        return (
+            <div>
+                <button
+                    disabled={model.value.length == 0}
+                    onClick={() => dispatch({type: "remove"})}>
+                    Remove char
+                </button>
+                <p>Text: <em>{model.value}</em></p>
+                <button
+                    disabled={model.value.length == 0}
+                    onClick={() => dispatch({type: "add"})}>
+                    Add char
+                </button>
+            </div>
+        )
+    })
+};
 
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
