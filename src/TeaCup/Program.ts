@@ -42,7 +42,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         }
     }
 
-    render(): React.ReactNode {
+    render(): ReactNode {
         if (this.state.currentModel === undefined) {
             // console.log("render : no model, returning null");
             return null;
