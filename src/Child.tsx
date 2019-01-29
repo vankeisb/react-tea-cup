@@ -21,6 +21,7 @@ export function init(): Model {
 
 export const view = (dispatch:Dispatcher<Msg>) => (model: Model) => {
     return Memo.memo(model)((model) => {
+        console.log("Child.view");
         return (
             <div>
                 <button

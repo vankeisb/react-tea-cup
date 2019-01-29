@@ -36,7 +36,7 @@ interface CounterProps {
 }
 
 const Counter = React.memo<CounterProps>((props) => {
-    console.log("Counter render");
+    console.log("Counter.view");
     return (
         <div>
             <h1>This is TEA with React...</h1>
