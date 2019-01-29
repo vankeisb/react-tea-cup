@@ -7,11 +7,7 @@ Want some TEA in your React ?
 Elm and React follow different paths. One tries to advocate for a single stack (Elm), whereas the other 
 is very open and already has several "flavors".
 
-Also, all the React "TEA-alternatives" (ie Redux et al) seem very complex, overkill at best, and sometimes just bad.
-
-This makes it hard for people to choose what flavor best fits them. Choice is good. Too much choice ? Maybe not so good...
-
-So this is an attempt to implement our beloved TEA pattern, with React (and TypeScript).
+This is an attempt to implement our beloved TEA pattern, with React (and TypeScript).
 
 ## Features
 
@@ -25,6 +21,14 @@ Has to be :
     * hey, TS isn't Elm...
 * Integrable with other "styles" of React
     * Redux, Stateful components etc
+
+
+## Concepts
+
+* React for vdom/rendering
+* "pure" view/update 
+* `Cmd` for side effects 
+* `Html.program` equivalent (turns your `view`, `update`, etc. into a React `Component`)
     
     
 # Pros & Cons (so far)    
