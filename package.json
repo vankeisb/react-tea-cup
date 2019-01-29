@@ -1,7 +1,13 @@
 {
   "name": "react-tea-cup",
-  "version": "0.0.1",
-  "description": "Blah",
+  "version": "0.0.2",
+  "description": "Put some TEA in your React.",
+  "author": "Rémi Van Keisbelck <remi@rvkb.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:vankeisb/react-tea-cup.git"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
