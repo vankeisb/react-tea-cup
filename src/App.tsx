@@ -70,6 +70,7 @@ const Counter = React.memo<CounterProps>((props) => {
 
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
+    console.log("App.view");
     return (
         <div>
             <Counter dispatch={dispatch} enabled={model.enabled} value={model.value}/>

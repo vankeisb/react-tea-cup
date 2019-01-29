@@ -1,6 +1,7 @@
 import {Dispatcher} from "./TeaCup/Dispatcher";
 import React from 'react';
 import {Cmd, noCmd} from "./TeaCup/Cmd";
+import * as Memo from "./TeaCup/Memo";
 
 export interface Model {
     value: string
@@ -18,7 +19,8 @@ export function init(): Model {
 }
 
 
-export function view(dispatch: Dispatcher<Msg>, model: Model) {
+export const view = Memo.memo((dispatch:Dispatcher<Msg>, model: Model) => {
+    console.log("Child.view");
     return (
         <div>
             <button
@@ -34,7 +36,26 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
             </button>
         </div>
     )
-}
+});
+
+
+// export function view(dispatch: Dispatcher<Msg>, model: Model) {
+//     return (
+//         <div>
+//             <button
+//                 disabled={model.value.length == 0}
+//                 onClick={() => dispatch({type: "remove"})}>
+//                 Remove char
+//             </button>
+//             <p>Text: <em>{model.value}</em></p>
+//             <button
+//                 disabled={model.value.length == 0}
+//                 onClick={() => dispatch({type: "add"})}>
+//                 Add char
+//             </button>
+//         </div>
+//     )
+// }
 
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
