@@ -1,14 +1,14 @@
 import {Dispatcher, Cmd, noCmd, Sub, onAnimationFrame} from 'react-tea-cup'
 import * as React from 'react'
 
-interface Model {
+export interface Model {
     readonly started: boolean
     readonly t: number
     readonly fps: number
     readonly animText: string
 }
 
-type Msg
+export type Msg
     = { type: "raf", t: number }
     | { type: "toggle" }
     | { type: "text-changed", text: string }
@@ -57,7 +57,7 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
 function viewAnim(text: String, t:number) {
     const a = text.split("").map((c, i) => {
         const st = t / 200;
-        const y1 = Math.sin(st + (i / 5)) * 10;
+        const y1 = Math.sin(st + (i / 5)) * 5;
         // const y2 = Math.sin(t / 666 + i) * 10;
         const style = {
             // paddingBottom: y + "px",
@@ -73,12 +73,15 @@ function viewAnim(text: String, t:number) {
     });
     const style = {
         display: "flex",
-        padding: "12px"
+        padding: "12px",
+        minHeight: "48px"
     };
     return (
         <div style={style}>{a}</div>
     )
 }
+
+
 
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
