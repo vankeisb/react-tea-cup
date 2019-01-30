@@ -1,4 +1,4 @@
-import {Sub} from "../../Sub";
+import {Sub} from "./Sub";
 
 
 let subs: Array<RafSub<any>> = [];
