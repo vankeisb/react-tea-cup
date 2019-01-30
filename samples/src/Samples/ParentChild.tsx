@@ -2,9 +2,9 @@ import * as Counter from './Counter'
 import {Dispatcher, map, Cmd, Sub, noCmd} from 'react-tea-cup';
 import * as React from 'react'
 
-type Model = Array<Counter.Model>
+export type Model = Array<Counter.Model>
 
-interface Msg { 
+export interface Msg {
     readonly childIndex: number
     readonly childMsg: Counter.Msg
 }
