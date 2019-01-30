@@ -6,7 +6,7 @@ export * from './Random'
 export * from './Result'
 export * from './Task'
 export * from './Sub'
-export * from './Browser/Events/Animation'
+export * from './Animation'
 
 
 
