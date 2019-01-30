@@ -33,26 +33,29 @@ export function init() : [Model, Cmd<Msg>] {
     ]
 }
 
-export const view = (dispatch: Dispatcher<Msg>) => (model: Model) => (
-    <div>
-        {model.map((counterModel, index) => {
-            return (
-                <div key={index}>
-                    {
-                        Counter.view(
-                            map(dispatch, (cMsg: Counter.Msg) => {
-                                return {
-                                    childIndex: index,
-                                    childMsg: cMsg            
-                                }
-                            })
-                        )(counterModel)
-                    }
-                </div>
-            )            
-        })}
-    </div>
-);
+export function view(dispatch: Dispatcher<Msg>, model: Model) {
+    return (
+        <div>
+            {model.map((counterModel, index) => {
+                return (
+                    <div key={index}>
+                        {
+                            Counter.view(
+                                map(dispatch, (cMsg: Counter.Msg) => {
+                                    return {
+                                        childIndex: index,
+                                        childMsg: cMsg
+                                    }
+                                })
+                                , counterModel
+                            )
+                        }
+                    </div>
+                )
+            })}
+        </div>
+    )
+}
 
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
@@ -71,11 +74,11 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         } else {
             newModels.push(cModel)            
         }
-    })
+    });
     return [ newModels, Cmd.none() ];
 }
 
 
-export const subscriptions = (model: Model) => {
+export function subscriptions(model: Model) {
     return Sub.none<Msg>()
 }

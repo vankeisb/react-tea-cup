@@ -17,7 +17,7 @@ export function init() {
     })
 }
 
-export const view = (dispatch: Dispatcher<Msg>) => (model: Model) => {
+export function view(dispatch: Dispatcher<Msg>, model: Model) {
     return (
         <div>
             <span>Time = {model.t}</span>
@@ -26,7 +26,7 @@ export const view = (dispatch: Dispatcher<Msg>) => (model: Model) => {
             </button>
         </div>
     )
-};
+}
 
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
@@ -39,10 +39,10 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 }
 
 
-export const subscriptions = (model:Model) => {
+export function subscriptions(model:Model) {
     if (model.started) {
         return onAnimationFrame((t:number) => { return {type:"raf", t:t} as Msg})
     } else {
         return Sub.none<Msg>()
     }
-};
+}
