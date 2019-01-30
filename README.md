@@ -58,3 +58,9 @@ Has to be :
 * why do I need a catch-all for "unions" ? seems that sometimes it's needed, sometimes it is not... annoying.
 * can't trust the debugger !! I've seen it report false variable values... sourcemap problem ?
 
+# Memo vs PureComponent
+
+We could be totally pure, by replacing view by a PureComponent, props-based.
+Problem is that we could not easily embed stateful components then.
+
+So we choose to let people explicity use memo() if needed. It's a small price to pay to stay open.
