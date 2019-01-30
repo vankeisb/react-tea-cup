@@ -1,4 +1,4 @@
-import {Component, ReactNode} from 'react';
+import {Component, PureComponent, ReactNode} from 'react';
 import {Dispatcher} from "./Dispatcher";
 import {Cmd} from "./Cmd";
 import { Sub } from './Sub';
@@ -29,10 +29,12 @@ class Guid {
     }
 }
 
+
 export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, ProgramState<Model>> {
 
     private count: number = 0;
     private readonly uuid = Guid.newGuid();
+    private bd: Dispatcher<Msg>;
 
     private logger() {
         // @ts-ignore
@@ -96,6 +98,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         };
         // connect to sub
         const d = this.dispatch.bind(this);
+        this.bd = d;
         sub.init(d);
         // trigger initial command
         mac[1].run(d);
@@ -108,7 +111,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         }
         const model = this.state.currentModel;
         // console.log("render : calling view");
-        return this.props.view(this.dispatch.bind(this), model);
+        return this.props.view(this.bd, model);
     }
 
 
