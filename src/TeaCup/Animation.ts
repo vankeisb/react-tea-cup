@@ -25,7 +25,6 @@ function tick() {
     }
 }
 
-
 class RafSub<M> extends Sub<M> {
 
     readonly mapper: (t:number) => M;
