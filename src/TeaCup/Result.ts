@@ -1,8 +1,8 @@
 export type Result<E,R> = Ok<R> | Err<E>
 
 export interface Ok<R> {
-    type: "ok",
-    value: R
+    readonly type: "ok",
+    readonly value: R
 }
 
 export interface Err<E> {
