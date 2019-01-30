@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dispatcher, Cmd, Sub } from "react-tea-cup";
+import {Dispatcher, Cmd, Sub, noCmd} from "react-tea-cup";
 
 
 // model can be anything of course. Here, it
@@ -10,7 +10,9 @@ export type Model = number;
 export type Msg = { type: "inc" } | { type: "dec" };
 
 // init func : creates initial Model (no Cmds at init yet...)
-export const init = () => 0;
+export function init() : [Model, Cmd<Msg>] {
+    return noCmd(0)
+}
 
 // view : renders the Model. Same as Elm's, but you
 // need this "dispatch" arg, so that you can emit Msgs

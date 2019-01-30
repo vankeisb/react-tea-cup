@@ -1,5 +1,5 @@
 import * as Counter from './Counter'
-import { Dispatcher, map, Cmd, Sub } from 'react-tea-cup';
+import {Dispatcher, map, Cmd, Sub, noCmd} from 'react-tea-cup';
 import * as React from 'react'
 
 type Model = Array<Counter.Model>
@@ -9,11 +9,27 @@ interface Msg {
     readonly childMsg: Counter.Msg
 }
 
-export const init = () => {
-    return [
+export function init() : [Model, Cmd<Msg>] {
+    const macs = [
         Counter.init(),
         Counter.init(),
         Counter.init()
+    ];
+    const models: Array<Counter.Model> = macs.map(mac => mac[0]);
+    return [
+        models,
+        Cmd.batch(
+            macs
+                .map(mac => mac[1])
+                .map((cmd, index) =>
+                    cmd.map((c:Counter.Msg) => {
+                        return {
+                            childIndex: index,
+                            childMsg: c
+                        }
+                    })
+                )
+        )
     ]
 }
 
@@ -36,7 +52,7 @@ export const view = (dispatch: Dispatcher<Msg>) => (model: Model) => (
             )            
         })}
     </div>
-)
+);
 
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {

@@ -10,12 +10,12 @@ type Msg
     = { type: "raf", t: number }
     | { type: "toggle" }
 
-export const init = () => {
-    return {
+export function init() {
+    return noCmd<Model,Msg>({
         started: false,
         t: 0
-    }
-};
+    })
+}
 
 export const view = (dispatch: Dispatcher<Msg>) => (model: Model) => {
     return (
@@ -30,12 +30,11 @@ export const view = (dispatch: Dispatcher<Msg>) => (model: Model) => {
 
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
-    console.log("up", msg, model);
     switch (msg.type) {
         case "toggle":
-            return noCmd({...model, started: !model.started})
+            return noCmd({...model, started: !model.started});
         case "raf":
-            return noCmd({...model, t: msg.t})
+            return noCmd({...model, t: Math.round(msg.t)});
     }
 }
 
@@ -47,10 +46,3 @@ export const subscriptions = (model:Model) => {
         return Sub.none<Msg>()
     }
 };
-
-
-class RafSub extends Sub<Msg> {
-    run(dispatch: Dispatcher<Msg>): void {
-
-    }
-}

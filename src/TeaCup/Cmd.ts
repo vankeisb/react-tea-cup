@@ -6,6 +6,10 @@ export abstract class Cmd<Msg> {
         return new CmdNone();
     }
 
+    static batch<Msg>(cmds: Array<Cmd<Msg>>): Cmd<Msg> {
+        return new BatchCmd(cmds);
+    }
+
     abstract run(dispatch: Dispatcher<Msg>): void;
 
     map<ParentMsg>(mapper: (c:Msg) => ParentMsg): Cmd<ParentMsg> {
@@ -46,5 +50,21 @@ class CmdMapped<Msg, ParentMsg> extends Cmd<ParentMsg> {
 
     }
 
+
+}
+
+
+class BatchCmd<Msg> extends Cmd<Msg> {
+
+    private readonly cmds: Array<Cmd<Msg>>;
+
+    constructor(cmds: Array<Cmd<Msg>>) {
+        super();
+        this.cmds = cmds;
+    }
+
+    run(dispatch: Dispatcher<Msg>): void {
+        this.cmds.forEach(cmd => cmd.run(dispatch));
+    }
 
 }
