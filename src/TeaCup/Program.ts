@@ -8,45 +8,71 @@ interface ProgramProps<Model,Msg> {
     init: () => Model
     view: (dispatch: Dispatcher<Msg>) => (model: Model) => ReactNode
     update: (msg: Msg, model: Model) => [Model, Cmd<Msg>]
-    subscriptions: (dispatch: Dispatcher<Msg>) => (model: Model) => Sub<Msg>
+    subscriptions: (model: Model) => Sub<Msg>
 }
 
 interface ProgramState<Model> {
-    currentModel?: Model
+    currentModel: Model
+    currentSub: Sub<any>
 }
 
 
 export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, ProgramState<Model>> {
 
+    private count: number = 0;
+
     dispatch(msg:Msg) {
-        // console.log(">>> dispatch", msg);
-        if (this.state.currentModel === undefined) {
-            // console.log("<<< dispatch : no model, nothing done");
-            return;
-        }
-        // console.log("dispatch : calling update()");
-        const updated = this.props.update(msg, this.state.currentModel);
-        // console.log("dispatch : new model obtained, setting state");
+
+        this.count = this.count + 1;
+        const c = this.count;
+        const debug = (...msgs: any[]) => {
+            const args = [ "[dispatch-" + c + "]" ].concat(msgs);
+            console.log(args);
+        };
+    
+        debug(">>>", msg);
+        const currentModel = this.state.currentModel;
+        const updated = this.props.update(msg, currentModel);
+        debug("updated", updated, "previousModel", currentModel);
+        const newSub = this.props.subscriptions(updated[0]);
+        const prevSub = this.state.currentSub;
+        debug("new sub obtained", newSub);
         this.setState({
-            currentModel: updated[0]
+            currentModel: updated[0],
+            currentSub: newSub
         });
 
         const d = this.dispatch.bind(this);
 
-        // console.log("dispatch: processing commands");
-        updated[1].run(d);
-        // console.log("dispatch : done");
+        debug("releasing previous sub", prevSub, "initializing", newSub);
+        newSub.init(d);
+        prevSub.release();
 
-        // const subs = this.props.subscriptions(this.di)
+        // run commands and subs in a separate timout, to 
+        // make sure that this dispatch is done
+        setTimeout(() => {
+            // console.log("dispatch: processing commands");
+            debug("performing command", updated[1]);
+            updated[1].run(d);
+            debug("<<<  done");
+        }, 0);
+
     }
 
 
     constructor(props: Readonly<ProgramProps<Model, Msg>>) {
         super(props);
-        // console.log("program ctor : calling init() and setting initial state");
+        const model = props.init();
+        const sub = props.subscriptions(model);
         this.state = {
-            currentModel: props.init()
-        }
+            currentModel: model,
+            currentSub: sub
+        };
+        // connect to sub
+        const d = this.dispatch.bind(this);
+        console.log("initial sub", sub);
+        sub.init(d);
+        // TODO trigger initial Cmd !
     }
 
     render(): ReactNode {

@@ -33,6 +33,6 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 }
 
 
-export const subscriptions = (dispatch: Dispatcher<Msg>) => (model: Model) => {
+export const subscriptions = (model: Model) => {
   return Sub.none<Msg>()
-}
+};
