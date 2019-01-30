@@ -64,7 +64,7 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     model.forEach((cModel, cIndex) => {
         if (cIndex === msg.childIndex) {
             const mc = Counter.update(msg.childMsg, cModel);
-            newModels.push(mc[0])
+            newModels.push(mc[0]);
             cmds.push(mc[1].map((cMsg: Counter.Msg) => {
                 return {
                     childIndex: cIndex,
@@ -80,5 +80,14 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 
 
 export function subscriptions(model: Model) {
-    return Sub.none<Msg>()
+    return Sub.batch(
+        model.map((cModel, index) =>
+            Counter.subscriptions(cModel).map((cMsg: Counter.Msg) => {
+                return {
+                    childIndex: index,
+                    childMsg: cMsg
+                }
+            })
+        )
+    )
 }
