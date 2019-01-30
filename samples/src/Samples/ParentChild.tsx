@@ -1,5 +1,5 @@
 import * as Counter from './Counter'
-import { Dispatcher, map, Cmd } from 'react-tea-cup';
+import { Dispatcher, map, Cmd, Sub } from 'react-tea-cup';
 import * as React from 'react'
 
 type Model = Array<Counter.Model>
@@ -51,4 +51,9 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         }
     })
     return [ newModels, Cmd.none() ];
+}
+
+
+export const subscriptions = (dispatch: Dispatcher<Msg>) => (model: Model) => {
+    return Sub.none<Msg>()
 }

@@ -1,12 +1,14 @@
 import {Component, ReactNode} from 'react';
 import {Dispatcher} from "./Dispatcher";
 import {Cmd} from "./Cmd";
+import { Sub } from './Sub';
 
 
 interface ProgramProps<Model,Msg> {
     init: () => Model
     view: (dispatch: Dispatcher<Msg>) => (model: Model) => ReactNode
     update: (msg: Msg, model: Model) => [Model, Cmd<Msg>]
+    subscriptions: (dispatch: Dispatcher<Msg>) => (model: Model) => Sub<Msg>
 }
 
 interface ProgramState<Model> {
@@ -28,9 +30,14 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         this.setState({
             currentModel: updated[0]
         });
+
+        const d = this.dispatch.bind(this);
+
         // console.log("dispatch: processing commands");
-        updated[1].run(this.dispatch.bind(this));
+        updated[1].run(d);
         // console.log("dispatch : done");
+
+        // const subs = this.props.subscriptions(this.di)
     }
 
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dispatcher, Cmd } from "react-tea-cup";
+import { Dispatcher, Cmd, Sub } from "react-tea-cup";
 
 
 // model can be anything of course. Here, it
@@ -30,4 +30,9 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     case "dec":
       return [model - 1, Cmd.none()];
   }
+}
+
+
+export const subscriptions = (dispatch: Dispatcher<Msg>) => (model: Model) => {
+  return Sub.none<Msg>()
 }
