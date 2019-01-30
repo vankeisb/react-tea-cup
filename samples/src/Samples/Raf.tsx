@@ -5,33 +5,78 @@ interface Model {
     readonly started: boolean
     readonly t: number
     readonly fps: number
+    readonly animText: string
 }
 
 type Msg
     = { type: "raf", t: number }
     | { type: "toggle" }
+    | { type: "text-changed", text: string }
+
 
 export function init() {
     return noCmd<Model,Msg>({
         started: false,
         t: 0,
-        fps: 0
+        fps: 0,
+        animText: "This text gets animated..."
     })
 }
 
+
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
-    let fps;
+    let fps, anim;
     if (model.started) {
-        fps = <div>{Math.round(model.fps)} FPS</div>
+        fps = <div>{Math.round(model.fps)} FPS</div>;
+        anim = viewAnim(model.animText, model.t);
     }
     return (
         <div>
-            <span>Time = {model.t}</span>
+            <div>
+                <input
+                    type="text"
+                    value={model.animText}
+                    onChange={ e =>
+                        dispatch({
+                            type: "text-changed",
+                            text: (e.target as HTMLInputElement).value
+                        })
+                    }/>
+            </div>
+            <span>Time = {Math.round(model.t)}</span>
             <button onClick={_ => dispatch({type:"toggle"})}>
                 {model.started ? "Stop" : "Start"}
             </button>
             {fps}
+            {anim}
         </div>
+    )
+}
+
+
+function viewAnim(text: String, t:number) {
+    const a = text.split("").map((c, i) => {
+        const st = t / 200;
+        const y1 = Math.sin(st + (i / 5)) * 10;
+        // const y2 = Math.sin(t / 666 + i) * 10;
+        const style = {
+            // paddingBottom: y + "px",
+            // height: "24px",
+            // width: "12px"
+            "display": "block",
+            "white-space": "pre",
+            fontSize: 32 + y1 + "px"
+        };
+        return (
+            <div key={i} style={style}>{c}</div>
+        )
+    });
+    const style = {
+        display: "flex",
+        padding: "12px"
+    };
+    return (
+        <div style={style}>{a}</div>
     )
 }
 
@@ -49,6 +94,12 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                     t: msg.t,
                     fps: fps
                 });
+
+        case "text-changed":
+            return noCmd({
+                ...model,
+                animText: msg.text
+            });
     }
 }
 
