@@ -53,6 +53,8 @@ Has to be :
 * Exceptions !!! Exceptions !!!
 * Open doors for crap everywhere (state, side effects, mutations...)
 
-# TODOs
+# wtf ?
 
-Subs and Effect Managers...
+* why do I need a catch-all for "unions" ? seems that sometimes it's needed, sometimes it is not... annoying.
+* can't trust the debugger !! I've seen it report false variable values... sourcemap problem ?
+
