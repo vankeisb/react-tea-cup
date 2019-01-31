@@ -101,7 +101,9 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         this.bd = d;
         sub.init(d);
         // trigger initial command
-        mac[1].execute(d);
+        setTimeout(() => {
+            mac[1].execute(d);
+        }, 0)
     }
 
     render(): ReactNode {

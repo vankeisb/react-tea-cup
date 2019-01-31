@@ -11,15 +11,15 @@ export abstract class Task<E,R> {
         return new TaskCmd(t, toMsg)
     }
 
-    static perform<R,M>(t:Task<any,R>, toMsg:(r:R) => M): Cmd<M> {
+    static perform<R,M>(t:Task<void,R>, toMsg:(r:R) => M): Cmd<M> {
         return new TaskNoErrCmd(t, toMsg)
     }
 
-    static succeed<R>(r:R): Task<any,R> {
+    static succeed<R>(r:R): Task<void,R> {
         return new TSuccess(r)
     }
 
-    static fail<E>(e:E): Task<E, any> {
+    static fail<E>(e:E): Task<E, void> {
         return new TError(e)
     }
 
@@ -140,6 +140,7 @@ class TaskCmd<E,R,M> extends Cmd<M> {
     }
 
     execute(dispatch: Dispatcher<M>): void {
+        debugger;
         this.task.execute((r:Result<E,R>) => {
             dispatch(this.toMsg(r))
         });

@@ -1,13 +1,12 @@
-import {Cmd, Dispatcher, noCmd, Random, Sub, Task} from "react-tea-cup";
+import {Cmd, Dispatcher, Just, Maybe, Nothing, Random, Sub, Task} from "react-tea-cup";
 import * as React from 'react'
 
-export type Model = number
+export type Model = Maybe<number>
 
 
 export type Msg
     = { type: "clicked" }
     | { type: "random-received", value: number }
-
 
 
 function randomize(): Cmd<Msg> {
@@ -24,14 +23,19 @@ function randomize(): Cmd<Msg> {
 
 
 export function init(): [Model, Cmd<Msg>] {
-    return [ 0, randomize() ]
+    return [ Nothing(), randomize() ]
 }
 
 
 export function view(d:Dispatcher<Msg>, model: Model) {
     return (
         <div>
-            This is a random number : {model}
+            <p>
+                This is a random number :
+                {
+                    model.map((n:number) => n.toString()).withDefault("")
+                }
+            </p>
             <br/>
             <button onClick={_ => d({type: "clicked"})}>
                 Randomize
@@ -47,7 +51,7 @@ export function update(msg: Msg, model: Model) : [Model, Cmd<Msg>] {
         case "clicked":
             return [ model, randomize() ];
         case "random-received":
-            return [ msg.value, Cmd.none() ];
+            return [ Just(msg.value), Cmd.none() ];
     }
 }
 
