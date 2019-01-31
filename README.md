@@ -35,6 +35,13 @@ Has to be :
 * Support for parent/child (`Cmd.map`, `Html.map`)
 * `Html.lazy` equivalent (memoization) for performance
     
+
+# Install & use
+
+    npm i react-tea-cup --save
+    
+See the [Samples](./samples), e.g. the infamous [Counter](./samples/src/Samples/Counter.tsx) !
+    
     
 # Pros & Cons (so far)    
     
