@@ -9,4 +9,6 @@ script:
   - npm run compile
   - npm run test
   - npm install
-  - cd samples && npm install && npm test
+  - cd samples
+  - npm install
+  - npm test
