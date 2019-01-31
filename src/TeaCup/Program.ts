@@ -75,12 +75,12 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         newSub.init(d);
         prevSub.release();
 
-        // run commands in a separate timout, to
+        // perform commands in a separate timout, to
         // make sure that this dispatch is done
         setTimeout(() => {
             // console.log("dispatch: processing commands");
             debug("performing command", updated[1]);
-            updated[1].run(d);
+            updated[1].execute(d);
             debug("<<<  done");
         }, 0);
 
@@ -101,7 +101,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         this.bd = d;
         sub.init(d);
         // trigger initial command
-        mac[1].run(d);
+        mac[1].execute(d);
     }
 
     render(): ReactNode {

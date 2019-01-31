@@ -4,6 +4,7 @@ import * as Counter from './Samples/Counter'
 import * as ParentChild from './Samples/ParentChild'
 import * as Raf from './Samples/Raf'
 import * as Perf from './Samples/Perf'
+import * as Rand from './Samples/Rand'
 
 
 interface Model {
@@ -11,6 +12,7 @@ interface Model {
     readonly parentChild: ParentChild.Model
     readonly raf: Raf.Model
     readonly perf: Perf.Model
+    readonly rand: Rand.Model
 }
 
 
@@ -19,6 +21,7 @@ type Msg
     | { type: "parentChild", child: ParentChild.Msg }
     | { type: "raf", child: Raf.Msg }
     | { type: "perf", child: Perf.Msg }
+    | { type: "rand", child: Rand.Msg }
 
 
 function init(): [Model, Cmd<Msg>] {
@@ -26,18 +29,21 @@ function init(): [Model, Cmd<Msg>] {
     const parentChild = ParentChild.init();
     const raf = Raf.init();
     const perf = Perf.init();
+    const rand = Rand.init();
     return [
         {
-                counter: counter[0],
-                parentChild: parentChild[0],
-                raf: raf[0],
-                perf: perf[0]
+            counter: counter[0],
+            parentChild: parentChild[0],
+            raf: raf[0],
+            perf: perf[0],
+            rand: rand[0]
         },
         Cmd.batch([
-                counter[1].map(mapCounter),
-                parentChild[1].map(mapParentChild),
-                raf[1].map(mapRaf),
-                perf[1].map(mapPerf)
+            counter[1].map(mapCounter),
+            parentChild[1].map(mapParentChild),
+            raf[1].map(mapRaf),
+            perf[1].map(mapPerf),
+            rand[1].map(mapRand)
         ])
     ]
 }
@@ -71,22 +77,30 @@ function mapPerf(m: Perf.Msg) : Msg {
         }
 }
 
+function mapRand(m: Rand.Msg) : Msg {
+    return {
+        type: "rand",
+        child: m
+    }
+}
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
     return (
         <div>
-                <h1>Samples</h1>
-                <p>
-                        This is the samples app for <code>react-tea-cup</code>.
-                </p>
-                <h2>Counter</h2>
-                {Counter.view(map(dispatch, mapCounter), model.counter)}
-                <h2>Parent/child</h2>
-                {ParentChild.view(map(dispatch, mapParentChild), model.parentChild)}
-                <h2>Raf</h2>
-                {Raf.view(map(dispatch, mapRaf), model.raf)}
-                <h2>Performance</h2>
-                {Perf.view(map(dispatch, mapPerf), model.perf)}
+            <h1>Samples</h1>
+            <p>
+                This is the samples app for <code>react-tea-cup</code>.
+            </p>
+            <h2>Counter</h2>
+            {Counter.view(map(dispatch, mapCounter), model.counter)}
+            <h2>Random</h2>
+            {Rand.view(map(dispatch, mapRand), model.rand)}
+            <h2>Parent/child</h2>
+            {ParentChild.view(map(dispatch, mapParentChild), model.parentChild)}
+            <h2>Raf</h2>
+            {Raf.view(map(dispatch, mapRaf), model.raf)}
+            <h2>Performance</h2>
+            {Perf.view(map(dispatch, mapPerf), model.perf)}
         </div>
     )
 }
@@ -106,6 +120,9 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         case "perf":
             const macPerf = Perf.update(msg.child, model.perf);
             return [{...model, perf: macPerf[0]}, macPerf[1].map(mapPerf)];
+        case "rand":
+            const macRand = Rand.update(msg.child, model.rand);
+            return [{...model, rand: macRand[0]}, macRand[1].map(mapRand)];
     }
 
 }
@@ -129,6 +146,7 @@ const App = () => (
         view={view}
         update={update}
         subscriptions={subscriptions}
+        debug={true}
     />
 );
 

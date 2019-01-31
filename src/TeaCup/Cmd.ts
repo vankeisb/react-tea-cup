@@ -10,7 +10,7 @@ export abstract class Cmd<Msg> {
         return new BatchCmd(cmds);
     }
 
-    abstract run(dispatch: Dispatcher<Msg>): void;
+    abstract execute(dispatch: Dispatcher<Msg>): void;
 
     map<ParentMsg>(mapper: (c:Msg) => ParentMsg): Cmd<ParentMsg> {
         return new CmdMapped(this, mapper);
@@ -20,7 +20,7 @@ export abstract class Cmd<Msg> {
 
 
 class CmdNone<Msg> extends Cmd<Msg> {
-    run(dispatch: Dispatcher<Msg>): void {
+    execute(dispatch: Dispatcher<Msg>): void {
         // it's a noop !
     }
 }
@@ -41,10 +41,10 @@ class CmdMapped<Msg, ParentMsg> extends Cmd<ParentMsg> {
         this.mapper = mapper;
     }
 
-    run(dispatch: Dispatcher<ParentMsg>): void {
-        this.command.run(
+    execute(dispatch: Dispatcher<ParentMsg>): void {
+        this.command.execute(
             (m:Msg) => {
-                return this.mapper(m)
+                dispatch(this.mapper(m))
             }
         )
 
@@ -63,8 +63,8 @@ class BatchCmd<Msg> extends Cmd<Msg> {
         this.cmds = cmds;
     }
 
-    run(dispatch: Dispatcher<Msg>): void {
-        this.cmds.forEach(cmd => cmd.run(dispatch));
+    execute(dispatch: Dispatcher<Msg>): void {
+        this.cmds.forEach(cmd => cmd.execute(dispatch));
     }
 
 }
