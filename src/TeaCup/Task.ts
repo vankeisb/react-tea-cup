@@ -11,20 +11,52 @@ export abstract class Task<E,R> {
         return new TaskCmd(t, toMsg)
     }
 
-    static perform<R,M>(t:Task<void,R>, toMsg:(r:R) => M): Cmd<M> {
+    static perform<R,M>(t:Task<any,R>, toMsg:(r:R) => M): Cmd<M> {
         return new TaskNoErrCmd(t, toMsg)
     }
 
-    static succeed<R>(r:R): Task<void,R> {
+    static succeed<R>(r:R): Task<any,R> {
         return new TSuccess(r)
     }
 
-    static fail<E>(e:E): Task<E, void> {
+    static fail<E>(e:E): Task<E, any> {
         return new TError(e)
     }
 
     map<R2>(f:(r:R) => R2): Task<E,R2> {
         return new TMapped(this, f)
+    }
+
+    mapError<E2>(f:(e:E) => E2): Task<E2,R> {
+        return new TMappedErr(this, f)
+    }
+
+    andThen<R2>(f:(r:R) => Task<E,R2>): Task<E,R2> {
+        return new TThen(this, f)
+    }
+}
+
+
+class TThen<E,R,R2> extends Task<E,R2> {
+
+    private readonly task: Task<E,R>;
+    private readonly f: (r:R) => Task<E,R2>;
+
+    constructor(task: Task<E, R>, f: (r: R) => Task<E, R2>) {
+        super();
+        this.task = task;
+        this.f = f;
+    }
+
+    execute(callback: (r: Result<E, R2>) => void): void {
+        this.task.execute((r:Result<E,R>) => {
+            if (r.isOk()) {
+                const next = this.f(r.get());
+                next.execute(callback);
+            } else {
+                callback(Err(r.getError()));
+            }
+        })
     }
 }
 
@@ -43,6 +75,24 @@ class TMapped<E,R,R2> extends Task<E,R2> {
     execute(callback: (r: Result<E, R2>) => void): void {
         this.task.execute((r:Result<E,R>) => {
             callback(r.map(this.mapper))
+        })
+    }
+}
+
+class TMappedErr<E,R,E2> extends Task<E2,R> {
+
+    private readonly task: Task<E,R>;
+    private readonly mapper: (e:E) => E2;
+
+    constructor(task: Task<E, R>, mapper: (e: E) => E2) {
+        super();
+        this.task = task;
+        this.mapper = mapper;
+    }
+
+    execute(callback: (r: Result<E2, R>) => void): void {
+        this.task.execute((r:Result<E,R>) => {
+            callback(r.mapError(this.mapper))
         })
     }
 }

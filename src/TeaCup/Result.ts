@@ -81,10 +81,10 @@ class RErr<E,R> extends Result<E,R> {
 }
 
 
-export function Ok<R>(r:R): Result<void, R> {
+export function Ok<R>(r:R): Result<any, R> {
     return new ROk(r);
 }
 
-export function Err<E>(e: E): Result<E, void> {
+export function Err<E>(e: E): Result<E, any> {
     return new RErr(e);
 }

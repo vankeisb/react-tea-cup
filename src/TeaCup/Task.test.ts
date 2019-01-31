@@ -21,6 +21,49 @@ test("map", done => {
 });
 
 
+test("mapError", done => {
+    expectErr(
+        done,
+        Task.fail("wtf").mapError(s => s + " is wrong?"),
+        "wtf is wrong?"
+    )
+});
+
+
+test("andThen", done => {
+    expectOk(
+        done,
+        Task.succeed(1).andThen((i:number) => {
+            return Task.succeed(i + 10)
+        }),
+        11
+    );
+});
+
+
+test("more complex stuff", done => {
+    expectOk(
+        done,
+        Task.succeed("hello")
+            .map(s => s + " world")
+            .andThen(s => Task.succeed(s + " and").map(s => s + " people"))
+            .map(s => s + " and dolphins"),
+        "hello world and people and dolphins"
+    )
+});
+
+test("more complex stuff with err", done => {
+    expectErr(
+        done,
+        Task.fail("hello")
+            .mapError(s => s + " world")
+            .andThen(s => Task.fail(s + " foo")), // this should not appear ! second task never gets executed
+        "hello world"
+    )
+});
+
+
+
 function attempt<E,R>(t:Task<E,R>, callback:(r:Result<E,R>) => void) {
     Task.attempt(t, m => m).execute(callback)
 }
