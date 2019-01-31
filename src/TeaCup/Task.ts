@@ -2,13 +2,10 @@ import {Cmd} from "./Cmd";
 import {Dispatcher} from "./Dispatcher";
 import {Err, Ok, Result} from "./Result";
 
-export class Task<E,R> {
 
-    readonly body: () => Promise<Result<E,R>>;
+export abstract class Task<E,R> {
 
-    constructor(body: () => Promise<Result<E, R>>) {
-        this.body = body;
-    }
+    abstract execute(callback:(r:Result<E,R>) => void): void
 
     static attempt<E,R,M>(t:Task<E,R>, toMsg:(r:Result<E,R>) => M): Cmd<M> {
         return new TaskCmd(t, toMsg)
@@ -19,25 +16,65 @@ export class Task<E,R> {
     }
 
     static succeed<R>(r:R): Task<void,R> {
-        return new Task<void, R>((() => Promise.resolve(Ok(r))))
+        return new TSuccess(r)
     }
 
     static fail<E>(e:E): Task<E, void> {
-        return new Task<E, void>(() => Promise.resolve(Err(e)))
+        return new TError(e)
     }
 
     map<R2>(f:(r:R) => R2): Task<E,R2> {
-        const thisBody = this.body;
-        const mappedBody = () => {
-            return thisBody().then(
-                r => {
-                    return r.map(f)
-                }
-            )
-        };
-        return new Task(mappedBody);
+        return new TMapped(this, f)
+    }
+}
+
+
+class TMapped<E,R,R2> extends Task<E,R2> {
+
+    private readonly task: Task<E,R>;
+    private readonly mapper: (r:R) => R2;
+
+    constructor(task: Task<E, R>, mapper: (r: R) => R2) {
+        super();
+        this.task = task;
+        this.mapper = mapper;
     }
 
+    execute(callback: (r: Result<E, R2>) => void): void {
+        this.task.execute((r:Result<E,R>) => {
+            callback(r.map(this.mapper))
+        })
+    }
+}
+
+
+class TSuccess<R> extends Task<void,R> {
+
+    private readonly result:R;
+
+    constructor(result: R) {
+        super();
+        this.result = result;
+    }
+
+    execute(callback: (r: Result<void, R>) => void): void {
+        callback(Ok(this.result));
+    }
+}
+
+
+class TError<E> extends Task<E,void> {
+
+    private readonly err:E;
+
+    constructor(err: E) {
+        super();
+        this.err = err;
+    }
+
+    execute(callback: (r: Result<E, void>) => void): void {
+        callback(Err(this.err))
+    }
 }
 
 
@@ -53,11 +90,12 @@ class TaskCmd<E,R,M> extends Cmd<M> {
     }
 
     execute(dispatch: Dispatcher<M>): void {
-        this.task.body().then(r => {
+        this.task.execute((r:Result<E,R>) => {
             dispatch(this.toMsg(r))
-        })
+        });
     }
 }
+
 
 class TaskNoErrCmd<R,M> extends Cmd<M> {
 
@@ -71,14 +109,12 @@ class TaskNoErrCmd<R,M> extends Cmd<M> {
     }
 
     execute(dispatch: Dispatcher<M>): void {
-        this.task.body().then(r => {
+        this.task.execute((r:Result<void,R>) => {
             if (!r.isOk()) {
                 throw Error("got an error from a void task : " + r)
             }
             dispatch(this.toMsg(r.get()));
-        });
+        })
     }
-
-
 }
 
