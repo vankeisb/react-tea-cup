@@ -2,7 +2,15 @@ export abstract class Maybe<T> {
     abstract map<T2>(f:(t:T) => T2) : Maybe<T2>
     abstract withDefault(t:T) : T
     abstract isPresent() : boolean
-    abstract get() : T | undefined
+    abstract get() : T
+
+    match<R>(ifJust: (t:T) => R, ifNothing: () => R): R {
+        if (this.isPresent()) {
+            return ifJust(this.get());
+        } else {
+            return ifNothing();
+        }
+    }
 
     static of<T>(t:T | undefined | null): Maybe<T> {
         if (t === undefined || t === null) {
@@ -44,7 +52,7 @@ class MJust<T> extends Maybe<T> {
         return true;
     }
 
-    get(): T | undefined {
+    get(): T {
         return this.value;
     }
 
@@ -65,8 +73,8 @@ class MNothing<T> extends Maybe<T> {
         return false;
     }
 
-    get(): T | undefined {
-        return undefined;
+    get(): T {
+        throw Error("trying to get value on Nothing");
     }
 
 }

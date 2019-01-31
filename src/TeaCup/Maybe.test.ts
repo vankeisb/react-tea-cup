@@ -33,5 +33,26 @@ test("is present", () => {
 
 test("get", () => {
     expect(Just(1).get()).toBe(1);
-    expect(Nothing().get()).toBeUndefined();
+    expect(() => Nothing().get()).toThrowError("trying to get value on Nothing")
+});
+
+
+test("match just", () => {
+    expect(
+        Just(1).match(
+            (i:number) => 1,
+            () => 2
+        )
+    ).toBe(1)
+});
+
+
+test("match nothing", () => {
+    const n: Maybe<number> = Nothing();
+    expect(
+        n.match(
+            (i:number) => 1,
+            () => 2
+        )
+    ).toBe(2)
 });
