@@ -26,7 +26,20 @@ export class Task<E,R> {
         return new Task<E, void>(() => Promise.resolve(Err(e)))
     }
 
+    map<R2>(f:(r:R) => R2): Task<E,R2> {
+        const thisBody = this.body;
+        const mappedBody = () => {
+            return thisBody().then(
+                r => {
+                    return r.map(f)
+                }
+            )
+        };
+        return new Task(mappedBody);
+    }
+
 }
+
 
 class TaskCmd<E,R,M> extends Cmd<M> {
 

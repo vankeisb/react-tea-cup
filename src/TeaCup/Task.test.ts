@@ -12,6 +12,15 @@ test("fail", done => {
 });
 
 
+test("map", done => {
+    expectOk(
+        done,
+        Task.succeed(1).map(i => i + 1),
+        2
+    )
+});
+
+
 function attempt<E,R>(t:Task<E,R>, callback:(r:Result<E,R>) => void) {
     Task.attempt(t, m => m).execute(callback)
 }
