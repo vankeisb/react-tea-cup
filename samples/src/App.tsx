@@ -5,6 +5,7 @@ import * as ParentChild from './Samples/ParentChild'
 import * as Raf from './Samples/Raf'
 import * as Perf from './Samples/Perf'
 import * as Rand from './Samples/Rand'
+import * as ClassMsgs from './Samples/ClassMsgs'
 
 
 interface Model {
@@ -13,6 +14,7 @@ interface Model {
     readonly raf: Raf.Model
     readonly perf: Perf.Model
     readonly rand: Rand.Model
+    readonly clsm: ClassMsgs.Model
 }
 
 
@@ -22,6 +24,7 @@ type Msg
     | { type: "raf", child: Raf.Msg }
     | { type: "perf", child: Perf.Msg }
     | { type: "rand", child: Rand.Msg }
+    | { type: "clsm", child: ClassMsgs.Msg }
 
 
 function init(): [Model, Cmd<Msg>] {
@@ -30,20 +33,23 @@ function init(): [Model, Cmd<Msg>] {
     const raf = Raf.init();
     const perf = Perf.init();
     const rand = Rand.init();
+    const clsm = ClassMsgs.init();
     return [
         {
             counter: counter[0],
             parentChild: parentChild[0],
             raf: raf[0],
             perf: perf[0],
-            rand: rand[0]
+            rand: rand[0],
+            clsm: clsm[0]
         },
         Cmd.batch([
             counter[1].map(mapCounter),
             parentChild[1].map(mapParentChild),
             raf[1].map(mapRaf),
             perf[1].map(mapPerf),
-            rand[1].map(mapRand)
+            rand[1].map(mapRand),
+            clsm[1].map(mapClsm)
         ])
     ]
 }
@@ -84,6 +90,15 @@ function mapRand(m: Rand.Msg) : Msg {
     }
 }
 
+
+function mapClsm(m: ClassMsgs.Msg) : Msg {
+    return {
+        type: "clsm",
+        child: m
+    }
+}
+
+
 function view(dispatch: Dispatcher<Msg>, model: Model) {
     return (
         <div>
@@ -101,6 +116,8 @@ function view(dispatch: Dispatcher<Msg>, model: Model) {
             {Raf.view(map(dispatch, mapRaf), model.raf)}
             <h2>Performance</h2>
             {Perf.view(map(dispatch, mapPerf), model.perf)}
+            <h2>More OOP</h2>
+            {ClassMsgs.view(map(dispatch, mapClsm), model.clsm)}
         </div>
     )
 }
@@ -123,6 +140,9 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         case "rand":
             const macRand = Rand.update(msg.child, model.rand);
             return [{...model, rand: macRand[0]}, macRand[1].map(mapRand)];
+        case "clsm":
+            const macClsm = ClassMsgs.update(msg.child, model.clsm);
+            return [{...model, clsm: macClsm[0]}, macClsm[1].map(mapClsm)];
     }
 
 }
