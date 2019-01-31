@@ -2,8 +2,9 @@
 
 Want some TEA in your React ?
 
-
 `react-tea-cup` is a very thin library that helps following The Elm Architecture, in React. 
+
+**Disclaimer: This is an early inception, playground project ! Use at your own risk.**
 
 # Why ?
 
@@ -43,17 +44,40 @@ Has to be :
 See the [Samples](./samples), e.g. the infamous [Counter](./samples/src/Samples/Counter.tsx) !
     
     
-# Pros & Cons (so far)    
+# Conclusions (so far)
+
+
+I am not yet really sold on the approach !
+
+TEA really shines with Elm. The pattern is simple, and 
+enforced by the language and libraries. With the React/TS stack, 
+you cannot have the same level of guarantees. 
+So even if TEA is "theoretically" doable with React, there 
+will always be loose contracts, open doors and other uglyness.
+Not to mention even more boilerplate. I think that Redux et al 
+will suffer the same problems, if you have TS as a basis.
+
+On the other hand, writing stateful React components can 
+quickly become painful. It leads to distributed state, 
+spaghetti code and other issues. Looks simple at first sight, 
+but becomes hard to understand when the app scales.
+
+So, in order to figure this out, I need to try a somehow complex UI, 
+implemented with the two approaches : Stateful vs. TEA.
+This thould bring interesting conclusions...  
+     
     
 ## What's cool    
 
 * Really TEA-like (minus everything else that's good in Elm, but still better than nothing)
 * Simple to implement (so far)
 * Interop at the `Component` level
+* Easy to profile with standard tooling
     
 ## What sucks
 
-* Boilerplate/Uglyness in "tagged types"
+* Boilerplate/Uglyness everywhere
+    * null, undefined, NaN... back to square 1 (without the money)
     * Discriminated Unions with "switch/cast" looks so ugly vs. real tags + pattern matching
 * Compiler often needs some help 
     * declare args, vars, use "as"...
@@ -63,10 +87,10 @@ See the [Samples](./samples), e.g. the infamous [Counter](./samples/src/Samples/
 * Exceptions !!! Exceptions !!!
 * Open doors for crap everywhere (state, side effects, mutations...)
 
-# wtf ?
+### To be investigated
 
 * why do I need a catch-all for "unions" ? seems that sometimes it's needed, sometimes it is not... annoying.
-* can't trust the debugger !! I've seen it report false variable values... sourcemap problem ?
+* can't trust the debugger !! I've seen it report false variable values... sourcemap problem ? dev server problem ? go figure out...
 
 # Memo vs PureComponent
 
