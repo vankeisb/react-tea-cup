@@ -1,14 +1,14 @@
 import {Task} from "./Task";
-import {number} from "prop-types";
 import {Result} from "./Result";
 
+
 test("succeed", done => {
-    const t = Task.succeed(123);
-    const cmd = Task.perform(t, i => i);
-    cmd.execute(r => {
-        expect(r).toBe(123);
-        done();
-    })
+    expectOk(done, Task.succeed(123), 123);
+});
+
+
+test("fail", done => {
+    expectErr(done, Task.fail("wtf?"), "wtf?");
 });
 
 
@@ -19,4 +19,24 @@ function attempt<E,R>(t:Task<E,R>, callback:(r:Result<E,R>) => void) {
 
 function perform<R>(t:Task<void,R>, callback:(r:R) => void) {
     Task.perform(t, m => m).execute(callback)
+}
+
+
+function expectOk<R>(done: () => void, t:Task<void,R>, r:R) {
+    perform(t, result => {
+        expect(result).toBe(r);
+        done()
+    })
+}
+
+
+function expectErr<E,R>(done: () => void, t:Task<E,R>, e:E) {
+    attempt(t, result => {
+        if (result.isOk()) {
+            fail("expected an error");
+        } else {
+            expect(result.getError()).toBe(e);
+        }
+        done()
+    })
 }
