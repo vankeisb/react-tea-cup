@@ -6,4 +6,7 @@ install:
   - npm install
 
 script:
+  - npm run compile
   - npm run test
+  - npm install
+  - cd samples && npm install && npm test
