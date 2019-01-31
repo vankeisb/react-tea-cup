@@ -146,7 +146,6 @@ const App = () => (
         view={view}
         update={update}
         subscriptions={subscriptions}
-        debug={true}
     />
 );
 
