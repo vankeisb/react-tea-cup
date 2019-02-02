@@ -10,7 +10,11 @@ export class List<T> {
     }
 
     static fromArray<T>(ts:Array<T>): List<T> {
-        return new List<T>(ts)
+        if (ts.length === 0) {
+            return List.empty();
+        } else {
+            return new List<T>(ts)
+        }
     }
 
     head(): Maybe<T> {
@@ -27,16 +31,16 @@ export class List<T> {
 
     tail(): List<T> {
         if (this.length() <= 1) {
-            return EMPTY_LIST;
+            return new List([]);
         } else {
             const tailArray = [...this.elems];
             tailArray.shift();
-            return new List(tailArray);
+            return new List<T>(tailArray);
         }
     }
 
-    private static empty<T>(): List<T> {
-        return EMPTY_LIST;
+    static empty<T>(): List<T> {
+        return new List<T>([]);
     }
 
     toArray(): Array<T> {
@@ -44,6 +48,3 @@ export class List<T> {
     }
 
 }
-
-
-const EMPTY_LIST = List.fromArray([]);
