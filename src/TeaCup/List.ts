@@ -1,5 +1,4 @@
 import {Just, Maybe, Nothing} from "./Maybe";
-import {element} from "prop-types";
 
 export class List<T> {
 
@@ -15,6 +14,10 @@ export class List<T> {
         } else {
             return new List<T>(ts)
         }
+    }
+
+    static empty<T>(): List<T> {
+        return new List<T>([]);
     }
 
     head(): Maybe<T> {
@@ -39,12 +42,12 @@ export class List<T> {
         }
     }
 
-    static empty<T>(): List<T> {
-        return new List<T>([]);
-    }
-
     toArray(): Array<T> {
         return [...this.elems];
+    }
+
+    map<T2>(f:(t:T) => T2): List<T2> {
+        return new List(this.elems.map(f))
     }
 
 }
