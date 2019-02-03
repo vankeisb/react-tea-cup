@@ -22,7 +22,7 @@ export class List<T> {
 
     head(): Maybe<T> {
         if (this.length() === 0) {
-            return nothing();
+            return nothing;
         } else {
             return just(this.elems[0]);
         }

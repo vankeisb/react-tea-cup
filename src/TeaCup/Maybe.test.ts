@@ -5,7 +5,8 @@ test("just with default", () => {
 });
 
 test("nothing with default", () => {
-    expect(nothing().withDefault(1)).toBe(1);
+    const m: Maybe<number> = nothing;
+    expect(m.withDefault(1)).toBe(1);
 });
 
 test("just map", () => {
@@ -14,18 +15,32 @@ test("just map", () => {
 });
 
 test("nothing map", () => {
-    const n: Maybe<number> = nothing();
+    const n: Maybe<number> = nothing;
     expect(n.map(i => i + 1).withDefault(10)).toBe(10);
     expect(n.map(i => i + 1).map(i => i + 2).withDefault(10)).toBe(10);
 });
 
-test("switch", () => {
-    switch (nothing().type) {
+test("switch nothing", () => {
+    const m: Maybe<number> = nothing;
+    switch (m.type) {
         case "Just":
             fail("expected nothing");
             break;
         case "Nothing":
             // all good !
+            break;
+    }
+});
+
+
+test("switch just", () => {
+    const m:Maybe<number> = just(1);
+    switch (m.type) {
+        case "Just":
+            expect(m.value).toBe(1);
+            break;
+        case "Nothing":
+            fail("expected a Just");
             break;
     }
 });

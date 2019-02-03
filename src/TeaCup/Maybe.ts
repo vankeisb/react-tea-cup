@@ -26,9 +26,12 @@ export function just<T>(t:T): Maybe<T> {
 
 export class Nothing<T> {
     readonly type: 'Nothing' = 'Nothing';
+    static value: Nothing<never> = new Nothing();
+
+    private constructor() {}
 
     map<T2>(f:(t:T) => T2): Maybe<T2> {
-        return new Nothing();
+        return Nothing.value;
     }
 
     withDefault(d:T): T {
@@ -37,11 +40,7 @@ export class Nothing<T> {
 }
 
 
-export function nothing<T>(): Maybe<T> {
-    return new Nothing<T>();
-}
-
-
+export const nothing: Maybe<never> = Nothing.value;
 
 
 

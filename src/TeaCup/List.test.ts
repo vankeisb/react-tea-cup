@@ -25,7 +25,7 @@ test("head and tail", () => {
         expect(l.tail().toArray()).toEqual(tail);
     }
 
-    expectHeadAndTail(List.empty(), nothing(), []);
+    expectHeadAndTail(List.empty(), nothing, []);
     expectHeadAndTail(List.fromArray(["foo"]), just("foo"), []);
     expectHeadAndTail(List.fromArray([1, 2]), just(1), [2]);
     expectHeadAndTail(List.fromArray([true, true, false]), just(true), [true, false]);
