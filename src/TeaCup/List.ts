@@ -1,4 +1,4 @@
-import {Just, Maybe, Nothing} from "./Maybe";
+import {just, nothing, Maybe} from "./Maybe";
 
 export class List<T> {
 
@@ -22,9 +22,9 @@ export class List<T> {
 
     head(): Maybe<T> {
         if (this.length() === 0) {
-            return Nothing();
+            return nothing();
         } else {
-            return Just(this.elems[0]);
+            return just(this.elems[0]);
         }
     }
 

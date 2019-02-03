@@ -50,12 +50,15 @@ class TThen<E,R,R2> extends Task<E,R2> {
 
     execute(callback: (r: Result<E, R2>) => void): void {
         this.task.execute((r:Result<E,R>) => {
-            if (r.isOk()) {
-                const next = this.f(r.get());
-                next.execute(callback);
-            } else {
-                callback(Err(r.getError()));
-            }
+            r.match(
+                (r:R) => {
+                    const next = this.f(r);
+                    next.execute(callback);
+                },
+                (e:E) => {
+                    callback(new Err(e));
+                }
+            );
         })
     }
 }
@@ -108,7 +111,7 @@ class TSuccess<R> extends Task<void,R> {
     }
 
     execute(callback: (r: Result<void, R>) => void): void {
-        callback(Ok(this.result));
+        callback(new Ok(this.result));
     }
 }
 
@@ -123,7 +126,7 @@ class TError<E> extends Task<E,void> {
     }
 
     execute(callback: (r: Result<E, void>) => void): void {
-        callback(Err(this.err))
+        callback(new Err(this.err))
     }
 }
 
@@ -161,10 +164,10 @@ class TaskNoErrCmd<R,M> extends Cmd<M> {
 
     execute(dispatch: Dispatcher<M>): void {
         this.task.execute((r:Result<void,R>) => {
-            if (!r.isOk()) {
-                throw Error("got an error from a void task : " + r)
-            }
-            dispatch(this.toMsg(r.get()));
+            r.match(
+                (ok:R) => dispatch(this.toMsg(ok)),
+                (err:any) => { throw Error("got an error from a void task : " + r + ", " + err) }
+            )
         })
     }
 }

@@ -1,5 +1,5 @@
 import {List} from "./List";
-import {Just, Maybe, Nothing} from "./Maybe";
+import {just, Maybe, nothing} from "./Maybe";
 
 test("immutable from array", () => {
     const a = ["foo", "bar", "baz"];
@@ -25,10 +25,10 @@ test("head and tail", () => {
         expect(l.tail().toArray()).toEqual(tail);
     }
 
-    expectHeadAndTail(List.empty(), Nothing(), []);
-    expectHeadAndTail(List.fromArray(["foo"]), Just("foo"), []);
-    expectHeadAndTail(List.fromArray([1, 2]), Just(1), [2]);
-    expectHeadAndTail(List.fromArray([true, true, false]), Just(true), [true, false]);
+    expectHeadAndTail(List.empty(), nothing(), []);
+    expectHeadAndTail(List.fromArray(["foo"]), just("foo"), []);
+    expectHeadAndTail(List.fromArray([1, 2]), just(1), [2]);
+    expectHeadAndTail(List.fromArray([true, true, false]), just(true), [true, false]);
 });
 
 
