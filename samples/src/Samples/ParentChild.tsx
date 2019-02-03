@@ -1,8 +1,8 @@
 import * as Counter from './Counter'
-import {Dispatcher, map, Cmd, Sub, noCmd} from 'react-tea-cup';
+import {Dispatcher, map, Cmd, Sub} from 'react-tea-cup';
 import * as React from 'react'
 
-export type Model = Array<Counter.Model>
+export type Model = ReadonlyArray<Counter.Model>
 
 export interface Msg {
     readonly childIndex: number
@@ -72,10 +72,10 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                 }
             }))
         } else {
-            newModels.push(cModel)            
+            newModels.push(cModel)
         }
     });
-    return [ newModels, Cmd.none() ];
+    return [ newModels, Cmd.batch(cmds) ];
 }
 
 

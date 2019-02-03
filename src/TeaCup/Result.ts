@@ -49,7 +49,7 @@ export class Err<E,R> {
     }
 
     toMaybe(): Maybe<R> {
-        return nothing();
+        return nothing;
     }
 
     match<X>(onOk: (r: R) => X, onErr: (e: E) => X): X {

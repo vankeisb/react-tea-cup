@@ -11,15 +11,15 @@ export abstract class Task<E,R> {
         return new TaskCmd(t, toMsg)
     }
 
-    static perform<R,M>(t:Task<void,R>, toMsg:(r:R) => M): Cmd<M> {
+    static perform<R,M>(t:Task<never,R>, toMsg:(r:R) => M): Cmd<M> {
         return new TaskNoErrCmd(t, toMsg)
     }
 
-    static succeed<R>(r:R): Task<void,R> {
+    static succeed<R>(r:R): Task<never,R> {
         return new TSuccess(r)
     }
 
-    static fail<E>(e:E): Task<E, void> {
+    static fail<E>(e:E): Task<E, never> {
         return new TError(e)
     }
 
@@ -101,7 +101,7 @@ class TMappedErr<E,R,E2> extends Task<E2,R> {
 }
 
 
-class TSuccess<R> extends Task<void,R> {
+class TSuccess<R> extends Task<never,R> {
 
     private readonly result:R;
 
@@ -110,13 +110,13 @@ class TSuccess<R> extends Task<void,R> {
         this.result = result;
     }
 
-    execute(callback: (r: Result<void, R>) => void): void {
+    execute(callback: (r: Result<never, R>) => void): void {
         callback(new Ok(this.result));
     }
 }
 
 
-class TError<E> extends Task<E,void> {
+class TError<E> extends Task<E,never> {
 
     private readonly err:E;
 
@@ -125,7 +125,7 @@ class TError<E> extends Task<E,void> {
         this.err = err;
     }
 
-    execute(callback: (r: Result<E, void>) => void): void {
+    execute(callback: (r: Result<E, never>) => void): void {
         callback(new Err(this.err))
     }
 }

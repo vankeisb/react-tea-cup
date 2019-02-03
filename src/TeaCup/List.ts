@@ -50,4 +50,8 @@ export class List<T> {
         return new List(this.elems.map(f))
     }
 
+    mapWithIndex<T2>(f:(t:T, i:number) => T2): List<T2> {
+        return new List(this.elems.map(f))
+    }
+
 }

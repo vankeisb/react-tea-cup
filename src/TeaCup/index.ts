@@ -8,5 +8,6 @@ export * from './Task'
 export * from './Sub'
 export * from './Animation'
 export * from './Maybe'
+export * from './List'
 
 
