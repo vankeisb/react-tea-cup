@@ -54,8 +54,3 @@ export function update(msg: Msg, model: Model) : [Model, Cmd<Msg>] {
             return [ just(msg.value), Cmd.none() ];
     }
 }
-
-
-export function subscriptions(model: Model) {
-    return Sub.none()
-}

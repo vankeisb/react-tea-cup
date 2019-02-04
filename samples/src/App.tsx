@@ -153,8 +153,7 @@ function subscriptions(model: Model) : Sub<Msg> {
         [
             Counter.subscriptions(model.counter).map(mapCounter),
             ParentChild.subscriptions(model.parentChild).map(mapParentChild),
-            Raf.subscriptions(model.raf).map(mapRaf),
-            Perf.subscriptions(model.perf).map(mapPerf)
+            Raf.subscriptions(model.raf).map(mapRaf)
         ]
     )
 }

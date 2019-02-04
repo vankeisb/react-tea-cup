@@ -4,10 +4,10 @@ import * as React from 'react'
 
 export type Model = ReadonlyArray<Counter.Model>
 
-export interface Msg {
-    readonly childIndex: number
-    readonly childMsg: Counter.Msg
-}
+export type Msg = Readonly<{
+    childIndex: number
+    childMsg: Counter.Msg
+}>
 
 export function init() : [Model, Cmd<Msg>] {
     const macs = [
