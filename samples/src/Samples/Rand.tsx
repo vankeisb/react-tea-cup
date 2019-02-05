@@ -1,4 +1,4 @@
-import {Cmd, Dispatcher, Just, Maybe, Nothing, Random, Sub, Task} from "react-tea-cup";
+import {Cmd, Dispatcher, just, Maybe, nothing, Random, Sub, Task} from "react-tea-cup";
 import * as React from 'react'
 
 export type Model = Maybe<number>
@@ -12,7 +12,7 @@ export type Msg
 function randomize(): Cmd<Msg> {
     return Task.perform(
         Random.fromIntervalInclusive(0, 100),
-        i => {
+        (i:number) => {
             return {
                 type: "random-received",
                 value: i
@@ -23,7 +23,7 @@ function randomize(): Cmd<Msg> {
 
 
 export function init(): [Model, Cmd<Msg>] {
-    return [ Nothing(), randomize() ]
+    return [ nothing, randomize() ]
 }
 
 
@@ -51,11 +51,6 @@ export function update(msg: Msg, model: Model) : [Model, Cmd<Msg>] {
         case "clicked":
             return [ model, randomize() ];
         case "random-received":
-            return [ Just(msg.value), Cmd.none() ];
+            return [ just(msg.value), Cmd.none() ];
     }
-}
-
-
-export function subscriptions(model: Model) {
-    return Sub.none()
 }

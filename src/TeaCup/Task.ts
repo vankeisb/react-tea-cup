@@ -11,15 +11,15 @@ export abstract class Task<E,R> {
         return new TaskCmd(t, toMsg)
     }
 
-    static perform<R,M>(t:Task<void,R>, toMsg:(r:R) => M): Cmd<M> {
+    static perform<R,M>(t:Task<never,R>, toMsg:(r:R) => M): Cmd<M> {
         return new TaskNoErrCmd(t, toMsg)
     }
 
-    static succeed<R>(r:R): Task<void,R> {
+    static succeed<R>(r:R): Task<never,R> {
         return new TSuccess(r)
     }
 
-    static fail<E>(e:E): Task<E, void> {
+    static fail<E>(e:E): Task<E, never> {
         return new TError(e)
     }
 
@@ -50,12 +50,15 @@ class TThen<E,R,R2> extends Task<E,R2> {
 
     execute(callback: (r: Result<E, R2>) => void): void {
         this.task.execute((r:Result<E,R>) => {
-            if (r.isOk()) {
-                const next = this.f(r.get());
-                next.execute(callback);
-            } else {
-                callback(Err(r.getError()));
-            }
+            r.match(
+                (r:R) => {
+                    const next = this.f(r);
+                    next.execute(callback);
+                },
+                (e:E) => {
+                    callback(new Err(e));
+                }
+            );
         })
     }
 }
@@ -98,7 +101,7 @@ class TMappedErr<E,R,E2> extends Task<E2,R> {
 }
 
 
-class TSuccess<R> extends Task<void,R> {
+class TSuccess<R> extends Task<never,R> {
 
     private readonly result:R;
 
@@ -107,13 +110,13 @@ class TSuccess<R> extends Task<void,R> {
         this.result = result;
     }
 
-    execute(callback: (r: Result<void, R>) => void): void {
-        callback(Ok(this.result));
+    execute(callback: (r: Result<never, R>) => void): void {
+        callback(new Ok(this.result));
     }
 }
 
 
-class TError<E> extends Task<E,void> {
+class TError<E> extends Task<E,never> {
 
     private readonly err:E;
 
@@ -122,8 +125,8 @@ class TError<E> extends Task<E,void> {
         this.err = err;
     }
 
-    execute(callback: (r: Result<E, void>) => void): void {
-        callback(Err(this.err))
+    execute(callback: (r: Result<E, never>) => void): void {
+        callback(new Err(this.err))
     }
 }
 
@@ -161,10 +164,10 @@ class TaskNoErrCmd<R,M> extends Cmd<M> {
 
     execute(dispatch: Dispatcher<M>): void {
         this.task.execute((r:Result<void,R>) => {
-            if (!r.isOk()) {
-                throw Error("got an error from a void task : " + r)
-            }
-            dispatch(this.toMsg(r.get()));
+            r.match(
+                (ok:R) => dispatch(this.toMsg(ok)),
+                (err:any) => { throw Error("got an error from a void task : " + r + ", " + err) }
+            )
         })
     }
 }

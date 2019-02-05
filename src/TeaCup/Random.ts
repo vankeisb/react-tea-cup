@@ -2,7 +2,7 @@ import {Task} from './Task'
 
 export class Random {
 
-    static fromIntervalInclusive(lo: number, hi: number): Task<void, number> {
+    static fromIntervalInclusive(lo: number, hi: number): Task<never, number> {
         return Task.succeed(randomIntFromInterval(lo, hi));
     }
 

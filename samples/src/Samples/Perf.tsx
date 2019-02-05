@@ -2,9 +2,9 @@ import {Cmd, Dispatcher, memo, noCmd, Sub} from "react-tea-cup";
 import * as React from 'react';
 
 
-export interface Model {
-    readonly value: number;
-}
+export type Model = Readonly<{
+    value: number;
+}>
 
 
 function randomIntFromInterval(min: number,max: number)  {// min and max included
@@ -50,7 +50,7 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
                 Therefore, I use Memo in order to avoid rendering when
                 I don't need to (and impact the whole app !).
             </p>
-            <button onClick={_ => dispatch({type:"inc"})}>Increment me</button>
+            <button onClick={() => dispatch({type:"inc"})}>Increment me</button>
         </div>
     ))
 }
@@ -64,9 +64,4 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                 value: model.value + 1
             })
     }
-}
-
-
-export function subscriptions(model: Model) {
-    return Sub.none<Msg>();
 }

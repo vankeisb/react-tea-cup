@@ -69,12 +69,12 @@ function attempt<E,R>(t:Task<E,R>, callback:(r:Result<E,R>) => void) {
 }
 
 
-function perform<R>(t:Task<void,R>, callback:(r:R) => void) {
+function perform<R>(t:Task<never,R>, callback:(r:R) => void) {
     Task.perform(t, m => m).execute(callback)
 }
 
 
-function expectOk<R>(done: () => void, t:Task<void,R>, r:R) {
+function expectOk<R>(done: () => void, t:Task<never,R>, r:R) {
     perform(t, result => {
         expect(result).toBe(r);
         done()
@@ -84,11 +84,10 @@ function expectOk<R>(done: () => void, t:Task<void,R>, r:R) {
 
 function expectErr<E,R>(done: () => void, t:Task<E,R>, e:E) {
     attempt(t, result => {
-        if (result.isOk()) {
-            fail("expected an error");
-        } else {
-            expect(result.getError()).toBe(e);
-        }
+        result.match(
+            (_:R) => fail("expected an error"),
+            (err:E) => expect(err).toBe(e)
+        );
         done()
     })
 }
