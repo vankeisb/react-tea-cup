@@ -6,6 +6,7 @@ import * as Raf from './Samples/Raf'
 import * as Perf from './Samples/Perf'
 import * as Rand from './Samples/Rand'
 import * as ClassMsgs from './Samples/ClassMsgs'
+import * as Sful from './Samples/StatefulInView'
 
 
 interface Model {
@@ -15,6 +16,7 @@ interface Model {
     readonly perf: Perf.Model
     readonly rand: Rand.Model
     readonly clsm: ClassMsgs.Model
+    readonly sful: Sful.Model
 }
 
 
@@ -25,6 +27,7 @@ type Msg
     | { type: "perf", child: Perf.Msg }
     | { type: "rand", child: Rand.Msg }
     | { type: "clsm", child: ClassMsgs.Msg }
+    | { type: "sful", child: Sful.Msg }
 
 
 function init(): [Model, Cmd<Msg>] {
@@ -34,6 +37,7 @@ function init(): [Model, Cmd<Msg>] {
     const perf = Perf.init();
     const rand = Rand.init();
     const clsm = ClassMsgs.init();
+    const sful = Sful.init();
     return [
         {
             counter: counter[0],
@@ -41,7 +45,8 @@ function init(): [Model, Cmd<Msg>] {
             raf: raf[0],
             perf: perf[0],
             rand: rand[0],
-            clsm: clsm[0]
+            clsm: clsm[0],
+            sful: sful[0]
         },
         Cmd.batch([
             counter[1].map(mapCounter),
@@ -49,7 +54,8 @@ function init(): [Model, Cmd<Msg>] {
             raf[1].map(mapRaf),
             perf[1].map(mapPerf),
             rand[1].map(mapRand),
-            clsm[1].map(mapClsm)
+            clsm[1].map(mapClsm),
+            sful[1].map(mapSful)
         ])
     ]
 }
@@ -99,6 +105,14 @@ function mapClsm(m: ClassMsgs.Msg) : Msg {
 }
 
 
+function mapSful(m: Sful.Msg) : Msg {
+    return {
+        type: "sful",
+        child: m
+    }
+}
+
+
 function view(dispatch: Dispatcher<Msg>, model: Model) {
     return (
         <div>
@@ -118,6 +132,8 @@ function view(dispatch: Dispatcher<Msg>, model: Model) {
             {Perf.view(map(dispatch, mapPerf), model.perf)}
             <h2>More OOP</h2>
             {ClassMsgs.view(map(dispatch, mapClsm), model.clsm)}
+            <h2>Stateful in view()</h2>
+            {Sful.view(map(dispatch, mapSful), model.sful)}
         </div>
     )
 }
@@ -143,6 +159,9 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         case "clsm":
             const macClsm = ClassMsgs.update(msg.child, model.clsm);
             return [{...model, clsm: macClsm[0]}, macClsm[1].map(mapClsm)];
+        case "sful":
+            const macSful = Sful.update(msg.child, model.sful);
+            return [{...model, sful: macSful[0]}, macSful[1].map(mapSful)];
     }
 
 }

@@ -43,6 +43,14 @@ export class Nothing<T> {
 export const nothing: Maybe<never> = Nothing.value;
 
 
+export function maybeOf<T>(t:T | undefined): Maybe<T> {
+    if (t === undefined) {
+        return nothing;
+    } else {
+        return just(t);
+    }
+}
+
 
 // export abstract class Maybe<T> {
 //     abstract map<T2>(f:(t:T) => T2) : Maybe<T2>
