@@ -28,7 +28,7 @@ type Msg
     | { type: "rand", child: Rand.Msg }
     | { type: "clsm", child: ClassMsgs.Msg }
     | { type: "sful", child: Sful.Msg }
-
+    
 
 function init(): [Model, Cmd<Msg>] {
     const counter = Counter.init();
@@ -55,7 +55,7 @@ function init(): [Model, Cmd<Msg>] {
             perf[1].map(mapPerf),
             rand[1].map(mapRand),
             clsm[1].map(mapClsm),
-            sful[1].map(mapSful)
+            sful[1].map(mapSful),
         ])
     ]
 }

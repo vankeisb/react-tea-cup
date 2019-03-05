@@ -143,7 +143,6 @@ class TaskCmd<E,R,M> extends Cmd<M> {
     }
 
     execute(dispatch: Dispatcher<M>): void {
-        debugger;
         this.task.execute((r:Result<E,R>) => {
             dispatch(this.toMsg(r))
         });
