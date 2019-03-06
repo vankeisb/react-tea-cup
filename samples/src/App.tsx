@@ -1,5 +1,5 @@
 import React from 'react';
-import {Cmd, Dispatcher, Program, map, Sub} from "react-tea-cup";
+import {Cmd, Dispatcher, ProgramWithNav, map, Sub, noCmd} from "react-tea-cup";
 import * as Counter from './Samples/Counter'
 import * as ParentChild from './Samples/ParentChild'
 import * as Raf from './Samples/Raf'
@@ -17,6 +17,7 @@ interface Model {
     readonly rand: Rand.Model
     readonly clsm: ClassMsgs.Model
     readonly sful: Sful.Model
+    readonly hash: string;
 }
 
 
@@ -28,9 +29,11 @@ type Msg
     | { type: "rand", child: Rand.Msg }
     | { type: "clsm", child: ClassMsgs.Msg }
     | { type: "sful", child: Sful.Msg }
+    | { type: "urlChange", location: Location }
     
 
-function init(): [Model, Cmd<Msg>] {
+function init(location:Location): [Model, Cmd<Msg>] {
+
     const counter = Counter.init();
     const parentChild = ParentChild.init();
     const raf = Raf.init();
@@ -38,6 +41,7 @@ function init(): [Model, Cmd<Msg>] {
     const rand = Rand.init();
     const clsm = ClassMsgs.init();
     const sful = Sful.init();
+    const h = location.hash.startsWith("#") ? location.hash.substring(1) : location.hash;
     return [
         {
             counter: counter[0],
@@ -46,7 +50,8 @@ function init(): [Model, Cmd<Msg>] {
             perf: perf[0],
             rand: rand[0],
             clsm: clsm[0],
-            sful: sful[0]
+            sful: sful[0],
+            hash: h
         },
         Cmd.batch([
             counter[1].map(mapCounter),
@@ -114,6 +119,28 @@ function mapSful(m: Sful.Msg) : Msg {
 
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
+
+    function navItem(hash:string, label:string) {
+        if (hash === model.hash) {
+            return <span>{label}</span>;
+        } else {
+            return (
+                <a href={"#" + hash}>
+                    {label}
+                </a>
+            )
+        }
+    }
+
+
+    const nav =
+        <ul>
+            <li>{navItem("", "Home")}</li>
+            <li>{navItem("foo", "Foo")}</li>
+            <li>{navItem("bar", "Bar")}</li>
+        </ul>;
+
+
     return (
         <div>
             <h1>Samples</h1>
@@ -134,6 +161,8 @@ function view(dispatch: Dispatcher<Msg>, model: Model) {
             {ClassMsgs.view(map(dispatch, mapClsm), model.clsm)}
             <h2>Stateful in view()</h2>
             {Sful.view(map(dispatch, mapSful), model.sful)}
+            <h2>Routing/Navigation</h2>
+            {nav}
         </div>
     )
 }
@@ -162,6 +191,12 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         case "sful":
             const macSful = Sful.update(msg.child, model.sful);
             return [{...model, sful: macSful[0]}, macSful[1].map(mapSful)];
+        case "urlChange":
+            const h = msg.location.hash;
+            return noCmd({
+                ...model,
+                hash: h.startsWith("#") ? h.substring(1) : h
+            });
     }
 
 }
@@ -178,13 +213,24 @@ function subscriptions(model: Model) : Sub<Msg> {
 }
 
 
+function onUrlChange(l:Location) : Msg {
+    return {
+        type: "urlChange",
+        location: l
+    }
+}
+
+
 const App = () => (
-    <Program
+    <ProgramWithNav
         init={init}
         view={view}
         update={update}
         subscriptions={subscriptions}
+        onUrlChange={onUrlChange}
     />
 );
+
+
 
 export default App;
