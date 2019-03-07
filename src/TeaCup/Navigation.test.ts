@@ -5,6 +5,7 @@ type MyRoute
     = { type: "home" }
     | { type: "songs" }
     | { type: "song", id: number, edit: boolean }
+    | { type: "settings"}
 
 
 function home(): MyRoute {
@@ -24,10 +25,10 @@ function song(id:number, edit:boolean = false): MyRoute {
 }
 
 const router: Router<MyRoute> = new Router([
-    route0(home),
     route1(str("songs"), songs),
-    route2(str("song"), int(), (_, id) => song(id)),
-    route3(str("song"), int(), str("edit"), (s, id) => song(id, true))
+    route0(home),
+    route3(str("song"), int(), str("edit"), (s, id) => song(id, true)),
+    route2(str("song"), int(), (_, id) => song(id))
 ]);
 
 
