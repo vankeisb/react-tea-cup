@@ -173,20 +173,77 @@ export function regex<T>(r:RegExp, converter: (s:string) => Maybe<T>): PathElem<
 
 
 
-export function route0<R>(f:() => R): RouteDef<R> {
-    return new RouteDef([], f);
+export class Path0 {
+
+    map<R>(f:() => R): RouteDef<R> {
+        return new RouteDef<R>([], f);
+    }
+
 }
 
-export function route1<E,R>(e:PathElem<E>, f:(e:E) => R): RouteDef<R> {
-    return new RouteDef([e], f);
+const PATH0 = new Path0();
+
+export class Path1<T> {
+    readonly e:PathElem<T>;
+
+    constructor(e: PathElem<T>) {
+        this.e = e;
+    }
+
+    map<R>(f:(t:T) => R): RouteDef<R> {
+        return new RouteDef<R>([this.e], f);
+    }
+
 }
 
-export function route2<E1,E2,R>(e1:PathElem<E1>, e2: PathElem<E2>, f:(e1:E1, e2:E2) => R): RouteDef<R> {
-    return new RouteDef([e1, e2], f);
+export class Path2<T1,T2> {
+    readonly e1:PathElem<T1>;
+    readonly e2:PathElem<T2>;
+
+    constructor(e1: PathElem<T1>, e2: PathElem<T2>) {
+        this.e1 = e1;
+        this.e2 = e2;
+    }
+
+    map<R>(f:(t1:T1, t2:T2) => R): RouteDef<R> {
+        return new RouteDef<R>([this.e1, this.e2], f);
+    }
+
 }
 
-export function route3<E1,E2,E3,R>(e1:PathElem<E1>, e2: PathElem<E2>, e3: PathElem<E3>, f:(e1:E1, e2:E2, e3:E3) => R): RouteDef<R> {
-    return new RouteDef([e1, e2, e3], f);
+
+export class Path3<T1,T2,T3> {
+    readonly e1:PathElem<T1>;
+    readonly e2:PathElem<T2>;
+    readonly e3:PathElem<T3>;
+
+    constructor(e1: PathElem<T1>, e2: PathElem<T2>, e3: PathElem<T3>) {
+        this.e1 = e1;
+        this.e2 = e2;
+        this.e3 = e3;
+    }
+
+
+    map<R>(f:(t1:T1, t2:T2, t3:T3) => R): RouteDef<R> {
+        return new RouteDef<R>([this.e1, this.e2, this.e3], f);
+    }
+}
+
+
+export function route0(): Path0 {
+    return PATH0;
+}
+
+export function route1<E>(e:PathElem<E>): Path1<E> {
+    return new Path1<E>(e);
+}
+
+export function route2<E1,E2,R>(e1:PathElem<E1>, e2: PathElem<E2>): Path2<E1,E2> {
+    return new Path2<E1, E2>(e1, e2);
+}
+
+export function route3<E1,E2,E3,R>(e1:PathElem<E1>, e2: PathElem<E2>, e3: PathElem<E3>): Path3<E1,E2,E3> {
+    return new Path3<E1, E2, E3>(e1, e2, e3);
 }
 
 
