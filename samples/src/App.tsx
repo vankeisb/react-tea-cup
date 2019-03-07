@@ -11,7 +11,7 @@ import {
     Router,
     route0,
     str,
-    route1, route2, int, just, Maybe, nothing, maybeOf
+    route1, route2, int, just, Maybe, nothing, maybeOf, QueryParams
 } from "react-tea-cup";
 import * as Counter from './Samples/Counter'
 import * as ParentChild from './Samples/ParentChild'
@@ -22,10 +22,17 @@ import * as ClassMsgs from './Samples/ClassMsgs'
 import * as Sful from './Samples/StatefulInView'
 
 
+
+enum Tab {
+    All, Open, Closed
+}
+
+
 type Route
     = { _tag: "home" }
     | { _tag: "samples" }
-    | { _tag: "todos", id: Maybe<string> }
+    | { _tag: "todos", tab: Tab }
+    | { _tag: "todo", id: string }
 
 
 function homeRoute() : Route  {
@@ -36,15 +43,34 @@ function samplesRoute() : Route {
     return {_tag: "samples"}
 }
 
-function todosRoute(id: Maybe<string> = nothing) : Route {
-    return {_tag: "todos", id: id}
+function todosRoute(tab: Tab = Tab.All) : Route {
+    return {_tag: "todos", tab: tab };
+}
+
+function todoRoute(id:string): Route {
+    return {_tag: "todo", id: id }
 }
 
 
 const router: Router<Route> = new Router<Route>(
     route0.map(() => homeRoute()),
-    route1(str("todos")).map((_:string) => todosRoute()),
-    route2(str("todos"), str()).map((_:string, id:string) => todosRoute(just(id))),
+    route1(str("todos")).map((_:string, q:QueryParams) => {
+        return todosRoute(
+            q.getHash()
+                .map((h: string) => {
+                    switch (h) {
+                        case "open":
+                            return Tab.Open;
+                        case "closed":
+                            return Tab.Closed;
+                        default:
+                            return Tab.All;
+                    }
+                })
+                .withDefault(Tab.All)
+        )
+    }),
+    route2(str("todos"), str()).map((_:string, id:string) => todoRoute(id)),
     route1(str("samples")).map((_:string) => samplesRoute())
 );
 
@@ -56,8 +82,21 @@ function routeToUrl(route: Route): string {
         case "samples":
             return "/samples";
         case "todos":
-            const idPart = route.id.map((id:string) => "/" + id).withDefault("");
-            return `/todos${idPart}`;
+            let hash;
+            switch (route.tab) {
+                case Tab.All:
+                    hash = "";
+                    break;
+                case Tab.Open:
+                    hash = "#open";
+                    break;
+                case Tab.Closed:
+                    hash = "#closed";
+                    break;
+            }
+            return `/todos${hash}`;
+        case "todo":
+            return `/todos/${route.id}`;
     }
 }
 
@@ -98,6 +137,7 @@ type Msg
     | { type: "urlChange", location: Location }
     | { type: "newUrl", url: string }
     | { type: "noop" }
+    | { type: "tabClicked", tab: Tab }
     
 
 const NoOp: Msg = { type: "noop" };
@@ -210,9 +250,9 @@ function view(dispatch: Dispatcher<Msg>, model: Model) {
                 case "samples":
                     return viewSamples(dispatch, model);
                 case "todos":
-                    return route.id
-                        .map((id:string) => viewTodo(dispatch, model, id))
-                        .withDefault(viewTodos(dispatch, model));
+                    return viewTodos(dispatch, model, route.tab);
+                case "todo":
+                    return viewTodo(dispatch, model, route.id)
             }
         })
         .withDefault(
@@ -272,7 +312,42 @@ function backToHome(d:Dispatcher<Msg>) {
 }
 
 
-function viewTodos(dispatch: Dispatcher<Msg>, model: Model) {
+function viewTodos(dispatch: Dispatcher<Msg>, model: Model, curTab: Tab) {
+
+    function viewTab(t: Tab) {
+        const active = t === curTab;
+        let label;
+        switch (t) {
+            case Tab.All:
+                label = "All";
+                break;
+            case Tab.Open:
+                label = "Open";
+                break;
+            case Tab.Closed:
+                label = "Closed";
+                break;
+        }
+        return (
+            <li>
+                { active
+                    ? (
+                        <span>{label}</span>
+                    )
+                    : (
+                        <a href="#"
+                            onClick={e => {
+                                e.preventDefault();
+                                dispatch({type:"tabClicked", tab: t});
+                            }}>
+                            {label}
+                        </a>
+                    )
+                }
+            </li>
+        )
+    }
+
     return (
         <div>
             {backToHome(dispatch)}
@@ -284,27 +359,46 @@ function viewTodos(dispatch: Dispatcher<Msg>, model: Model) {
                     </p>
                 )
                 : (
-                    <ul>
-                        {model.todos.map(todo => {
-                            const style = {
-                                textDecoration: todo.done ? "line-through" : "none"
-                            };
-                            return (
-                                <li
-                                    key={todo.id}
-                                    style={style}>
-                                    <a
-                                        href="#"
-                                        onClick={e => {
-                                            e.preventDefault();
-                                            dispatch(navigateTo(todosRoute(just(todo.id))))
-                                        }}>
-                                        {todo.text}
-                                    </a>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                    <div>
+                        <ul>
+                            {viewTab(Tab.All)}
+                            {viewTab(Tab.Open)}
+                            {viewTab(Tab.Closed)}
+                        </ul>
+                        <ul>
+                            {model.todos
+                                .filter(todo => {
+                                    switch (curTab) {
+                                        case Tab.All:
+                                            return true;
+                                        case Tab.Open:
+                                            return !todo.done;
+                                        case Tab.Closed:
+                                            return todo.done;
+                                    }
+                                })
+                                .map(todo => {
+                                    const style = {
+                                        textDecoration: todo.done ? "line-through" : "none"
+                                    };
+                                    return (
+                                        <li
+                                            key={todo.id}
+                                            style={style}>
+                                            <a
+                                                href="#"
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    dispatch(navigateTo(todoRoute(todo.id)))
+                                                }}>
+                                                {todo.text}
+                                            </a>
+                                        </li>
+                                    );
+                                })
+                            }
+                        </ul>
+                    </div>
                 )
             }
         </div>
@@ -415,7 +509,14 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                     (_:Location) => NoOp
                 )
             ];
-
+        case "tabClicked":
+            return [
+                model,
+                Task.perform(
+                    newUrl(routeToUrl(todosRoute(msg.tab))),
+                    (_:Location) => NoOp
+                )
+            ];
         case "noop":
             return noCmd(model);
     }

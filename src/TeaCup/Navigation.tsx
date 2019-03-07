@@ -197,9 +197,11 @@ export class Path0 {
 export class QueryParams {
 
     private readonly store: { [id:string] : string[] };
+    private readonly hash: Maybe<string>;
 
-    private constructor(store: { [id: string]: string[] }) {
+    private constructor(store: { [id: string]: string[] }, hash: Maybe<string>) {
         this.store = store;
+        this.hash = hash;
     }
 
     getValues(name:string): Maybe<ReadonlyArray<string>> {
@@ -215,12 +217,16 @@ export class QueryParams {
         }
     }
 
-    static empty(): QueryParams {
-        return new QueryParams({});
+    getHash(): Maybe<string> {
+        return this.hash;
     }
 
-    static fromQueryString(queryString:string): QueryParams {
-        const params = queryString.split("&");
+    static empty(): QueryParams {
+        return new QueryParams({}, nothing);
+    }
+
+    static fromQueryStringAndHash(queryString?:string, hash?: string): QueryParams {
+        const params = queryString === undefined ? [] : queryString.split("&");
         const store: { [id:string]: string[] } = {};
 
         function addToStore(name:string, value:string) {
@@ -242,7 +248,7 @@ export class QueryParams {
             }
         });
 
-        return new QueryParams(store);
+        return new QueryParams(store, maybeOf(hash).map(h => h.startsWith("#") ? h.substring(1) : h));
     }
 
 }
@@ -376,7 +382,7 @@ export class Router<R> {
     }
 
     parseLocation(location: Location): Maybe<R> {
-        return this.parse(location.pathname, QueryParams.fromQueryString(location.search));
+        return this.parse(location.pathname, QueryParams.fromQueryStringAndHash(location.search, location.hash));
     }
 
 }
