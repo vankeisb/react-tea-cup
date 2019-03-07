@@ -27,14 +27,9 @@ const router: Router<MyRoute> = new Router([
     route0(home),
     route1(str("songs"), songs),
     route2(str("song"), int(), (_, id) => song(id)),
-    route3(str("song"), int(), str("edit"), (s, id, e) => song(id, true))
+    route3(str("song"), int(), str("edit"), (s, id) => song(id, true))
 ]);
 
-
-// test("failing", () => {
-//     expect(router.parsePath("song/123")).toEqual(just(song(123)));
-//     expect(router.parsePath("song/123/edit")).toEqual(just(song(123, true)));
-// });
 
 
 expectRoute("/", home());
