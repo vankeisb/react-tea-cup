@@ -1,19 +1,18 @@
-import {Router, int, route0, route1, route2, route3, str} from "./Navigation";
+import {Router, int, route0, route1, route2, route3, str, QueryParams} from "./Navigation";
 import {just, Maybe, nothing} from "./Maybe";
 
 type MyRoute
     = { type: "home" }
-    | { type: "songs" }
+    | { type: "songs", filter: Maybe<string> }
     | { type: "song", id: number, edit: boolean }
-    | { type: "settings",  q: string }
 
 
 function home(): MyRoute {
     return { type: "home" }
 }
 
-function songs(): MyRoute {
-    return { type: "songs" }
+function songs(filter: Maybe<string> = nothing): MyRoute {
+    return { type: "songs", filter: filter};
 }
 
 function song(id:number, edit:boolean = false): MyRoute {
@@ -24,28 +23,20 @@ function song(id:number, edit:boolean = false): MyRoute {
     }
 }
 
-function settings(q:string): MyRoute {
-    return {
-        type: "settings",
-        q: q
-    }
-}
-
-const router: Router<MyRoute> = new Router([
-    route1(str("songs")).map(songs),
-    route0().map(home),
+const router: Router<MyRoute> = new Router(
+    route1(str("songs")).map((s:string, query:QueryParams) => songs(query.getValue("q"))),
+    route0.map(() => home()),
     route3(str("song"), int(), str("edit")).map((s, id) => song(id, true)),
-    route2(str("song"), int()).map((_, id) => song(id)),
-    // route1(str("settings")).map(_ => settings(""))
-]);
+    route2(str("song"), int()).map((_, id) => song(id))
+);
 
 
 
 expectRoute("/", home());
-expectRoute("/songs", songs());
+expectRoute("/songs", songs(nothing));
 expectRoute("/song/123", song(123));
 expectRoute("/song/123/edit", song(123, true));
-// expectRoute("/settings", settings(""));
+expectRoute("/songs?q=foobar", songs(just("foobar")));
 expectNotFound("/foo");
 expectNotFound("/songs/1");
 expectNotFound("/song");
@@ -53,15 +44,38 @@ expectNotFound("/song/abc");
 expectNotFound("/song/123/foo");
 
 
-function expectRoute(path:string, route: MyRoute) {
-    return test(path, () => {
-        expect(router.parsePath(path)).toEqual(just(route));
+interface Loc {
+    pathname: string;
+    query: QueryParams;
+}
+
+function locFromUrl(url:string): Loc {
+    const indexOfQuery = url.indexOf("?");
+    if (indexOfQuery == -1) {
+        return {
+            pathname: url,
+            query: QueryParams.empty()
+        }
+    } else {
+        return {
+            pathname: url.substring(0, indexOfQuery),
+            query: QueryParams.fromQueryString(url.substring(indexOfQuery + 1))
+        }
+    }
+}
+
+
+function expectRoute(url:string, route: MyRoute) {
+    return test(url, () => {
+        const loc = locFromUrl(url);
+        expect(router.parse(loc.pathname, loc.query)).toEqual(just(route));
     })
 }
 
-function expectNotFound(path:string) {
-    return test(path, () => {
-        expect(router.parsePath(path)).toEqual(nothing);
+function expectNotFound(url:string) {
+    return test(url + " (not found)", () => {
+        const loc = locFromUrl(url);
+        expect(router.parse(loc.pathname, loc.query)).toEqual(nothing);
     })
 }
 
