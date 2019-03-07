@@ -4,7 +4,7 @@ import {Cmd} from "./Cmd";
 import { Sub } from './Sub';
 
 
-interface ProgramProps<Model,Msg> {
+export interface ProgramProps<Model,Msg> {
     init: () => [Model, Cmd<Msg>]
     view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode
     update: (msg: Msg, model: Model) => [Model, Cmd<Msg>]
@@ -34,7 +34,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
 
     private count: number = 0;
     private readonly uuid = Guid.newGuid();
-    private bd: Dispatcher<Msg>;
+    private readonly bd: Dispatcher<Msg>;
 
     private logger() {
         // @ts-ignore
