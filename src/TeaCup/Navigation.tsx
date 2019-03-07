@@ -6,8 +6,8 @@ import {Task} from "./Task";
 import {Ok, Result} from "./Result";
 import * as React from 'react';
 import {Component, createRef, ReactNode, RefObject} from "react";
-import {just, Maybe, nothing} from "./Maybe";
-import {number} from "prop-types";
+import {just, Maybe, maybeOf, nothing} from "./Maybe";
+import {List} from "./List";
 
 
 export interface NavProps<Model,Msg> {
@@ -94,7 +94,7 @@ export abstract class PathElem<T> {
 }
 
 
-class StrPathElem extends PathElem<string> {
+class ConstantPathElem extends PathElem<string> {
 
     readonly s:string;
 
@@ -156,9 +156,22 @@ class IntPathElem extends RegexPathElem<number> {
 }
 
 
+class StrPathElem extends PathElem<string> {
 
-export function str(s:string): PathElem<string> {
-    return new StrPathElem(s);
+    mapPart(part: string): Maybe<string> {
+        return just(part);
+    }
+
+}
+
+
+export function str(s?:string): PathElem<string> {
+    if (s === undefined) {
+        return new StrPathElem();
+    } else {
+        return new ConstantPathElem(s);
+    }
+
 
 }
 
@@ -172,16 +185,68 @@ export function regex<T>(r:RegExp, converter: (s:string) => Maybe<T>): PathElem<
 }
 
 
-
 export class Path0 {
 
-    map<R>(f:() => R): RouteDef<R> {
+    map<R>(f:(query:QueryParams) => R): RouteDef<R> {
         return new RouteDef<R>([], f);
     }
 
 }
 
-const PATH0 = new Path0();
+
+export class QueryParams {
+
+    private readonly store: { [id:string] : string[] };
+
+    private constructor(store: { [id: string]: string[] }) {
+        this.store = store;
+    }
+
+    getValues(name:string): Maybe<ReadonlyArray<string>> {
+        return maybeOf(this.store[name]);
+    }
+
+    getValue(name:string): Maybe<string> {
+        const values = this.store[name];
+        if (values === undefined) {
+            return nothing;
+        } else {
+            return List.fromArray(values).head()
+        }
+    }
+
+    static empty(): QueryParams {
+        return new QueryParams({});
+    }
+
+    static fromQueryString(queryString:string): QueryParams {
+        const params = queryString.split("&");
+        const store: { [id:string]: string[] } = {};
+
+        function addToStore(name:string, value:string) {
+            let values = store[name];
+            if (values === undefined) {
+                values = [ value ];
+                store[name] = values;
+            } else {
+                values.push(value);
+            }
+        }
+
+        params.forEach(param => {
+            const parts = param.split("=");
+            if (parts.length === 1) {
+                addToStore(parts[0], "");
+            } else if (parts.length > 1) {
+                addToStore(parts[0], parts[1]);
+            }
+        });
+
+        return new QueryParams(store);
+    }
+
+}
+
 
 export class Path1<T> {
     readonly e:PathElem<T>;
@@ -190,7 +255,7 @@ export class Path1<T> {
         this.e = e;
     }
 
-    map<R>(f:(t:T) => R): RouteDef<R> {
+    map<R>(f:(t:T, query:QueryParams) => R): RouteDef<R> {
         return new RouteDef<R>([this.e], f);
     }
 
@@ -205,7 +270,7 @@ export class Path2<T1,T2> {
         this.e2 = e2;
     }
 
-    map<R>(f:(t1:T1, t2:T2) => R): RouteDef<R> {
+    map<R>(f:(t1:T1, t2:T2, query:QueryParams) => R): RouteDef<R> {
         return new RouteDef<R>([this.e1, this.e2], f);
     }
 
@@ -224,15 +289,14 @@ export class Path3<T1,T2,T3> {
     }
 
 
-    map<R>(f:(t1:T1, t2:T2, t3:T3) => R): RouteDef<R> {
+    map<R>(f:(t1:T1, t2:T2, t3:T3, query:QueryParams) => R): RouteDef<R> {
         return new RouteDef<R>([this.e1, this.e2, this.e3], f);
     }
 }
 
 
-export function route0(): Path0 {
-    return PATH0;
-}
+export const route0: Path0 = new Path0();
+
 
 export function route1<E>(e:PathElem<E>): Path1<E> {
     return new Path1<E>(e);
@@ -252,12 +316,16 @@ export class RouteDef<R> {
     readonly pathElems: ReadonlyArray<PathElem<any>>;
     readonly f:Function;
 
-    constructor(pathElems: ReadonlyArray<PathElem<any>>, f:Function) {
+    constructor(pathElems: ReadonlyArray<PathElem<any>>, f: Function) {
         this.pathElems = pathElems;
         this.f = f;
     }
 
-    mapParts(parts: ReadonlyArray<string>): Maybe<R> {
+    checkRoute(pathname: string, query: QueryParams): Maybe<R> {
+        // extract path parts from location and split
+        const p1 = pathname.startsWith("/") ? pathname.substring(1) : pathname;
+        const p2 = p1.endsWith("/") ? p1.substring(0, p1.length - 2) : p1;
+        const parts = p2 === "" ? [] : p2.split("/");
         if (parts.length === this.pathElems.length) {
             // map every individual part, bail out if
             // something cannot be converted
@@ -274,9 +342,12 @@ export class RouteDef<R> {
                         return nothing;
                 }
             }
+
+            // append query params to args
+            mappedParts.push(query);
+
             // now we have mapped args, let's call the route's func
-            const r: R = this.f.apply({}, mappedParts);
-            return just(r);
+            return just(this.f.apply({}, mappedParts));
         } else {
             return nothing;
         }
@@ -288,24 +359,24 @@ export class Router<R> {
 
     readonly routeDefs: ReadonlyArray<RouteDef<R>>;
 
-    constructor(routeDefs: ReadonlyArray<RouteDef<R>>) {
+    constructor(...routeDefs: RouteDef<R>[]) {
         this.routeDefs = routeDefs;
     }
 
-    parsePath(path: string) : Maybe<R> {
-        // extract path parts from location and split
-        const p1 = path.startsWith("/") ? path.substring(1) : path;
-        const p2 = p1.endsWith("/") ? p1.substring(0, p1.length - 2) : p1;
-        const parts = p2 === "" ? [] : p2.split("/");
+    parse(pathname: string, query: QueryParams) : Maybe<R> {
         // try all routes one after the other
         for (let i = 0; i < this.routeDefs.length; i++) {
             const d = this.routeDefs[i];
-            const r = d.mapParts(parts);
+            const r = d.checkRoute(pathname, query);
             if (r.type === "Just") {
                 return r;
             }
         }
         return nothing;
+    }
+
+    parseLocation(location: Location): Maybe<R> {
+        return this.parse(location.pathname, QueryParams.fromQueryString(location.search));
     }
 
 }

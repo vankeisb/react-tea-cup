@@ -1,5 +1,18 @@
 import React from 'react';
-import {Cmd, Dispatcher, ProgramWithNav, map, Sub, noCmd, newUrl, Task} from "react-tea-cup";
+import {
+    Cmd,
+    Dispatcher,
+    ProgramWithNav,
+    map,
+    Sub,
+    noCmd,
+    newUrl,
+    Task,
+    Router,
+    route0,
+    str,
+    route1, route2, int, just, Maybe, nothing, maybeOf
+} from "react-tea-cup";
 import * as Counter from './Samples/Counter'
 import * as ParentChild from './Samples/ParentChild'
 import * as Raf from './Samples/Raf'
@@ -7,6 +20,58 @@ import * as Perf from './Samples/Perf'
 import * as Rand from './Samples/Rand'
 import * as ClassMsgs from './Samples/ClassMsgs'
 import * as Sful from './Samples/StatefulInView'
+
+
+type Route
+    = { _tag: "home" }
+    | { _tag: "samples" }
+    | { _tag: "todos", id: Maybe<string> }
+
+
+function homeRoute() : Route  {
+    return {_tag: "home"}
+}
+
+function samplesRoute() : Route {
+    return {_tag: "samples"}
+}
+
+function todosRoute(id: Maybe<string> = nothing) : Route {
+    return {_tag: "todos", id: id}
+}
+
+
+const router: Router<Route> = new Router<Route>(
+    route0.map(() => homeRoute()),
+    route1(str("todos")).map((_:string) => todosRoute()),
+    route2(str("todos"), str()).map((_:string, id:string) => todosRoute(just(id))),
+    route1(str("samples")).map((_:string) => samplesRoute())
+);
+
+
+function routeToUrl(route: Route): string {
+    switch (route._tag) {
+        case "home":
+            return "/";
+        case "samples":
+            return "/samples";
+        case "todos":
+            const idPart = route.id.map((id:string) => "/" + id).withDefault("");
+            return `/todos${idPart}`;
+    }
+}
+
+
+function navigateTo(route: Route): Msg {
+    return { type: "newUrl", url: routeToUrl(route) };
+}
+
+
+interface TodoItem {
+    readonly id: string;
+    readonly text: string;
+    readonly done: boolean;
+}
 
 
 interface Model {
@@ -17,7 +82,8 @@ interface Model {
     readonly rand: Rand.Model
     readonly clsm: ClassMsgs.Model
     readonly sful: Sful.Model
-    readonly hash: string;
+    readonly route: Maybe<Route>
+    readonly todos: ReadonlyArray<TodoItem>
 }
 
 
@@ -30,7 +96,7 @@ type Msg
     | { type: "clsm", child: ClassMsgs.Msg }
     | { type: "sful", child: Sful.Msg }
     | { type: "urlChange", location: Location }
-    | { type: "navButtonClicked" }
+    | { type: "newUrl", url: string }
     | { type: "noop" }
     
 
@@ -56,7 +122,19 @@ function init(location:Location): [Model, Cmd<Msg>] {
             rand: rand[0],
             clsm: clsm[0],
             sful: sful[0],
-            hash: h
+            route: router.parseLocation(location),
+            todos: [
+                {
+                    id: "1",
+                    text: "Wash your dog",
+                    done: false
+                },
+                {
+                    id: "2",
+                    text: "Walk your car",
+                    done: true
+                }
+            ]
         },
         Cmd.batch([
             counter[1].map(mapCounter),
@@ -124,43 +202,154 @@ function mapSful(m: Sful.Msg) : Msg {
 
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
-
-    function navItem(hash:string, label:string) {
-        if (hash === model.hash) {
-            return <span>{label}</span>;
-        } else {
-            return (
-                <a href={"#" + hash}>
-                    {label}
-                </a>
-            )
-        }
-    }
-
-
-    const nav =
-        <div>
-            <p>
-                Some tabs, based on the URL
-            </p>
-            <ul>
-                <li>{navItem("", "Home")}</li>
-                <li>{navItem("foo", "Foo")}</li>
-                <li>{navItem("bar", "Bar")}</li>
-            </ul>
-            <p>
-                And a <code>newUrl</code> call from a button :
-                <button onClick={_ => dispatch({
-                    type: "navButtonClicked"
-                })}>
-                    Go to #Foo
-                </button>
-            </p>
-        </div>;
+    return model.route
+        .map((route:Route) => {
+            switch (route._tag) {
+                case "home":
+                    return viewHome(dispatch);
+                case "samples":
+                    return viewSamples(dispatch, model);
+                case "todos":
+                    return route.id
+                        .map((id:string) => viewTodo(dispatch, model, id))
+                        .withDefault(viewTodos(dispatch, model));
+            }
+        })
+        .withDefault(
+            <div>
+                <h1>Page not found !</h1>
+                <p>
+                    The router didn't find a route, this is a client-side 404...
+                </p>
+            </div>
+        )
+}
 
 
+function viewHome(dispatch: Dispatcher<Msg>) {
     return (
         <div>
+            <h1>TeaCup sample app</h1>
+            <p>
+                Browse the
+                {" "}
+                <a href="#"
+                    onClick={e => {
+                        e.preventDefault();
+                        dispatch(navigateTo(samplesRoute()));
+                    }}>
+                    samples
+                </a>
+                {" "}
+                or try the
+                {" "}
+                <a href="#"
+                    onClick={e => {
+                        e.preventDefault();
+                        dispatch(navigateTo(todosRoute()));
+                    }}>
+                    TodoMVC app
+                </a>
+                .
+            </p>
+        </div>
+    )
+}
+
+
+function backToHome(d:Dispatcher<Msg>) {
+    return (
+        <div>
+            <a href="#"
+               onClick={e => {
+                   e.preventDefault();
+                   d(navigateTo(homeRoute()));
+               }}>
+                {"<-"} Back to home
+            </a>
+        </div>
+   );
+}
+
+
+function viewTodos(dispatch: Dispatcher<Msg>, model: Model) {
+    return (
+        <div>
+            {backToHome(dispatch)}
+            <h1>Todo MVC</h1>
+            { model.todos.length === 0
+                ? (
+                    <p>
+                        You have nothing to do ! Neat !!
+                    </p>
+                )
+                : (
+                    <ul>
+                        {model.todos.map(todo => {
+                            const style = {
+                                textDecoration: todo.done ? "line-through" : "none"
+                            };
+                            return (
+                                <li
+                                    key={todo.id}
+                                    style={style}>
+                                    <a
+                                        href="#"
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            dispatch(navigateTo(todosRoute(just(todo.id))))
+                                        }}>
+                                        {todo.text}
+                                    </a>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )
+            }
+        </div>
+    )
+}
+
+
+function viewTodo(dispatch: Dispatcher<Msg>, model: Model, id: string) {
+    const todo = maybeOf(model.todos.find(t => t.id === id));
+    return (
+        <div>
+            <div>
+                <a href="#"
+                    onClick={e => {
+                        e.preventDefault();
+                        dispatch(navigateTo(todosRoute()))
+                    }}>
+                    {"<-"} back to list
+                </a>
+            </div>
+            { todo
+                .map((t:TodoItem) =>
+                        <div>
+                            <h1>Todo</h1>
+                            {t.text}
+                        </div>
+                )
+                .withDefault(
+                    <div>
+                        <h1>Todo not found !</h1>
+                        <p>
+                            There's no TODO for ID {id}.
+                        </p>
+                    </div>
+                )
+            }
+        </div>
+    )
+}
+
+
+function viewSamples(dispatch: Dispatcher<Msg>, model: Model) {
+    return (
+        <div>
+            {backToHome(dispatch)}
             <h1>Samples</h1>
             <p>
                 This is the samples app for <code>react-tea-cup</code>.
@@ -185,7 +374,6 @@ function view(dispatch: Dispatcher<Msg>, model: Model) {
                 in your program. For now we only use dummy href
                 but we should use a more advanced url parser...
             </p>
-            {nav}
         </div>
     )
 }
@@ -215,17 +403,19 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
             const macSful = Sful.update(msg.child, model.sful);
             return [{...model, sful: macSful[0]}, macSful[1].map(mapSful)];
         case "urlChange":
-            const h = msg.location.hash;
             return noCmd({
                 ...model,
-                hash: h.startsWith("#") ? h.substring(1) : h
+                route: router.parseLocation(msg.location)
             });
-        case "navButtonClicked":
-            const newUrlCmd: Cmd<Msg> = Task.perform(
-                newUrl("#foo"),
-                (l:Location) => NoOp
-            );
-            return [model, newUrlCmd];
+        case "newUrl":
+            return [
+                model,
+                Task.perform(
+                    newUrl(msg.url),
+                    (_:Location) => NoOp
+                )
+            ];
+
         case "noop":
             return noCmd(model);
     }
