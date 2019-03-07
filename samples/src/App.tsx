@@ -1,5 +1,5 @@
 import React from 'react';
-import {Cmd, Dispatcher, ProgramWithNav, map, Sub, noCmd} from "react-tea-cup";
+import {Cmd, Dispatcher, ProgramWithNav, map, Sub, noCmd, newUrl, Task} from "react-tea-cup";
 import * as Counter from './Samples/Counter'
 import * as ParentChild from './Samples/ParentChild'
 import * as Raf from './Samples/Raf'
@@ -30,7 +30,12 @@ type Msg
     | { type: "clsm", child: ClassMsgs.Msg }
     | { type: "sful", child: Sful.Msg }
     | { type: "urlChange", location: Location }
+    | { type: "navButtonClicked" }
+    | { type: "noop" }
     
+
+const NoOp: Msg = { type: "noop" };
+
 
 function init(location:Location): [Model, Cmd<Msg>] {
 
@@ -134,11 +139,24 @@ function view(dispatch: Dispatcher<Msg>, model: Model) {
 
 
     const nav =
-        <ul>
-            <li>{navItem("", "Home")}</li>
-            <li>{navItem("foo", "Foo")}</li>
-            <li>{navItem("bar", "Bar")}</li>
-        </ul>;
+        <div>
+            <p>
+                Some tabs, based on the URL
+            </p>
+            <ul>
+                <li>{navItem("", "Home")}</li>
+                <li>{navItem("foo", "Foo")}</li>
+                <li>{navItem("bar", "Bar")}</li>
+            </ul>
+            <p>
+                And a <code>newUrl</code> call from a button :
+                <button onClick={_ => dispatch({
+                    type: "navButtonClicked"
+                })}>
+                    Go to #Foo
+                </button>
+            </p>
+        </div>;
 
 
     return (
@@ -202,6 +220,14 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                 ...model,
                 hash: h.startsWith("#") ? h.substring(1) : h
             });
+        case "navButtonClicked":
+            const newUrlCmd: Cmd<Msg> = Task.perform(
+                newUrl("#foo"),
+                (l:Location) => NoOp
+            );
+            return [model, newUrlCmd];
+        case "noop":
+            return noCmd(model);
     }
 
 }
