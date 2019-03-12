@@ -5,9 +5,12 @@ const num = Decode.num;
 const field = Decode.field;
 
 
-test("number", () => {
+test("primitives", () => {
     expect(num.decodeValue(1)).toEqual(ok(1));
     expect(num.decodeValue("yeah")).toEqual(err("value is not a number : \"yeah\""));
+
+    expect(Decode.bool.decodeValue(true)).toEqual(ok(true));
+    expect(Decode.bool.decodeValue("boom")).toEqual(err("value is not a boolean : \"boom\""))
 });
 
 
@@ -91,6 +94,56 @@ test("map3", () => {
 
     expect(point.decodeValue({x:1,y:2,z:3})).toEqual(ok([1,2,3]));
     expect(point.decodeValue({x:1})).toEqual(err("path not found [y] on {\"x\":1}"));
+});
+
+
+test("map8", () => {
+
+    interface My {
+        readonly a: number
+        readonly b: number
+        readonly c: number
+        readonly d: number
+        readonly e: number
+        readonly f: number
+        readonly g: number
+        readonly h: number
+    }
+
+    const o = {
+        "a": 1,
+        "b": 2,
+        "c": 3,
+        "d": 4,
+        "e": 5,
+        "f": 6,
+        "g": 7,
+        "h": 8
+    };
+
+    expect(Decode.map8(
+        (a:number,b:number,c:number,d:number,e:number,f:number,g:number,h:number) => {
+            return {
+                a: a,
+                b: b,
+                c: c,
+                d: d,
+                e: e,
+                f: f,
+                g: g,
+                h: h
+            } as My
+        },
+        field("a", num),
+        field("b", num),
+        field("c", num),
+        field("d", num),
+        field("e", num),
+        field("f", num),
+        field("g", num),
+        field("h", num),
+        ).decodeValue(o)
+    ).toEqual(ok(o));
 });
 
 
@@ -211,4 +264,9 @@ test("oneOf", () => {
     expect(badInt.decodeValue(123)).toEqual(ok(123));
     expect(badInt.decodeValue(null)).toEqual(ok(0));
     expect(badInt.decodeValue("foo")).toEqual(err("ran out of decoders for \"foo\""));
+});
+
+
+test("from string", () => {
+    expect(num.decodeString("123")).toEqual(ok(123));
 });

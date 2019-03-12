@@ -138,16 +138,20 @@ export class Decode {
             let v:any = o;
             const path: string[] = [];
 
+            function pathToStr() {
+                return `[${path.join(",")}]`
+            }
+
             for (let i=0 ; i<keys.length ; i++) {
                 if (isUndef(v)) {
-                    return err(`path not found [${path}] on ${stringifyForMsg(o)}`);
+                    return err(`path not found ${pathToStr()} on ${stringifyForMsg(o)}`);
                 }
                 const key = keys[i];
                 path.push(key);
                 if (v.hasOwnProperty(key)) {
                     v = v[key];
                 } else {
-                    return err(`path not found [${path}] on ${stringifyForMsg(o)}`);
+                    return err(`path not found ${pathToStr()} on ${stringifyForMsg(o)}`);
                 }
             }
 
@@ -156,7 +160,7 @@ export class Decode {
                 case "Ok":
                     return r;
                 case "Err":
-                    return err(`ran into decoder error at [${path}] : ${r.err}`);
+                    return err(`ran into decoder error at ${pathToStr()} : ${r.err}`);
             }
         })
     }
@@ -295,7 +299,7 @@ export class Decode {
 
 
     static succeed<T>(t:T): Decoder<T> {
-        return new Decoder<T>((o:any) => {
+        return new Decoder<T>(() => {
             return ok(t)
         })
     }
