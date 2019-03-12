@@ -66,6 +66,20 @@ test("map2", () => {
 });
 
 
+test("map3", () => {
+    const point: Decoder<number[]> =
+        Decode.map3(
+            (x:number, y:number, z:number) => [x,y,z],
+            field("x", num),
+            field("y", num),
+            field("z", num)
+        );
+
+    expect(point.decodeValue({x:1,y:2,z:3})).toEqual(ok([1,2,3]));
+    expect(point.decodeValue({x:1})).toEqual(err("field \"y\" not found on {\"x\":1}"));
+});
+
+
 test("andThen", () => {
 
     type Stuff

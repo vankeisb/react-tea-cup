@@ -137,6 +137,15 @@ export class Decode {
         );
     }
 
+    static map3<T1,T2,T3,T4>(f:(t1:T1, t2:T2, t3:T3) => T4, d1:Decoder<T1>, d2:Decoder<T2>, d3:Decoder<T3>): Decoder<T4> {
+        return Decode.andThen(
+            (t1:T1) => Decode.map2((t2:T2,t3:T3) => {
+                return f(t1,t2,t3)
+            }, d2, d3),
+            d1
+        );
+    }
+
     // Fancy Decoding
 
 
