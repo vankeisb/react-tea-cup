@@ -57,3 +57,13 @@ export class Err<E,R> {
     }
 
 }
+
+
+export function ok<E,R>(r:R): Result<E,R> {
+    return new Ok<E,R>(r);
+}
+
+
+export function err<E,R>(e:E): Result<E,R> {
+    return new Err(e);
+}
