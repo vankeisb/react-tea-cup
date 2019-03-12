@@ -51,21 +51,30 @@ export class Decode {
 
     // Primitives
 
+    static str: Decoder<string> = new Decoder<string>((o:any) => {
+        if (o !== null && o !== undefined && typeof o === "string") {
+            return ok(o);
+        } else {
+            return err(`value is not a string : ${stringifyForMsg(o)}`)
+        }
+    });
+
+    static bool: Decoder<boolean> = new Decoder<boolean>((o:any) => {
+        if (o !== null && o !== undefined && typeof o === "boolean") {
+            return ok(o);
+        } else {
+            return err(`value is not a boolean : ${stringifyForMsg(o)}`)
+        }
+    });
+
     static num: Decoder<number> = new Decoder<number>((o:any) => {
-        if (typeof o === "number") {
+        if (o !== null && o !== undefined && typeof o === "number") {
             return ok(o);
         } else {
             return err(`value is not a number : ${stringifyForMsg(o)}`)
         }
     });
 
-    static str: Decoder<string> = new Decoder<string>((o:any) => {
-        if (typeof o === "string") {
-            return ok(o);
-        } else {
-            return err(`value is not a string : ${stringifyForMsg(o)}`)
-        }
-    });
 
     // Data Structures
 
@@ -78,6 +87,30 @@ export class Decode {
             }
         })
     }
+
+
+    static array<T>(d:Decoder<T>): Decoder<Array<T>> {
+        return new Decoder<Array<T>>((o:any) => {
+            if (o instanceof Array) {
+                const a: Array<any> = o as Array<any>;
+                const res: Array<T> = [];
+                for (let i=0 ; i<a.length ; i++) {
+                    const r: Result<string,T> = d.decodeValue(a[i]);
+                    switch (r.tag) {
+                        case "Ok":
+                            res.push(r.value);
+                            break;
+                        case "Err":
+                            return err(`could not convert element at index ${i} of ${stringifyForMsg(o)} : ${r.err}`)
+                    }
+                }
+                return ok(res);
+            } else {
+                return err(`value is not an array : ${stringifyForMsg(o)}`);
+            }
+        })
+    }
+
 
     // Object Primitives
 
