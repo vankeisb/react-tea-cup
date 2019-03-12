@@ -1,6 +1,6 @@
 import {Cmd} from "./Cmd";
 import {Dispatcher} from "./Dispatcher";
-import {Err, Ok, Result} from "./Result";
+import {err, Err, ok, Ok, Result} from "./Result";
 
 
 export abstract class Task<E,R> {
@@ -23,6 +23,10 @@ export abstract class Task<E,R> {
         return new TError(e)
     }
 
+    static fromPromise<R>(p:Promise<R>): Task<any,R> {
+        return new TPromise(p);
+    }
+
     map<R2>(f:(r:R) => R2): Task<E,R2> {
         return new TMapped(this, f)
     }
@@ -34,6 +38,27 @@ export abstract class Task<E,R> {
     andThen<R2>(f:(r:R) => Task<E,R2>): Task<E,R2> {
         return new TThen(this, f)
     }
+}
+
+
+class TPromise<R> extends Task<any,R> {
+
+    private readonly p:Promise<R>;
+
+    constructor(p:Promise<R>) {
+        super();
+        this.p = p;
+    }
+
+    execute(callback: (r: Result<any, R>) => void): void {
+        this.p
+            .then(
+                (r:R) => callback(ok(r)),
+                (e:any) => callback(err(e))
+            )
+            .catch(e => callback(err(e)))
+    }
+
 }
 
 

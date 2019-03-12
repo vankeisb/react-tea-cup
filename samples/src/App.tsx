@@ -20,7 +20,7 @@ import * as Perf from './Samples/Perf'
 import * as Rand from './Samples/Rand'
 import * as ClassMsgs from './Samples/ClassMsgs'
 import * as Sful from './Samples/StatefulInView'
-
+import * as Rest from './Samples/Rest'
 
 
 enum Tab {
@@ -113,7 +113,22 @@ interface TodoItem {
 }
 
 
-interface Model {
+interface TodoMvc {
+    readonly todos: ReadonlyArray<TodoItem>
+    readonly tab: Tab
+    readonly todoId: Maybe<string>
+}
+
+
+type Model
+    = { tag: "home" }
+    | { tag: "samples", samples: Samples }
+    | { tag: "todo-mvc", todoMvc: TodoMvc }
+    | { tag: "not-found" }
+
+
+
+interface Samples {
     readonly counter: Counter.Model
     readonly parentChild: ParentChild.Model
     readonly raf: Raf.Model
@@ -121,8 +136,7 @@ interface Model {
     readonly rand: Rand.Model
     readonly clsm: ClassMsgs.Model
     readonly sful: Sful.Model
-    readonly route: Maybe<Route>
-    readonly todos: ReadonlyArray<TodoItem>
+    readonly rest: Rest.Model
 }
 
 
@@ -134,6 +148,7 @@ type Msg
     | { type: "rand", child: Rand.Msg }
     | { type: "clsm", child: ClassMsgs.Msg }
     | { type: "sful", child: Sful.Msg }
+    | { type: "rest", child: Rest.Msg }
     | { type: "urlChange", location: Location }
     | { type: "newUrl", url: string }
     | { type: "noop" }
@@ -143,8 +158,7 @@ type Msg
 const NoOp: Msg = { type: "noop" };
 
 
-function init(location:Location): [Model, Cmd<Msg>] {
-
+function initSamples(): [Model, Cmd<Msg>] {
     const counter = Counter.init();
     const parentChild = ParentChild.init();
     const raf = Raf.init();
@@ -152,29 +166,20 @@ function init(location:Location): [Model, Cmd<Msg>] {
     const rand = Rand.init();
     const clsm = ClassMsgs.init();
     const sful = Sful.init();
-    const h = location.hash.startsWith("#") ? location.hash.substring(1) : location.hash;
+    const rest = Rest.init();
     return [
         {
-            counter: counter[0],
-            parentChild: parentChild[0],
-            raf: raf[0],
-            perf: perf[0],
-            rand: rand[0],
-            clsm: clsm[0],
-            sful: sful[0],
-            route: router.parseLocation(location),
-            todos: [
-                {
-                    id: "1",
-                    text: "Wash your dog",
-                    done: false
-                },
-                {
-                    id: "2",
-                    text: "Walk your car",
-                    done: true
-                }
-            ]
+            tag: "samples",
+            samples: {
+                counter: counter[0],
+                parentChild: parentChild[0],
+                raf: raf[0],
+                perf: perf[0],
+                rand: rand[0],
+                clsm: clsm[0],
+                sful: sful[0],
+                rest: rest[0]
+            }
         },
         Cmd.batch([
             counter[1].map(mapCounter),
@@ -184,8 +189,59 @@ function init(location:Location): [Model, Cmd<Msg>] {
             rand[1].map(mapRand),
             clsm[1].map(mapClsm),
             sful[1].map(mapSful),
+            rest[1].map(mapRest)
         ])
-    ]
+    ];
+}
+
+
+
+const todos = [
+    {
+        id: "1",
+        text: "Wash your dog",
+        done: false
+    },
+    {
+        id: "2",
+        text: "Walk your car",
+        done: true
+    }
+];
+
+
+function init(location:Location): [Model, Cmd<Msg>] {
+
+    function fromRoute(route:Route): [Model,Cmd<Msg>] {
+        switch (route._tag) {
+            case "home":
+                return noCmd({ tag: "home"} as Model);
+            case "samples":
+                return initSamples();
+            case "todos":
+                return noCmd({
+                    tag: "todo-mvc",
+                    todoMvc: {
+                        todos: todos,
+                        tab: route.tab,
+                        todoId: nothing
+                    }
+                } as Model);
+            case "todo":
+                return noCmd({
+                    tag: "todo-mvc",
+                    todoMvc: {
+                        todos: todos,
+                        tab: Tab.All,
+                        todoId: just(route.id)
+                    }
+                } as Model);
+        }
+    }
+
+    return router.parseLocation(location)
+        .map(fromRoute)
+        .withDefault(noCmd({ tag: "not-found" } as Model));
 }
 
 
@@ -241,28 +297,35 @@ function mapSful(m: Sful.Msg) : Msg {
 }
 
 
+function mapRest(m: Rest.Msg) : Msg {
+    return {
+        type: "rest",
+        child: m
+    }
+}
+
+
 function view(dispatch: Dispatcher<Msg>, model: Model) {
-    return model.route
-        .map((route:Route) => {
-            switch (route._tag) {
-                case "home":
-                    return viewHome(dispatch);
-                case "samples":
-                    return viewSamples(dispatch, model);
-                case "todos":
-                    return viewTodos(dispatch, model, route.tab);
-                case "todo":
-                    return viewTodo(dispatch, model, route.id)
-            }
-        })
-        .withDefault(
-            <div>
-                <h1>Page not found !</h1>
-                <p>
-                    The router didn't find a route, this is a client-side 404...
-                </p>
-            </div>
-        )
+    switch (model.tag) {
+        case "home":
+            return viewHome(dispatch);
+        case "samples":
+            return viewSamples(dispatch, model.samples);
+        case "todo-mvc":
+            return viewTodoMvc(dispatch, model.todoMvc);
+        case "not-found":
+            return (
+                <div>
+                    <h1>Page not found !</h1>
+                    <p>
+                        The router didn't find a route, this is a client-side 404...
+                    </p>
+                </div>
+            )
+//            return viewTodos(dispatch, model, route.tab);
+//         case "todo":
+//             return viewTodo(dispatch, model, route.id)
+    }
 }
 
 
@@ -312,10 +375,19 @@ function backToHome(d:Dispatcher<Msg>) {
 }
 
 
-function viewTodos(dispatch: Dispatcher<Msg>, model: Model, curTab: Tab) {
+function viewTodoMvc(dispatch: Dispatcher<Msg>, todoMvc: TodoMvc) {
+    return todoMvc.todoId
+        .map((todoId:string) => viewTodo(dispatch, todoMvc, todoId))
+        .withDefault(viewTodos(dispatch, todoMvc))
+}
+
+
+function viewTodos(dispatch: Dispatcher<Msg>, todoMvc: TodoMvc) {
+
+    const { tab, todos } = todoMvc;
 
     function viewTab(t: Tab) {
-        const active = t === curTab;
+        const active = t === tab;
         let label;
         switch (t) {
             case Tab.All:
@@ -352,7 +424,7 @@ function viewTodos(dispatch: Dispatcher<Msg>, model: Model, curTab: Tab) {
         <div>
             {backToHome(dispatch)}
             <h1>Todo MVC</h1>
-            { model.todos.length === 0
+            { todos.length === 0
                 ? (
                     <p>
                         You have nothing to do ! Neat !!
@@ -366,9 +438,9 @@ function viewTodos(dispatch: Dispatcher<Msg>, model: Model, curTab: Tab) {
                             {viewTab(Tab.Closed)}
                         </ul>
                         <ul>
-                            {model.todos
+                            {todos
                                 .filter(todo => {
-                                    switch (curTab) {
+                                    switch (tab) {
                                         case Tab.All:
                                             return true;
                                         case Tab.Open:
@@ -406,8 +478,9 @@ function viewTodos(dispatch: Dispatcher<Msg>, model: Model, curTab: Tab) {
 }
 
 
-function viewTodo(dispatch: Dispatcher<Msg>, model: Model, id: string) {
-    const todo = maybeOf(model.todos.find(t => t.id === id));
+function viewTodo(dispatch: Dispatcher<Msg>, todoMvc: TodoMvc, id: string) {
+    const { todos } = todoMvc;
+    const todo = maybeOf(todos.find(t => t.id === id));
     return (
         <div>
             <div>
@@ -440,7 +513,7 @@ function viewTodo(dispatch: Dispatcher<Msg>, model: Model, id: string) {
 }
 
 
-function viewSamples(dispatch: Dispatcher<Msg>, model: Model) {
+function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
     return (
         <div>
             {backToHome(dispatch)}
@@ -449,52 +522,101 @@ function viewSamples(dispatch: Dispatcher<Msg>, model: Model) {
                 This is the samples app for <code>react-tea-cup</code>.
             </p>
             <h2>Counter</h2>
-            {Counter.view(map(dispatch, mapCounter), model.counter)}
+            {Counter.view(map(dispatch, mapCounter), samples.counter)}
             <h2>Random</h2>
-            {Rand.view(map(dispatch, mapRand), model.rand)}
+            {Rand.view(map(dispatch, mapRand), samples.rand)}
             <h2>Parent/child</h2>
-            {ParentChild.view(map(dispatch, mapParentChild), model.parentChild)}
+            {ParentChild.view(map(dispatch, mapParentChild), samples.parentChild)}
             <h2>Raf</h2>
-            {Raf.view(map(dispatch, mapRaf), model.raf)}
+            {Raf.view(map(dispatch, mapRaf), samples.raf)}
             <h2>Performance</h2>
-            {Perf.view(map(dispatch, mapPerf), model.perf)}
+            {Perf.view(map(dispatch, mapPerf), samples.perf)}
             <h2>More OOP</h2>
-            {ClassMsgs.view(map(dispatch, mapClsm), model.clsm)}
+            {ClassMsgs.view(map(dispatch, mapClsm), samples.clsm)}
             <h2>Stateful in view()</h2>
-            {Sful.view(map(dispatch, mapSful), model.sful)}
+            {Sful.view(map(dispatch, mapSful), samples.sful)}
+            <h2>Http / JSON</h2>
+            {Rest.view(map(dispatch, mapRest), samples.rest)}
         </div>
     )
 }
 
 
 function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
+
+    function mapSample<CM>(f:(s:Samples) => [Samples,Cmd<Msg>]): [Model, Cmd<Msg>] {
+        switch (model.tag) {
+            case "samples":
+                const sac:[Samples,Cmd<Msg>] = f(model.samples);
+                const newModel: Model = {...model, samples: sac[0]};
+                return [newModel, sac[1]];
+            default:
+                return noCmd(model);
+        }
+    }
+
     switch (msg.type) {
         case "counter":
-            const macCounter = Counter.update(msg.child, model.counter);
-            return [{...model, counter: macCounter[0]}, macCounter[1].map(mapCounter)];
+            return mapSample(
+                (s:Samples) => {
+                    const macCounter = Counter.update(msg.child, s.counter);
+                    return [{...s, counter: macCounter[0]}, macCounter[1].map(mapCounter)];
+                }
+            );
         case "parentChild":
-            const macPc = ParentChild.update(msg.child, model.parentChild);
-            return [{...model, parentChild: macPc[0]}, macPc[1].map(mapParentChild)];
+            return mapSample(
+                (s:Samples) => {
+                    const macPc = ParentChild.update(msg.child, s.parentChild);
+                    return [{...s, parentChild: macPc[0]}, macPc[1].map(mapParentChild)];
+                }
+            );
+
         case "raf":
-            const macRaf = Raf.update(msg.child, model.raf);
-            return [{...model, raf: macRaf[0]}, macRaf[1].map(mapRaf)];
+            return mapSample(
+                (s:Samples) => {
+                    const macRaf = Raf.update(msg.child, s.raf);
+                    return [{...s, raf: macRaf[0]}, macRaf[1].map(mapRaf)];
+                }
+            );
         case "perf":
-            const macPerf = Perf.update(msg.child, model.perf);
-            return [{...model, perf: macPerf[0]}, macPerf[1].map(mapPerf)];
+            return mapSample(
+                (s:Samples) => {
+                    const macPerf = Perf.update(msg.child, s.perf);
+                    return [{...s, perf: macPerf[0]}, macPerf[1].map(mapPerf)];
+                }
+            );
         case "rand":
-            const macRand = Rand.update(msg.child, model.rand);
-            return [{...model, rand: macRand[0]}, macRand[1].map(mapRand)];
+            return mapSample(
+                (s:Samples) => {
+                    const macRand = Rand.update(msg.child, s.rand);
+                    return [{...s, rand: macRand[0]}, macRand[1].map(mapRand)];
+                }
+            );
         case "clsm":
-            const macClsm = ClassMsgs.update(msg.child, model.clsm);
-            return [{...model, clsm: macClsm[0]}, macClsm[1].map(mapClsm)];
+            return mapSample(
+                (s:Samples) => {
+                    const macClsm = ClassMsgs.update(msg.child, s.clsm);
+                    return [{...s, clsm: macClsm[0]}, macClsm[1].map(mapClsm)];
+                }
+            );
         case "sful":
-            const macSful = Sful.update(msg.child, model.sful);
-            return [{...model, sful: macSful[0]}, macSful[1].map(mapSful)];
+            return mapSample(
+                (s:Samples) => {
+                    const macSful = Sful.update(msg.child, s.sful);
+                    return [{...s, sful: macSful[0]}, macSful[1].map(mapSful)];
+                }
+            );
+        case "rest":
+            return mapSample(
+                (s:Samples) => {
+                    const macRest = Rest.update(msg.child, s.rest);
+                    return [{...s, rest: macRest[0]}, macRest[1].map(mapRest)];
+                }
+            );
+
         case "urlChange":
-            return noCmd({
-                ...model,
-                route: router.parseLocation(msg.location)
-            });
+            return init(msg.location);
+
         case "newUrl":
             return [
                 model,
@@ -519,13 +641,19 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 
 
 function subscriptions(model: Model) : Sub<Msg> {
-    return Sub.batch(
-        [
-            Counter.subscriptions(model.counter).map(mapCounter),
-            ParentChild.subscriptions(model.parentChild).map(mapParentChild),
-            Raf.subscriptions(model.raf).map(mapRaf)
-        ]
-    )
+    switch (model.tag) {
+        case "samples":
+            const { counter, parentChild, raf } = model.samples;
+            return Sub.batch(
+                [
+                    Counter.subscriptions(counter).map(mapCounter),
+                    ParentChild.subscriptions(parentChild).map(mapParentChild),
+                    Raf.subscriptions(raf).map(mapRaf)
+                ]
+            )
+        default:
+            return Sub.none();
+    }
 }
 
 
