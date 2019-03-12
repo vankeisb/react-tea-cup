@@ -200,3 +200,15 @@ test("lazy", () => {
     expect(comment.decodeValue(v)).toEqual(ok(v));
 
 });
+
+
+test("oneOf", () => {
+    const badInt: Decoder<number> = Decode.oneOf([
+        Decode.num,
+        Decode.null(0)
+    ]);
+
+    expect(badInt.decodeValue(123)).toEqual(ok(123));
+    expect(badInt.decodeValue(null)).toEqual(ok(0));
+    expect(badInt.decodeValue("foo")).toEqual(err("ran out of decoders for \"foo\""));
+});

@@ -151,9 +151,16 @@ export class Decode {
                 }
             }
 
-            return d.decodeValue(v);
+            const r = d.decodeValue(v);
+            switch (r.tag) {
+                case "Ok":
+                    return r;
+                case "Err":
+                    return err(`ran into decoder error at [${path}] : ${r.err}`);
+            }
         })
     }
+
 
     // Inconsistent Structure
 
@@ -168,6 +175,23 @@ export class Decode {
             }
         })
     }
+
+
+    static oneOf<T>(ds:ReadonlyArray<Decoder<T>>): Decoder<T> {
+        return new Decoder<T>((o:any) => {
+            for (let i=0; i<ds.length; i++) {
+                const r:Result<string,T> = ds[i].decodeValue(o);
+                switch (r.tag) {
+                    case "Ok":
+                        return r;
+                    case "Err":
+                        break;
+                }
+            }
+            return err(`ran out of decoders for ${stringifyForMsg(o)}`)
+        })
+    }
+
 
     // Mapping
 
@@ -201,6 +225,51 @@ export class Decode {
         );
     }
 
+    static map4<T1,T2,T3,T4,T5>(f:(t1:T1, t2:T2, t3:T3, t4:T4) => T5, d1:Decoder<T1>, d2:Decoder<T2>, d3:Decoder<T3>, d4:Decoder<T4>): Decoder<T5> {
+        return Decode.andThen(
+            (t1:T1) => Decode.map3((t2:T2,t3:T3, t4:T4) => {
+                return f(t1,t2,t3,t4)
+            }, d2, d3, d4),
+            d1
+        );
+    }
+
+    static map5<T1,T2,T3,T4,T5,T6>(f:(t1:T1, t2:T2, t3:T3, t4:T4, t5: T5) => T6, d1:Decoder<T1>, d2:Decoder<T2>, d3:Decoder<T3>, d4:Decoder<T4>, d5:Decoder<T5>): Decoder<T6> {
+        return Decode.andThen(
+            (t1:T1) => Decode.map4((t2:T2,t3:T3,t4:T4,t5:T5) => {
+                return f(t1,t2,t3,t4,t5)
+            }, d2, d3, d4, d5),
+            d1
+        );
+    }
+
+    static map6<T1,T2,T3,T4,T5,T6,T7>(f:(t1:T1, t2:T2, t3:T3, t4:T4, t5: T5, t6: T6) => T7, d1:Decoder<T1>, d2:Decoder<T2>, d3:Decoder<T3>, d4:Decoder<T4>, d5:Decoder<T5>, d6:Decoder<T6>): Decoder<T7> {
+        return Decode.andThen(
+            (t1:T1) => Decode.map5((t2:T2,t3:T3,t4:T4,t5:T5,t6:T6) => {
+                return f(t1,t2,t3,t4,t5,t6)
+            }, d2, d3, d4, d5, d6),
+            d1
+        );
+    }
+
+    static map7<T1,T2,T3,T4,T5,T6,T7,T8>(f:(t1:T1, t2:T2, t3:T3, t4:T4, t5: T5, t6: T6, t7:T7) => T8, d1:Decoder<T1>, d2:Decoder<T2>, d3:Decoder<T3>, d4:Decoder<T4>, d5:Decoder<T5>, d6:Decoder<T6>, d7:Decoder<T7>): Decoder<T8> {
+        return Decode.andThen(
+            (t1:T1) => Decode.map6((t2:T2,t3:T3,t4:T4,t5:T5,t6:T6,t7:T7) => {
+                return f(t1,t2,t3,t4,t5,t6,t7)
+            }, d2, d3, d4, d5, d6, d7),
+            d1
+        );
+    }
+
+    static map8<T1,T2,T3,T4,T5,T6,T7,T8,T9>(f:(t1:T1, t2:T2, t3:T3, t4:T4, t5: T5, t6: T6, t7:T7, t8:T8) => T9, d1:Decoder<T1>, d2:Decoder<T2>, d3:Decoder<T3>, d4:Decoder<T4>, d5:Decoder<T5>, d6:Decoder<T6>, d7:Decoder<T7>, d8:Decoder<T8>): Decoder<T9> {
+        return Decode.andThen(
+            (t1:T1) => Decode.map7((t2:T2,t3:T3,t4:T4,t5:T5,t6:T6,t7:T7,t8:T8) => {
+                return f(t1,t2,t3,t4,t5,t6,t7,t8)
+            }, d2, d3, d4, d5, d6, d7, d8),
+            d1
+        );
+    }
+
     // Fancy Decoding
 
 
@@ -211,15 +280,30 @@ export class Decode {
     }
 
 
-    static fail<T>(msg:string): Decoder<T> {
-        return new Decoder<T>(() => {
-            return err(msg)
+    static value: Decoder<any> = new Decoder<any>(o => o);
+
+
+    static null<T>(t:T): Decoder<T> {
+        return new Decoder<T>((o:any) => {
+            if (o === null) {
+                return ok(t);
+            } else {
+                return err(`expected null for ${stringifyForMsg(o)}`)
+            }
         })
     }
+
 
     static succeed<T>(t:T): Decoder<T> {
         return new Decoder<T>((o:any) => {
             return ok(t)
+        })
+    }
+
+
+    static fail<T>(msg:string): Decoder<T> {
+        return new Decoder<T>(() => {
+            return err(msg)
         })
     }
 
