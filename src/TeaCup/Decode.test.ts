@@ -149,3 +149,40 @@ test("andThen", () => {
     })).toEqual(err("field \"foo\" not found on {\"tag\":\"stuff1\",\"notThere\":true}"))
 
 });
+
+
+test("lazy", () => {
+
+    interface Comment {
+        readonly message: string
+        readonly responses: ReadonlyArray<Comment>
+    }
+
+    const comment: Decoder<Comment> = Decode.map2(
+        (message:string,responses:Comment[]) => {
+            return {
+                message: message,
+                responses: responses
+            } as Comment
+        },
+        field("message", Decode.str),
+        field("responses", Decode.array(Decode.lazy(() => comment)))
+    );
+
+    const v = {
+        message: "hello",
+            responses: [
+                {
+                    message: "there",
+                    responses: []
+                },
+                {
+                    message: "world",
+                    responses: []
+                }
+            ]
+    };
+
+    expect(comment.decodeValue(v)).toEqual(ok(v));
+
+});

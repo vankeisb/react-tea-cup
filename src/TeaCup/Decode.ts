@@ -182,6 +182,13 @@ export class Decode {
     // Fancy Decoding
 
 
+    static lazy<T>(f:() => Decoder<T>): Decoder<T> {
+        return new Decoder<T>((o:any) => {
+            return f().decodeValue(o)
+        })
+    }
+
+
     static fail<T>(msg:string): Decoder<T> {
         return new Decoder<T>(() => {
             return err(msg)
