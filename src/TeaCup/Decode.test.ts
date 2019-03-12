@@ -25,7 +25,21 @@ test("field", () => {
     };
 
     expect(field("age", num).decodeValue(o)).toEqual(ok(123));
-    expect(field("neh", num).decodeValue(o)).toEqual(err("field \"neh\" not found on {\"age\":123}"))
+    expect(field("neh", num).decodeValue(o)).toEqual(err("path not found [neh] on {\"age\":123}"))
+});
+
+
+test("at", () => {
+    const o = {
+        foo: {
+            bar: "baz"
+        }
+    };
+    expect(Decode.at(["foo", "bar"], Decode.str).decodeValue(o)).toEqual(ok("baz"));
+    expect(Decode.at(["foo", "bar", "nope"], Decode.str).decodeValue(o))
+        .toEqual(err("path not found [foo,bar,nope] on {\"foo\":{\"bar\":\"baz\"}}"));
+    expect(Decode.at(["x"], Decode.str).decodeValue(o))
+        .toEqual(err("path not found [x] on {\"foo\":{\"bar\":\"baz\"}}"))
 });
 
 
@@ -42,7 +56,7 @@ test("maybe", () => {
 
     expect(field("age", maybe(num)).decodeValue(o)).toEqual(ok(just(42)));
     expect(field("name", maybe(num)).decodeValue(o)).toEqual(ok(nothing));
-    expect(field("height", maybe(num)).decodeValue(o)).toEqual(err("field \"height\" not found on {\"name\":\"tom\",\"age\":42}"))
+    expect(field("height", maybe(num)).decodeValue(o)).toEqual(err("path not found [height] on {\"name\":\"tom\",\"age\":42}"))
 });
 
 
@@ -60,9 +74,9 @@ test("map2", () => {
         );
 
     expect(point.decodeValue({x:1,y:2})).toEqual(ok([1,2]));
-    expect(point.decodeValue({x:1})).toEqual(err("field \"y\" not found on {\"x\":1}"));
-    expect(point.decodeValue({y:1})).toEqual(err("field \"x\" not found on {\"y\":1}"));
-    expect(point.decodeValue({foo:1})).toEqual(err("field \"x\" not found on {\"foo\":1}"));
+    expect(point.decodeValue({x:1})).toEqual(err("path not found [y] on {\"x\":1}"));
+    expect(point.decodeValue({y:1})).toEqual(err("path not found [x] on {\"y\":1}"));
+    expect(point.decodeValue({foo:1})).toEqual(err("path not found [x] on {\"foo\":1}"));
 });
 
 
@@ -76,7 +90,7 @@ test("map3", () => {
         );
 
     expect(point.decodeValue({x:1,y:2,z:3})).toEqual(ok([1,2,3]));
-    expect(point.decodeValue({x:1})).toEqual(err("field \"y\" not found on {\"x\":1}"));
+    expect(point.decodeValue({x:1})).toEqual(err("path not found [y] on {\"x\":1}"));
 });
 
 
@@ -146,7 +160,7 @@ test("andThen", () => {
 
     expect(stuff.decodeValue({
         tag:"stuff1", notThere: true
-    })).toEqual(err("field \"foo\" not found on {\"tag\":\"stuff1\",\"notThere\":true}"))
+    })).toEqual(err("path not found [foo] on {\"tag\":\"stuff1\",\"notThere\":true}"))
 
 });
 

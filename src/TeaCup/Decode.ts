@@ -1,5 +1,6 @@
 import {err, ok, Result} from "./Result";
 import {just, Maybe, nothing} from "./Maybe";
+import {List} from "./List";
 
 
 export class Decoder<T> {
@@ -88,6 +89,13 @@ export class Decode {
         })
     }
 
+    static list<T>(d:Decoder<T>): Decoder<List<T>> {
+        return Decode.map(
+            (a:Array<T>) => List.fromArray(a),
+            Decode.array(d)
+        )
+    }
+
 
     static array<T>(d:Decoder<T>): Decoder<Array<T>> {
         return new Decoder<Array<T>>((o:any) => {
@@ -115,21 +123,35 @@ export class Decode {
     // Object Primitives
 
     static field<T>(key:string, d:Decoder<T>): Decoder<T> {
+        return Decode.at([key], d)
+    }
+
+    static at<T>(keys: ReadonlyArray<string>, d:Decoder<T>): Decoder<T> {
+
+        function isUndef(x:any) {
+            return x === null || x === undefined
+        }
+
+
         return new Decoder<T>((o:any) => {
-            if (o === null || o === undefined) {
-                return err(`expected field '${key}' but object is undefined`)
-            } else {
-                if (typeof o === "object") {
-                    if (o.hasOwnProperty(key)) {
-                        return d.decodeValue(o[key]);
-                    } else {
-                        // field not present, that's an err
-                        return err(`field "${key}" not found on ${stringifyForMsg(o)}`);
-                    }
+
+            let v:any = o;
+            const path: string[] = [];
+
+            for (let i=0 ; i<keys.length ; i++) {
+                if (isUndef(v)) {
+                    return err(`path not found [${path}] on ${stringifyForMsg(o)}`);
+                }
+                const key = keys[i];
+                path.push(key);
+                if (v.hasOwnProperty(key)) {
+                    v = v[key];
                 } else {
-                    return err(`expected field "${key}" but holder is not an object ${stringifyForMsg(o)}`);
+                    return err(`path not found [${path}] on ${stringifyForMsg(o)}`);
                 }
             }
+
+            return d.decodeValue(v);
         })
     }
 
