@@ -462,12 +462,6 @@ function viewSamples(dispatch: Dispatcher<Msg>, model: Model) {
             {ClassMsgs.view(map(dispatch, mapClsm), model.clsm)}
             <h2>Stateful in view()</h2>
             {Sful.view(map(dispatch, mapSful), model.sful)}
-            <h2>Routing/Navigation</h2>
-            <p>
-                This shows how you can get notified of url changes
-                in your program. For now we only use dummy href
-                but we should use a more advanced url parser...
-            </p>
         </div>
     )
 }
