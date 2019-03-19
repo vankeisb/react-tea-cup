@@ -317,8 +317,12 @@ export function route3<E1,E2,E3,R>(e1:PathElem<E1>, e2: PathElem<E2>, e3: PathEl
 }
 
 
+export interface RouteBase<R> {
+    checkRoute(pathname: string, query: QueryParams): Maybe<R>;
+}
 
-export class RouteDef<R> {
+
+export class RouteDef<R> implements RouteBase<R> {
     readonly pathElems: ReadonlyArray<PathElem<any>>;
     readonly f:Function;
 
@@ -327,11 +331,19 @@ export class RouteDef<R> {
         this.f = f;
     }
 
+    static sanitizePath(path:string): string {
+        const p1 = path.startsWith("/") ? path.substring(1) : path;
+        return p1.endsWith("/") ? p1.substring(0, p1.length - 2) : p1;
+    }
+
+    static splitPath(path:string): ReadonlyArray<string> {
+        const p = RouteDef.sanitizePath(path);
+        return p === "" ? [] : p.split("/");
+    }
+
     checkRoute(pathname: string, query: QueryParams): Maybe<R> {
         // extract path parts from location and split
-        const p1 = pathname.startsWith("/") ? pathname.substring(1) : pathname;
-        const p2 = p1.endsWith("/") ? p1.substring(0, p1.length - 2) : p1;
-        const parts = p2 === "" ? [] : p2.split("/");
+        const parts = RouteDef.splitPath(pathname);
         if (parts.length === this.pathElems.length) {
             // map every individual part, bail out if
             // something cannot be converted
@@ -363,16 +375,16 @@ export class RouteDef<R> {
 
 export class Router<R> {
 
-    readonly routeDefs: ReadonlyArray<RouteDef<R>>;
+    readonly routes: ReadonlyArray<RouteBase<R>>;
 
-    constructor(...routeDefs: RouteDef<R>[]) {
-        this.routeDefs = routeDefs;
+    constructor(...routeDefs: RouteBase<R>[]) {
+        this.routes = routeDefs;
     }
 
     parse(pathname: string, query: QueryParams) : Maybe<R> {
         // try all routes one after the other
-        for (let i = 0; i < this.routeDefs.length; i++) {
-            const d = this.routeDefs[i];
+        for (let i = 0; i < this.routes.length; i++) {
+            const d = this.routes[i];
             const r = d.checkRoute(pathname, query);
             if (r.type === "Just") {
                 return r;
