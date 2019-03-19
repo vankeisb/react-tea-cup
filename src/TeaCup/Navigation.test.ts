@@ -1,4 +1,4 @@
-import {Router, int, route0, route1, route2, route3, str, QueryParams} from "./Navigation";
+import {Router, int, route0, route1, route2, route3, str, QueryParams, RouteDef} from "./Navigation";
 import {just, Maybe, nothing} from "./Maybe";
 
 
@@ -7,6 +7,7 @@ type MyRoute
     | { type: "songs", filter: Maybe<string> }
     | { type: "song", id: number, edit: boolean }
     | { type: "settings", section: Maybe<string> }
+    | { type: "with-slashes", rest: Maybe<string> }
 
 
 function home(): MyRoute {
@@ -36,12 +37,33 @@ function settings(section: Maybe<string>): MyRoute {
 }
 
 
+function withSlashes(rest: Maybe<string>): MyRoute {
+    return {
+        type: "with-slashes",
+        rest: rest
+    }
+}
+
+
 const router: Router<MyRoute> = new Router(
     route1(str("songs")).map((s:string, query:QueryParams) => songs(query.getValue("q"))),
     route0.map(() => home()),
     route3(str("song"), int(), str("edit")).map((s, id) => song(id, true)),
     route2(str("song"), int()).map((_, id) => song(id)),
-    route1(str("settings")).map((_:string,query:QueryParams) => settings(query.getHash()))
+    route1(str("settings")).map((_:string,query:QueryParams) => settings(query.getHash())),
+    {
+        checkRoute(pathname: string, query: QueryParams): Maybe<MyRoute> {
+            const parts = RouteDef.splitPath(pathname);
+            if (parts.length < 2) {
+                return nothing;
+            }
+            if (parts[0] !== "with" || parts[1] !== "slashes") {
+                return nothing;
+            }
+            const rest = parts.length === 2 ? nothing : just(parts.slice(2).join("/"));
+            return just(withSlashes(rest));
+        }
+    }
 );
 
 
@@ -53,11 +75,16 @@ expectRoute("/song/123/edit", song(123, true));
 expectRoute("/songs?q=foobar", songs(just("foobar")));
 expectRoute("/settings", settings(nothing));
 expectRoute("/settings#blah", settings(just("blah")));
+expectRoute("/with/slashes", withSlashes(nothing));
+expectRoute("/with/slashes/foo", withSlashes(just("foo")));
+expectRoute("/with/slashes/foo/bar", withSlashes(just("foo/bar")));
+expectRoute("/with/slashes/foo/bar/baz", withSlashes(just("foo/bar/baz")));
 expectNotFound("/foo");
 expectNotFound("/songs/1");
 expectNotFound("/song");
 expectNotFound("/song/abc");
 expectNotFound("/song/123/foo");
+
 
 
 interface Loc {
