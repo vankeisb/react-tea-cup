@@ -8,6 +8,7 @@ type MyRoute
     | { type: "song", id: number, edit: boolean }
     | { type: "settings", section: Maybe<string> }
     | { type: "with-slashes", rest: Maybe<string> }
+    | { type: "with-spaces", v: string }
 
 
 function home(): MyRoute {
@@ -44,6 +45,13 @@ function withSlashes(rest: Maybe<string>): MyRoute {
     }
 }
 
+function withSpaces(v:string): MyRoute {
+    return {
+        type: "with-spaces",
+        v: v
+    }
+}
+
 
 const router: Router<MyRoute> = new Router(
     route1(str("songs")).map((s:string, query:QueryParams) => songs(query.getValue("q"))),
@@ -51,6 +59,9 @@ const router: Router<MyRoute> = new Router(
     route3(str("song"), int(), str("edit")).map((s, id) => song(id, true)),
     route2(str("song"), int()).map((_, id) => song(id)),
     route1(str("settings")).map((_:string,query:QueryParams) => settings(query.getHash())),
+    route2(str("with-spaces"), str()).map((_,v) => {
+        return withSpaces(v);
+    }),
     {
         checkRoute(pathname: string, query: QueryParams): Maybe<MyRoute> {
             const parts = RouteDef.splitPath(pathname);
@@ -79,6 +90,7 @@ expectRoute("/with/slashes", withSlashes(nothing));
 expectRoute("/with/slashes/foo", withSlashes(just("foo")));
 expectRoute("/with/slashes/foo/bar", withSlashes(just("foo/bar")));
 expectRoute("/with/slashes/foo/bar/baz", withSlashes(just("foo/bar/baz")));
+expectRoute("/with-spaces/foo%20bar", withSpaces("foo bar"));
 expectNotFound("/foo");
 expectNotFound("/songs/1");
 expectNotFound("/song");
