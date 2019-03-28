@@ -343,7 +343,7 @@ export class RouteDef<R> implements RouteBase<R> {
 
     checkRoute(pathname: string, query: QueryParams): Maybe<R> {
         // extract path parts from location and split
-        const parts = RouteDef.splitPath(pathname);
+        const parts = RouteDef.splitPath(decodeURI(pathname));
         if (parts.length === this.pathElems.length) {
             // map every individual part, bail out if
             // something cannot be converted
