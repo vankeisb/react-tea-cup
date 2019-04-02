@@ -4,6 +4,10 @@ import {Cmd} from "./Cmd";
 import { Sub } from './Sub';
 
 
+/**
+ * The program props : asks for init, view, update and subs in order
+ * to start the TEA MVU loop.
+ */
 export interface ProgramProps<Model,Msg> {
     init: () => [Model, Cmd<Msg>]
     view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode
@@ -30,6 +34,9 @@ class Guid {
 }
 
 
+/**
+ * A React component that holds a TEA "program", provides the Dispatcher, and implements the MVU loop.
+ */
 export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, ProgramState<Model>> {
 
     private count: number = 0;

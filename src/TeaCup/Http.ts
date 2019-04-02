@@ -1,6 +1,9 @@
 import {Task} from "./Task";
 import {err, ok, Result} from "./Result";
 
+/**
+ * Turns JS's fetch into Tasks.
+ */
 export class Http {
 
     static fetch(request:RequestInfo, init?: RequestInit): Task<Error,Response> {

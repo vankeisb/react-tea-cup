@@ -1,5 +1,8 @@
 import {just, Maybe, nothing} from "./Maybe";
 
+/**
+ * A computation may result in a value (Ok), or an error (Err)
+ */
 export type Result<E,R> = Ok<E,R> | Err<E,R>
 
 
@@ -58,12 +61,19 @@ export class Err<E,R> {
 
 }
 
-
+/**
+ * Create an Ok Result
+ * @param r the value to wrap
+ */
 export function ok<E,R>(r:R): Result<E,R> {
     return new Ok<E,R>(r);
 }
 
 
+/**
+ * Create an Err result
+ * @param e the error to wrap
+ */
 export function err<E,R>(e:E): Result<E,R> {
     return new Err(e);
 }
