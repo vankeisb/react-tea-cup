@@ -1,4 +1,5 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+This project includes various samples for `react-tea-cup`.
 
 ## Available Scripts
 
