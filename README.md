@@ -4,7 +4,7 @@ Want some TEA in your React ?
 
 `react-tea-cup` is a very thin library that helps following The Elm Architecture, in React. 
 
-**Disclaimer: This is an early inception, playground project ! Use at your own risk.**
+**Disclaimer: Inception stage, no guarantees, no support. Use at your own risk.**
 
 # Why ?
 
@@ -15,14 +15,16 @@ This is an attempt to implement our beloved TEA pattern, with React (and TypeScr
 
 ## Features
 
-Has to be :
 * Simple
     * Very easy to understand for TEA-friendly people
-    * Easy for people with some Redux knowledge
+    * Easy for people familiar to "state management" in React
 * As close to TEA as possible
     * Model, Msg, init, view, update, subs, fx managers
+    * with goodies too !
+        * Maybe, Result, Decoders, ...
 * As safe as we can 
-    * hey, TS isn't Elm...
+    * Make use of TS type checking
+    * Avoid this, null, mutable state, etc.
 * Integrable with other "styles" of React
     * Redux, Stateful components etc
 
@@ -39,6 +41,4 @@ Has to be :
 
 # Install & use
 
-    npm i react-tea-cup --save
-    
-See the [Samples](./samples), e.g. the infamous [Counter](./samples/src/Samples/Counter.tsx) !    
+Follow the [tutorial](./Tutorial.md), or look at the [samples](./samples). 

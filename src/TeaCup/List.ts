@@ -1,5 +1,8 @@
 import {just, nothing, Maybe} from "./Maybe";
 
+/**
+ * Immutable list of data
+ */
 export class List<T> {
 
     private readonly elems:Array<T>;

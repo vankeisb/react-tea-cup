@@ -10,6 +10,9 @@ import {just, Maybe, maybeOf, nothing} from "./Maybe";
 import {List} from "./List";
 
 
+/**
+ * Props for the ProgramWithNav.
+ */
 export interface NavProps<Model,Msg> {
     readonly onUrlChange: (l:Location) => Msg,
     readonly init: (l:Location) => [Model, Cmd<Msg>],
@@ -19,6 +22,9 @@ export interface NavProps<Model,Msg> {
 }
 
 
+/**
+ * Program that handles navigation (routing).
+ */
 export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model,Msg>, any> {
 
     private listener: Maybe<EventListener>;
@@ -43,7 +49,6 @@ export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model,Msg>, a
 
 
     componentDidMount(): void {
-        console.log("ProgramWithNav.componentDidMount");
         const l = () => {
             if (this.ref.current) {
                 this.ref.current.dispatch(this.props.onUrlChange(window.location))
@@ -54,7 +59,6 @@ export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model,Msg>, a
     }
 
     componentWillMount(): void {
-        console.log("ProgramWithNav.componentWillUnmount");
         if (this.listener.type === "Just") {
             window.removeEventListener("popstate", this.listener.value);
             this.listener = nothing;
@@ -63,6 +67,11 @@ export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model,Msg>, a
 }
 
 
+/**
+ * Return a Task that will eventually change the browser location via historty.pushState,
+ * and send back a Msg into the Program
+ * @param url the url to navigate to
+ */
 export function newUrl(url: string): Task<never,Location> {
     return new NewUrlTask(url);
 }
@@ -87,6 +96,10 @@ class NewUrlTask extends Task<never,Location> {
 
 
 }
+
+
+// router
+// ------
 
 
 export abstract class PathElem<T> {

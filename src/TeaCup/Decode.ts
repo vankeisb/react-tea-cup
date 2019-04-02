@@ -3,6 +3,9 @@ import {just, Maybe, nothing} from "./Maybe";
 import {List} from "./List";
 
 
+/**
+ * Decoder for a given type.
+ */
 export class Decoder<T> {
 
     private readonly f: (o:any) => Result<string,T>;
@@ -11,6 +14,10 @@ export class Decoder<T> {
         this.f = f;
     }
 
+    /**
+     * Attempt to decode passed JSON string into a T
+     * @param s the string to decode
+     */
     decodeString(s:string): Result<string,T> {
         try {
             const o = JSON.parse(s);
@@ -20,6 +27,10 @@ export class Decoder<T> {
         }
     }
 
+    /**
+     * Attempt to decode a JS value into a T
+     * @param o the value to decode
+     */
     decodeValue(o:any): Result<string,T> {
         return this.f(o);
     }
@@ -48,10 +59,16 @@ function stringifyForMsg(o:any, maxChars: number = 100): string {
 }
 
 
+/**
+ * Decoding primitives and utilities.
+ */
 export class Decode {
 
     // Primitives
 
+    /**
+     * string decoder
+     */
     static str: Decoder<string> = new Decoder<string>((o:any) => {
         if (o !== null && o !== undefined && typeof o === "string") {
             return ok(o);
@@ -60,6 +77,9 @@ export class Decode {
         }
     });
 
+    /**
+     * boolean decoder
+     */
     static bool: Decoder<boolean> = new Decoder<boolean>((o:any) => {
         if (o !== null && o !== undefined && typeof o === "boolean") {
             return ok(o);
@@ -68,6 +88,9 @@ export class Decode {
         }
     });
 
+    /**
+     * number decoder
+     */
     static num: Decoder<number> = new Decoder<number>((o:any) => {
         if (o !== null && o !== undefined && typeof o === "number") {
             return ok(o);
@@ -79,6 +102,10 @@ export class Decode {
 
     // Data Structures
 
+    /**
+     * Decoder for null/undefined values
+     * @param d the decoder to be used if the value is not null or undefined
+     */
     static nullable<T>(d:Decoder<T>): Decoder<Maybe<T>> {
         return new Decoder<Maybe<T>>((o:any) => {
             if (o === null || o === undefined) {
@@ -89,6 +116,10 @@ export class Decode {
         })
     }
 
+    /**
+     * Decoder for lists
+     * @param d the decoder for elements in the list
+     */
     static list<T>(d:Decoder<T>): Decoder<List<T>> {
         return Decode.map(
             (a:Array<T>) => List.fromArray(a),
@@ -96,7 +127,10 @@ export class Decode {
         )
     }
 
-
+    /**
+     * Decoder for arrays
+     * @param d the decoder for elements in the array
+     */
     static array<T>(d:Decoder<T>): Decoder<Array<T>> {
         return new Decoder<Array<T>>((o:any) => {
             if (o instanceof Array) {
@@ -122,10 +156,20 @@ export class Decode {
 
     // Object Primitives
 
+    /**
+     * Decoder for object fields
+     * @param key the name of the field
+     * @param d the decoder for the field's value
+     */
     static field<T>(key:string, d:Decoder<T>): Decoder<T> {
         return Decode.at([key], d)
     }
 
+    /**
+     * Decoder for navigable object properties
+     * @param keys a list of fields to navigate
+     * @param d the decoder for the leaf value
+     */
     static at<T>(keys: ReadonlyArray<string>, d:Decoder<T>): Decoder<T> {
 
         function isUndef(x:any) {
@@ -168,6 +212,10 @@ export class Decode {
 
     // Inconsistent Structure
 
+    /**
+     * Decoder for optional values : turns decoding failures into maybes.
+     * @param d the decoder to be used
+     */
     static maybe<T>(d:Decoder<T>): Decoder<Maybe<T>> {
         return new Decoder<Maybe<T>>((o:any) => {
             const v:Result<string,T> = d.decodeValue(o);
@@ -181,6 +229,10 @@ export class Decode {
     }
 
 
+    /**
+     * Tries passed decoders sequentially, and fails if no decoder succeeds
+     * @param ds an array of Decoders to try, one after the othen
+     */
     static oneOf<T>(ds:ReadonlyArray<Decoder<T>>): Decoder<T> {
         return new Decoder<T>((o:any) => {
             for (let i=0; i<ds.length; i++) {
@@ -199,6 +251,11 @@ export class Decode {
 
     // Mapping
 
+    /**
+     * Map a decoder
+     * @param f the mapping function
+     * @param d the decoder to use
+     */
     static map<T1,T2>(f:(t1:T1) => T2, d:Decoder<T1>): Decoder<T2> {
         return new Decoder<T2>((o:any) => {
             return d.decodeValue(o).map(f);
@@ -276,7 +333,10 @@ export class Decode {
 
     // Fancy Decoding
 
-
+    /**
+     * Decoder for recursive data structures
+     * @param f a no-arg function that yields a decoder
+     */
     static lazy<T>(f:() => Decoder<T>): Decoder<T> {
         return new Decoder<T>((o:any) => {
             return f().decodeValue(o)
@@ -284,9 +344,16 @@ export class Decode {
     }
 
 
+    /**
+     * Decoder for any value
+     */
     static value: Decoder<any> = new Decoder<any>(o => o);
 
 
+    /**
+     * Decoder for null
+     * @param the result to yield in case the decoded value is null
+     */
     static null<T>(t:T): Decoder<T> {
         return new Decoder<T>((o:any) => {
             if (o === null) {
@@ -297,7 +364,10 @@ export class Decode {
         })
     }
 
-
+    /**
+     * Decoder that always succeed
+     * @param t the value to yield
+     */
     static succeed<T>(t:T): Decoder<T> {
         return new Decoder<T>(() => {
             return ok(t)
@@ -305,6 +375,10 @@ export class Decode {
     }
 
 
+    /**
+     * Decoder that fails
+     * @param msg the message to use in the resulting Err
+     */
     static fail<T>(msg:string): Decoder<T> {
         return new Decoder<T>(() => {
             return err(msg)
@@ -312,6 +386,11 @@ export class Decode {
     }
 
 
+    /**
+     * Chain decoders
+     * @param f the function to apply if the first decoder has succeeded
+     * @param d the first decoder to use
+     */
     static andThen<T1,T2>(f:(t1:T1) => Decoder<T2>, d:Decoder<T1>): Decoder<T2> {
         return new Decoder<T2>((o:any) => {
             const r:Result<string,T1> = d.decodeValue(o);

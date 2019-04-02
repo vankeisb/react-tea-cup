@@ -2,39 +2,79 @@ import {Cmd} from "./Cmd";
 import {Dispatcher} from "./Dispatcher";
 import {err, Err, ok, Ok, Result} from "./Result";
 
-
+/**
+ * Base class for Tasks.
+ */
 export abstract class Task<E,R> {
 
+    /**
+     * To be implemented by concrete Tasks.
+     * @param callback the callback to call when the task is ran
+     */
     abstract execute(callback:(r:Result<E,R>) => void): void
 
+    /**
+     * Send a Task to the runtime for execution
+     * @param t the task
+     * @param toMsg a function that turns the result of the task into a Msg
+     */
     static attempt<E,R,M>(t:Task<E,R>, toMsg:(r:Result<E,R>) => M): Cmd<M> {
         return new TaskCmd(t, toMsg)
     }
 
+    /**
+     * Send a Task that never fails to the runtime for execution
+     * @param t the task
+     * @param toMsg a function that turns the result of the task into a Msg
+     */
     static perform<R,M>(t:Task<never,R>, toMsg:(r:R) => M): Cmd<M> {
         return new TaskNoErrCmd(t, toMsg)
     }
 
+    /**
+     * Create a task that succeeds with a value
+     * @param r the value
+     */
     static succeed<R>(r:R): Task<never,R> {
         return new TSuccess(r)
     }
 
+    /**
+     * Create a task that fails with an error
+     * @param e the error
+     */
     static fail<E>(e:E): Task<E, never> {
         return new TError(e)
     }
 
+    /**
+     * Create a task from a Promise
+     * @param p the promise
+     */
     static fromPromise<R>(p:Promise<R>): Task<any,R> {
         return new TPromise(p);
     }
 
+    /**
+     * Map the ok result of this task
+     * @param f the mapping function
+     */
     map<R2>(f:(r:R) => R2): Task<E,R2> {
         return new TMapped(this, f)
     }
 
+    /**
+     * Map the error result of this task
+     * @param f the mapping function
+     */
     mapError<E2>(f:(e:E) => E2): Task<E2,R> {
         return new TMappedErr(this, f)
     }
 
+    /**
+     * Chain this task with another task
+     * @param f a function that accepts the result of this task, and yields a new task
+     */
     andThen<R2>(f:(r:R) => Task<E,R2>): Task<E,R2> {
         return new TThen(this, f)
     }

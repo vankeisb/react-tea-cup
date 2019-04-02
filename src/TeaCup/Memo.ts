@@ -1,5 +1,10 @@
 import * as React from "react";
 
+/**
+ * Memoize the view for passed data, and wrap the function's result
+ * into a <Memo/> component.
+ * @param t the data to memoize.
+ */
 export function memo<T>(t:T) {
     return (f:(t:T) => React.ReactNode) => {
         return React.createElement(

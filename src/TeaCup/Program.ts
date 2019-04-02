@@ -4,6 +4,10 @@ import {Cmd} from "./Cmd";
 import { Sub } from './Sub';
 
 
+/**
+ * The program props : asks for init, view, update and subs in order
+ * to start the TEA MVU loop.
+ */
 export interface ProgramProps<Model,Msg> {
     init: () => [Model, Cmd<Msg>]
     view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode
@@ -30,6 +34,9 @@ class Guid {
 }
 
 
+/**
+ * A React component that holds a TEA "program", provides the Dispatcher, and implements the MVU loop.
+ */
 export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, ProgramState<Model>> {
 
     private count: number = 0;
@@ -57,32 +64,37 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
 
         const debug = this.logger();
 
-        debug(">>>", msg);
-        const currentModel = this.state.currentModel;
-        const updated = this.props.update(msg, currentModel);
-        debug("updated", updated, "previousModel", currentModel);
-        const newSub = this.props.subscriptions(updated[0]);
-        const prevSub = this.state.currentSub;
-        debug("new sub obtained", newSub);
-        this.setState({
-            currentModel: updated[0],
-            currentSub: newSub
+        this.setState((state, props) => {
+
+            debug(">>>", msg);
+            const currentModel = state.currentModel;
+            const updated = props.update(msg, currentModel);
+            debug("updated", updated, "previousModel", currentModel);
+            const newSub = props.subscriptions(updated[0]);
+            const prevSub = state.currentSub;
+            debug("new sub obtained", newSub);
+
+            const d = this.dispatch.bind(this);
+
+            debug("releasing previous sub", prevSub, "initializing", newSub);
+            newSub.init(d);
+            prevSub.release();
+
+            // perform commands in a separate timout, to
+            // make sure that this dispatch is done
+            setTimeout(() => {
+                // console.log("dispatch: processing commands");
+                debug("performing command", updated[1]);
+                updated[1].execute(d);
+                debug("<<<  done");
+            }, 0);
+
+            return {
+                currentModel: updated[0],
+                currentSub: newSub
+            }
         });
 
-        const d = this.dispatch.bind(this);
-
-        debug("releasing previous sub", prevSub, "initializing", newSub);
-        newSub.init(d);
-        prevSub.release();
-
-        // perform commands in a separate timout, to
-        // make sure that this dispatch is done
-        setTimeout(() => {
-            // console.log("dispatch: processing commands");
-            debug("performing command", updated[1]);
-            updated[1].execute(d);
-            debug("<<<  done");
-        }, 0);
 
     }
 
