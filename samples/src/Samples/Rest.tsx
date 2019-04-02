@@ -48,24 +48,13 @@ const buttonClicked: Msg = model => [
 
 
 function listCommits(): Cmd<Msg> {
-    const fetchTask: Task<Error,Response> = Http.fetch("https://api.github.com/repos/vankeisb/react-tea-cup/commits");
-    const fetchDecoded: Task<Error,ReadonlyArray<Commit>> = fetchTask.andThen((response:Response) => {
-        if (response.ok) {
-            return Task.fromPromise(response.json())
-                .andThen((data:any) => {
-                    const decoded = Decode.array(commitDecoder).decodeValue(data);
-                    switch (decoded.tag) {
-                        case "Ok":
-                            return Task.succeed(decoded.value);
-                        case "Err":
-                            return Task.fail(decoded.err);
-                    }
-                })
-        } else {
-            return Task.fail("response KO");
-        }
-    });
-    return Task.attempt(fetchDecoded, gotCommits);
+    return Task.attempt(
+        Http.jsonBody(
+            Http.fetch("https://api.github.com/repos/vankeisb/react-tea-cup/commits"),
+            Decode.array(commitDecoder)
+        ),
+        gotCommits
+    );
 }
 
 
