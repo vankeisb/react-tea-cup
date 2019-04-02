@@ -16,7 +16,7 @@ export abstract class Cmd<Msg> {
      * Batches passed commands into a single command.
      * @param cmds the commands to batch
      */
-    static batch<Msg>(...cmds: Array<Cmd<Msg>>): Cmd<Msg> {
+    static batch<Msg>(cmds: ReadonlyArray<Cmd<Msg>>): Cmd<Msg> {
         return new BatchCmd(cmds);
     }
 
@@ -81,9 +81,9 @@ class CmdMapped<Msg, ParentMsg> extends Cmd<ParentMsg> {
 
 class BatchCmd<Msg> extends Cmd<Msg> {
 
-    private readonly cmds: Array<Cmd<Msg>>;
+    private readonly cmds: ReadonlyArray<Cmd<Msg>>;
 
-    constructor(cmds: Array<Cmd<Msg>>) {
+    constructor(cmds: ReadonlyArray<Cmd<Msg>>) {
         super();
         this.cmds = cmds;
     }
