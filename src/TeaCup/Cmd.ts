@@ -16,7 +16,7 @@ export abstract class Cmd<Msg> {
      * Batches passed commands into a single command.
      * @param cmds the commands to batch
      */
-    static batch<Msg>(cmds: Array<Cmd<Msg>>): Cmd<Msg> {
+    static batch<Msg>(...cmds: Array<Cmd<Msg>>): Cmd<Msg> {
         return new BatchCmd(cmds);
     }
 
