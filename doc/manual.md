@@ -17,7 +17,10 @@ You may also use Subscriptions, which are explained a bit later.
 
 ### Model
 
-The model can be anything. Type, interface, it's up to you to decide. In any case, 
+The model is the state of your application. It holds all the data you need
+in order to display your pages etc.
+
+It can be implemented in different ways. Type, interface, it's up to you to decide. In any case, 
 *state should be immutable* ! This is a really important point : always make sure your 
 state cannot be mutated.
 
