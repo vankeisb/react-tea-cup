@@ -383,6 +383,10 @@ function expensiveView(dispatcher: Dispatcher<Msg>, stuff:Stuff) {
  
 > Of course this works only because you have immutable state...
 
+## Mixing with Stateful Components
+
+TODO
+
 ## Utilities
 
 tea-cup includes a few useful stuff that we miss from Elm, such as Maybes, Decoders, etc.
