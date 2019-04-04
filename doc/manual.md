@@ -349,20 +349,21 @@ ReactDOM.render(program, document.getElementById('root'))
 ## Performance
 
 A React application that is made of stateful components does not render all 
-components when one of them updates its local state. It usually will call `render()`
+components every time that one of them updates its local state. It usually will call `render()`
 only on a subset of the whole component tree, without the developer needing to know 
 (this is the theory : there are hooks in React especially to deal with this). This is good for the 
 application's performance.
 
 Redux, and probably other state management libs, also have a solution for rendering only 
-what has changed (again, in theory). 
+what has changed (again, in theory). They will render only components that are "connected" 
+to a subset of the whole state that has been updated.
 
-In tea-cup, just like in Elm, there's one single update loop. Updating the model
-means that `Program.render()` is called on, which in turns invokes the top-level 
-`view` function, ending-up re-rendering the whole tree. This could lead to performance issues 
+In tea-cup, just like in Elm, there's one single update loop. Updating anything in the model
+means that `Program.render()` is called, which in turns invokes the top-level 
+`view` function, ending-up re-rendering the whole tree. This can lead to performance issues 
 much faster than one could expect.
 
-The solution to this problem is to use memoization in your view functions when you
+The solution to this problem is to use memoization explicity in your view functions when you
 see performance degrading in the rendering phase. Using a JS profiler will help you 
 find the hotspots.  
 
