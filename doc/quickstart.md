@@ -1,22 +1,24 @@
+# Quickstart
+
 This is a quick introduction to using tea-cup. It shows how to create 
 a simple Counter application, from scratch. 
 
-# Setup
+## Setup
 
 You'll need to setup the project before you get to actual coding.
 
-## Create the project
+### Create the project
 
 You need a React project in order to start using tea-cup.
 In order to keep things simple, we'll use the infamous `create-react-app` :
 
     npx create-react-app my-app --typescript
     
-## Add tea-cup to your dependencies
+### Add tea-cup to your dependencies
 
     npm install react-tea-cup --save
     
-## Run the dev server
+### Run the dev server
 
 We'll start the dev server, and let it recompile everything 
 when we save files :
@@ -26,7 +28,7 @@ when we save files :
 This should also open your default browser to http://localhost:3000
 and show you the default generated app.
 
-# Implementing the counter
+## Implementing the counter
 
 Now let's add our usual TEA ingredients ! Open `src/App.tsx` in your 
 favourite editor, and replace its contents with this :
