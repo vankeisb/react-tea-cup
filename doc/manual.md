@@ -44,7 +44,13 @@ to trigger initial side effects, if any (e.g. send an HTTP request, read Local S
 
 ```typescript jsx
 function init(): [Model, Cmd<Msg>] {
-    ...
+    return [
+        {
+            foo: ...,
+            bar: "baz"
+        },
+        Cmd.none() // Commands are explained later...
+    ]
 }
 ```
 
