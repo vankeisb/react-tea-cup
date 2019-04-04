@@ -42,6 +42,8 @@ interface Model {
 The `init` function is responsible for creating the initial `Model` for the app, and 
 to trigger initial side effects, if any (e.g. send an HTTP request, read Local Storage, etc).
 
+It accepts no args, and returns a tuple with the initial `Model`, and `Cmd` (if any) :
+
 ```typescript jsx
 function init(): [Model, Cmd<Msg>] {
     return [
