@@ -104,19 +104,19 @@ Drawbacks :
 
 #### Functions
 
-A last variant is to use plain functions for encasulating the data (via capture) and 
+A last variant is to use plain functions for encapsulating the data (via capture) and 
 the behaviour of the `Msg`s :
 
 ```typescript jsx
 // Msg type : a function
-type Msg = (model:Model) => [Model, Cmd<Msg]
+type Msg = (model:Model) => [Model, Cmd<Msg>]
 
-// a concrete Msg
+// a simple msg with no payload
 const btnClicked: Msg = model => {
     ...
 }
 
-// msg with some payload
+// msg with some payload : func returning a func
 function sendEmail(recipients: ReadonlyArray<string>): Msg {
     return model => {
         recipients.map...
@@ -124,7 +124,7 @@ function sendEmail(recipients: ReadonlyArray<string>): Msg {
     }
 } 
 
-// here too, update is therefore very simple 
+// update just delegates to msg 
 function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     return msg(model)
 }
@@ -141,7 +141,7 @@ Drawbacks:
 
 Unlike in Elm, where you always _return_ Messages, in tea-cup you need to 
 explicitly _dispatch_ the Messages. This is done using a so-called `Dispatcher<Msg>`, 
-which is passed to your code where you need it.
+which is passed to you by tea-cup.
 
 Example of a message dispatch using discriminated unions :
 
@@ -190,26 +190,31 @@ function update(msg:Msg, model:Model): [Model, Cmd<Msg>] {
 ### Side effects
 
 Side effects happen outside of your program. Keyboard or Mouse events, HTTP calls, Web Sockets... 
-All this is handled in your TEA "Model -> View -> Update" loop. 
+All this is not directly handled in your TEA "Model -> View -> Update" loop, which has to stay pure. 
 
-It happens outside, but :
+Side effects happen outside, but :
 * you want to trigger some effects (e.g. _send_ an HTTP request)
 * you want to get notified of stuff that has happened (e.g. get the response of an HTTP request, respond to a click on the document, etc.)   
 
 Side effects are managed by so-called "Effect Managers". They are 
-external modules that encapsulate non-pure, low-level stuff. You interact with them via 
+external modules that encapsulate the non-pure, low-level stuff. You interact with them via 
 "Commands" and "Subscriptions".
 
 #### Commands
 
-Commands are declarative. You basically create a Command in order to tell the runtime to actually do 
-something for you, and notify you with a Message when it's done.
+Commands are declarative. You create a Command in order to tell the runtime to actually do 
+something for you, and to notify you with a Message when it's done.
+
+It's part of the `update` function's job to return the commands, if any (along with 
+the new `Model`).
+
+```typescript jsx
+function update(msg:Msg, model:Model): [Model, Cmd<Msg>] 
+```
 
 > Most of the time you won't need to implement your own Commands, unless you are 
 writing an Effect Manager of your own.
 
-It's part of the `update` function's job to return commands in order to instruct the runtime that 
-it has to perform side effects.
 
 #### Tasks
 
@@ -222,8 +227,9 @@ return it from your update function :
 
 ```typescript jsx
 // create a task that fetches 
-// stuff over HTTP
-const fetchTask: Task<Error,Response> = ...
+// stuff over HTTP using the 
+// Http module
+const fetchTask: Task<Error,Response> = Http.fetch(...)
   
 // turn the Task into a Cmd, and 
 // get the result as a Msg in a 
@@ -242,7 +248,6 @@ function onFetchResult(r:Result<Error,Response>): Msg {
 Tasks are base building blocks that can be combined, with `map` and `andThen`. They
 are a good place to encapsulate some native, non-pure JS calls, and make those 
 cleanly available in tea-cup. 
-
     
 #### Subscriptions
 
@@ -250,7 +255,7 @@ Subscriptions allow you to be notified of events happening outside of your progr
 turn them into `Msg`s that you handle in `update`. Such events can be global 
 keyboard or mouse events on the document, web socket messages, etc.
 
-In order to subscribe, you provide the `subscriptions` function :
+In order to subscribe, you need to implement the `subscriptions` function :
 
 ```typescript jsx
 function subscriptions(model: Model) : Sub<Msg> {
@@ -278,9 +283,78 @@ This function is evaluated at every update.
 
 ## Utilities
 
+tea-cup includes a few useful stuff that we miss from Elm, such as Maybe, Decoders, etc.
+
 ### Maybe
 
+A `Maybe` is either "just something", or "nothing" ! The concept is also known as an "Optional"
+in other languages. 
+
+It serves as a good replacement for optionals (`?`) in TS, which are not very functional and practical.
+
+```typescript jsx
+// TS optionals
+function strLen(s?: string) {
+    if (s === null || s === undefined) {
+        return 0
+    } else {
+        return s.length
+    }
+}
+
+// using a maybe
+function strLen(s?: string) {
+    return maybeOf(s).map(str => str.length).withDefault(0)
+}
+```
+
 ### Result
+
+A `Result` represent the result of a computation that may either succed in a value, 
+or fail with an error.
+
+```typescript jsx
+// a parser that either returns an Ast, 
+// or fails with a parse error
+
+interface ParseError {
+    msg: string
+    line: number
+    col: number
+}
+
+
+interface Ast {
+    ...
+}
+
+function parseStuff(text:string): Result<ParseError,Ast> {
+    ...
+    if (weHaveStuff) {
+        // assuming it parsed, we return an Ok result 
+        // with the ast
+        return ok(ast)
+    } else {
+        // parsing error : return this into an Err result
+        return err(parseErr)
+    }
+}
+
+
+// invoke the parser and handle the result :
+const parseResult: Result<ParseError,Ast> = parseStuff("...")
+
+// results have map() and mapError()
+const mappedResult: Result<string, number> = parseResult
+    .map(ast => evaluateAst(ast))
+    .mapError(parseError => parseError.msg + ` at line ${parseError.line}, col ${parseError.col}`)
+    
+// and even a match() method that is friendlier than a switch :
+const reactElem = parseResult.match(
+    ast => <p>Result = {evaluateAst(ast)}</p>,
+    err => <div className="error">{err.msg}</div>
+)
+```
 
 ### Decoders
 
