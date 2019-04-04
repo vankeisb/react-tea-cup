@@ -5,18 +5,18 @@ a simple Counter application, from scratch.
 
 You'll need to setup the project before you get to actual coding.
 
-1/ Create the project
+## Create the project
 
 You need a React project in order to start using tea-cup.
 In order to keep things simple, we'll use the infamous `create-react-app` :
 
     npx create-react-app my-app --typescript
     
-2/ Add tea-cup to your dependencies
+## Add tea-cup to your dependencies
 
     npm install react-tea-cup --save
     
-3/ Run the dev server
+## Run the dev server
 
 We'll start the dev server, and let it recompile everything 
 when we save files :
