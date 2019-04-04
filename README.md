@@ -41,4 +41,6 @@ This is an attempt to implement our beloved TEA pattern, with React (and TypeScr
 
 # Install & use
 
-Follow the [tutorial](./Tutorial.md), or look at the [samples](./samples). 
+* [Quickstart](doc/quickstart.md)  
+* [User Manual](doc/manual.md)
+* [Samples](./samples)
