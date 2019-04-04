@@ -10,16 +10,29 @@ This part is very similar to Elm. For a tea-cup app, you'll need at least :
 
 * a `Model` : this is the state of your application
 * some `Messages` : those are emitted when side effects occur (clicks, ajax requests, ...)
+* an `init` function that creates the initial `Model`, and possibly trigger initial side effects
 * a `view` function that renders your `Model` as React VDOM (TSX)
 * an `update` function that modifies the `Model` and possibly trigger side effects for your `Message`s
 
 You may also use Subscriptions, which are explained a bit later.
 
+### init
+
+The `init` function is responsible for creating the initial `Model` for the app, and 
+to trigger initial side effects, if any (e.g. send an HTTP request, read Local Storage, etc).
+
+```typescript jsx
+function init(): [Model, Cmd<Msg>] {
+    ...
+}
+```
+
+
 ### Model
 
 The model can be anything. Type, interface, it's up to you to decide. In any case, 
-*state should be immutable* ! This is a really important point. TS cannot force immutability
-but it can help to achieve it... Always make sure your state cannot be mutated.
+*state should be immutable* ! This is a really important point : always make sure your 
+state cannot be mutated.
 
 ```typescript jsx
 // state is a number !
@@ -161,7 +174,7 @@ Example of a message dispatch using discriminated unions :
 
 The `view` function is almost the same as in Elm, except that :
 
-* it needs to declare a `Dispatcher<Msg>` as its first arg, and the `Model` as the second arg
+* it needs to declare a `Dispatcher<Msg>` as its first arg, in addition to the `Model` (as the second arg)
 * it returns some React.Node (usually via TSX)
 
 ```typescript jsx
@@ -202,8 +215,9 @@ external modules that encapsulate the non-pure, low-level stuff. You interact wi
 
 #### Commands
 
-Commands are declarative. You create a Command in order to tell the runtime to actually do 
-something for you, and to notify you with a Message when it's done.
+Commands encapsulate side effects. They are declarative : you create a Command, and then 
+tell the runtime to execute it, and to notify you with a Message when it's done. You never 
+excecute commands yourself.
 
 It's part of the `update` function's job to return the commands, if any (along with 
 the new `Model`).
@@ -212,13 +226,15 @@ the new `Model`).
 function update(msg:Msg, model:Model): [Model, Cmd<Msg>] 
 ```
 
-> Most of the time you won't need to implement your own Commands, unless you are 
-writing an Effect Manager of your own.
-
+> Commands are usually returned by calls to Effect Managers. You can
+implement your own `Cmd` subclasses for encapsulating side effects or calls
+to native APIs and the like, but this is usually better done with Tasks, which 
+are composable. 
 
 #### Tasks
 
-A `Task` is an asynchronous unit of work that may either succeed, or fail. 
+A `Task` is a asynchronous unit of work that may either succeed, or fail. It can perform
+side effects, like sending HTTP requests, accessing the Local Storage etc. 
 
 Like Commands, Tasks are declarative :  you don't execute them yourself. It's the runtime's job.
 
@@ -247,11 +263,11 @@ function onFetchResult(r:Result<Error,Response>): Msg {
 
 Tasks are base building blocks that can be combined, with `map` and `andThen`. They
 are a good place to encapsulate some native, non-pure JS calls, and make those 
-cleanly available in tea-cup. 
+cleanly available in your TEA loop. 
     
 #### Subscriptions
 
-Subscriptions allow you to be notified of events happening outside of your program, and 
+Subscriptions allow you to be notified of events happening _outside_ of your program, and 
 turn them into `Msg`s that you handle in `update`. Such events can be global 
 keyboard or mouse events on the document, web socket messages, etc.
 
@@ -281,9 +297,60 @@ As you can see, the `subscriptions` function takes the `Model` as its sole argum
 allowing to conditionally subscribe to various things depending on the current state. 
 This function is evaluated at every update.
 
+## Program : Wiring everything up
+
+Just like in Elm, you need to pass your `init`, `view`, `update` and `subscriptions` functions 
+to a `Program` so that everything is wired up, and the magic happens.
+
+tea-cup's `Program` is a (stateful) React Component, that acts as the root container of 
+your application. You can include this program anywhere in your React App.
+
+Here's a full recap :
+
+```typescript jsx
+interface Model {
+    ...
+}
+
+
+type Msg 
+    = ...
+
+
+function init(): [Model, Cmd<Msg>] {
+    ...
+}
+
+function view(dispatch:Dispatcher<Msg>, model:Model) {
+    ...
+}
+
+function update(msg:Msg, model:Model): [Model, Cmd<Msg>] {
+    ...
+}
+
+function subscriptions(model:Model): Sub<Msg> {
+    ...
+}
+
+// wire our functions with a tea-cup Program
+const program = ( 
+    <Program
+        init={init}
+        view={view}
+        update={update}
+        subscriptions={subscriptions}
+    />
+);
+
+// render this as a regular React component
+ReactDOM.render(program, document.getElementById('root'))
+
+```
+
 ## Utilities
 
-tea-cup includes a few useful stuff that we miss from Elm, such as Maybe, Decoders, etc.
+tea-cup includes a few useful stuff that we miss from Elm, such as Maybes, Decoders, etc.
 
 ### Maybe
 
@@ -357,6 +424,63 @@ const reactElem = parseResult.match(
 ```
 
 ### Decoders
+
+Elm needs Decoders and Encoders in order to convert values from Elm to JS, and inversely. This 
+is needed because there's 2 disctinct type systems.
+
+TS has the same type system as JS, so the need for decoder is is different. Here, we mostly want to 
+_validate_ that some dynamic JS object is compliant to our TS types.
+
+Decoders avoids to cast and have runtime errors later on. They fail early, at decoding-time, with a nice error message. 
+
+```typescript jsx
+class User {
+    readonly name: string
+    readonly age: number
+    readonly roles: ReadonlyArray<string>
+}
+
+const o:any = JSON.parse(...)
+```
+
+A naïve way to turn an `any` into a TS type :
+
+```typescript jsx
+// let's just cast !
+// BAD : who knows what's in "o" ?
+const user: User = o as User
+```
+
+A safer way is to use a `Decoder` for the type `User` :
+
+```typescript jsx
+const userDecoder: Decoder<User> =
+    // map a 3-field object
+    Decoder.map3(
+        // values have been decoded, return our typed object 
+        (name:string, age:number, roles: ReadonlyArray<string>) => {
+            return {
+                name: name,
+                age: age,
+                roles: roles
+            }
+        },
+        Decode.field("name", Decode.str), // decoder for string field "name"
+        Decode.field("age", Decode.num), // decoder for number field "age"
+        // decoder for string[] field "roles"
+        Decode.field(
+            "roles",
+            Decode.array(Decode.str)           
+        )
+    )
+    
+// decoding yields a Result : it may have failed (with a message) !
+const user: Result<string,User> = userDecoder.decodeValue(o)    
+```
+
+Decoders can be easily combined and reused easily, and allow to do some 
+mapping/conversion along the way. They provide an elegant way of turning
+non-structured JS objects into complex TS types, safely.
 
 ### Http
 
