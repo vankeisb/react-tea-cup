@@ -5,27 +5,15 @@ of some libraries that have been ported from / inspired by Elm.
 
 ## Model-View-Update
 
-This part is very similar to Elm. For a tea-cup app, you'll need at least :
+For a tea-cup app, you'll need at least :
 
 * a `Model` : this is the state of your application
-* some `Messages` : those are emitted when events occur
 * an `init` function that creates the initial `Model`, and possibly trigger initial side effects
 * a `view` function that renders your `Model` as React VDOM (TSX)
+* some `Messages` : those are emitted when events occur
 * an `update` function that modifies the `Model` and possibly trigger side effects for your `Message`s
 
 You may also use Subscriptions, which are explained a bit later.
-
-### init
-
-The `init` function is responsible for creating the initial `Model` for the app, and 
-to trigger initial side effects, if any (e.g. send an HTTP request, read Local Storage, etc).
-
-```typescript jsx
-function init(): [Model, Cmd<Msg>] {
-    ...
-}
-```
-
 
 ### Model
 
@@ -46,8 +34,44 @@ interface Model {
 }
 ```
 
+### init
+
+The `init` function is responsible for creating the initial `Model` for the app, and 
+to trigger initial side effects, if any (e.g. send an HTTP request, read Local Storage, etc).
+
+```typescript jsx
+function init(): [Model, Cmd<Msg>] {
+    ...
+}
+```
+
+### View
+
+The `view` function is responsible of turning your `Model` into React Nodes.
+
+It needs to declare a `Dispatcher<Msg>` as its first arg, and the `Model` as the second arg, and 
+it returns a React.Node (usually via TSX) :
+
+```typescript jsx
+function view(dispatch:Dispatcher<Msg>, model: Model) {
+    return (
+        <div>
+            ...
+            <button onClick={dispatch(sendEmail(model.users.map(u => u.email)))}
+        </div>
+    )   
+}   
+```
+
+The `view` function is invoked by tea-cup at every `update`, for every `Msg` that is dispatched.
+
     
 ### Messages 
+
+Messages are the dynamic part of your application. They represent anything that happened, 
+and that requires to update the model, and render the app again. Messages are dispatched in order 
+to respond to DOM events (or to side effects), and you have to implement their behaviour in the 
+`update` function. 
 
 Messages in tea-cup can be expressed in different ways, unlike in Elm where you'll always use 
 a union type. tea-cup offers several options for implementing Msgs, it is up to you to 
@@ -169,24 +193,6 @@ Example of a message dispatch using discriminated unions :
 ```
          
 
-### View
-
-The `view` function is almost the same as in Elm, except that :
-
-* it needs to declare a `Dispatcher<Msg>` as its first arg, in addition to the `Model` (as the second arg)
-* it returns some React.Node (usually via TSX)
-
-```typescript jsx
-function view(dispatch:Dispatcher<Msg>, model: Model) {
-    return (
-        <div>
-            ...
-            <button onClick={dispatch(sendEmail(model.users.map(u => u.email)))}
-        </div>
-    )   
-}   
-```
-
 ### Update
     
 As explained above, the `update` function can be implemented in different ways, depending on how you model your 
@@ -199,7 +205,7 @@ function update(msg:Msg, model:Model): [Model, Cmd<Msg>] {
 }
 ```
 
-### Side effects
+## Side effects
 
 Side effects happen outside of your program. Keyboard or Mouse events, HTTP calls, Web Sockets... 
 All this is not directly handled in your TEA "Model -> View -> Update" loop, which has to stay pure. 
@@ -212,7 +218,7 @@ Side effects are managed by so-called "Effect Managers". They are
 external modules that encapsulate the non-pure, low-level stuff. You interact with them via 
 "Commands" and "Subscriptions".
 
-#### Commands
+### Commands
 
 Commands encapsulate side effects. They are declarative : you create a Command, and then 
 tell the runtime to execute it, and to notify you with a Message when it's done. You never 
@@ -230,7 +236,7 @@ implement your own `Cmd` subclasses for encapsulating side effects or calls
 to native APIs and the like, but this is usually better done with Tasks, which 
 are composable. 
 
-#### Tasks
+### Tasks
 
 A `Task` is a asynchronous unit of work that may either succeed, or fail. It can perform
 side effects, like sending HTTP requests, accessing the Local Storage etc. 
@@ -264,7 +270,7 @@ Tasks are base building blocks that can be combined, with `map` and `andThen`. T
 are a good place to encapsulate some native, non-pure JS calls, and make those 
 cleanly available in your TEA loop. 
     
-#### Subscriptions
+### Subscriptions
 
 Subscriptions allow you to be notified of events happening _outside_ of your program, and 
 turn them into `Msg`s that you handle in `update`. Such events can be global 
