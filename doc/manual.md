@@ -8,7 +8,7 @@ of some libraries that have been ported from / inspired by Elm.
 This part is very similar to Elm. For a tea-cup app, you'll need at least :
 
 * a `Model` : this is the state of your application
-* some `Messages` : those are emitted when side effects occur (clicks, ajax requests, ...)
+* some `Messages` : those are emitted when events occur
 * an `init` function that creates the initial `Model`, and possibly trigger initial side effects
 * a `view` function that renders your `Model` as React VDOM (TSX)
 * an `update` function that modifies the `Model` and possibly trigger side effects for your `Message`s
