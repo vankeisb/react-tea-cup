@@ -484,8 +484,47 @@ non-structured JS objects into complex TS types, safely.
 
 ### Http
 
+tea-cup ships with a simple yet useful `Http` module that makes the `fetch` API 
+available as `Tasks`, and provides utilities for managing HTTP requests and responses.
+
+```typescript jsx
+interface User {
+    ...
+}
+
+// decoder for User type
+const userDecoder: Decoder<User> = ...
+
+// task that will fetch the user over HTTP
+// and decode the body as a User.
+// If anything fails (non-OK response or invalid decoding),
+// then you'll get an Error.
+const fetchUserTask: Task<Error,User> = 
+    Http.jsonBody(
+        Http.fetch("https://..."),
+        userDecoder
+    );
+
+
+// the task can be turned into a Cmd so that it can be 
+// executed by the runtime, and we'll get the result in 
+// a "fetch-user-result" message 
+const fetchUserCmd: Cmd<Msg> = 
+    Task.attempt(
+        fetchUserTask,
+        (r:Result<Error,User>) => {
+            return {
+                type: "fetch-user-result",
+                result: r
+            }
+        }
+    )
+```
+
 ### Animation
 
+tea-cup ships with an `Animation` Effect Manager that allows to use `requestAnimationFrame`
+in your TEA loop.
 
 
 
