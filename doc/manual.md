@@ -1,8 +1,7 @@
 # react-tea-cup manual
 
 This document describes the overall design of tea-cup, and 
-of some libraries that we ported from Elm, such as Maybe 
-or Result.
+of some libraries that have been ported from / inspired by Elm.
 
 ## Model-View-Update
 
@@ -56,7 +55,7 @@ choose the form that suits you best.
 
 #### Discriminated unions
 
-Using dicriminated unions allows you to model your Messages as data, and have the update 
+Using discriminated unions allows you to model your Messages as data, and have the update 
 logic somewhere else (in the `update` function) :
 
 ```typescript jsx
