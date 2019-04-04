@@ -189,7 +189,7 @@ function view(dispatch:Dispatcher<Msg>, model: Model) {
 
 ### Update
     
-As explained above, the `update` function can have be implemented differently, depending on how you model your 
+As explained above, the `update` function can be implemented in different ways, depending on how you model your 
 messages. In any case, `update` needs the `Msg` and the current `Model`, and it should 
 return the next model, as well as side effects to trigger, if any (via `Cmd`) :
 
