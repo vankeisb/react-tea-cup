@@ -79,9 +79,9 @@ The `view` function is invoked by tea-cup at every `update`, for every `Msg` tha
     
 ### Messages 
 
-Messages are the dynamic part of your application. They represent anything that happened, 
+Messages are the dynamic part of your application. They represent anything that happens, 
 and that requires to update the model, and render the app again. Messages are dispatched in order 
-to respond to DOM events (or to side effects), and you have to implement their behaviour in the 
+to respond to DOM events (or to external side effects), and you have to implement their behaviour in the 
 `update` function. 
 
 Messages in tea-cup can be expressed in different ways, unlike in Elm where you'll always use 
@@ -218,44 +218,35 @@ function update(msg:Msg, model:Model): [Model, Cmd<Msg>] {
 
 ## Side effects
 
-Side effects happen outside of your program. Keyboard or Mouse events, HTTP calls, Web Sockets... 
-All this is not directly handled in your TEA "Model -> View -> Update" loop, which has to stay pure. 
+Side effects are everything that is not pure, and that happens outside of the Model -> View -> Update loop. 
 
-Side effects happen outside, but :
-* you want to trigger some effects (e.g. _send_ an HTTP request)
-* you want to get notified of stuff that has happened (e.g. get the response of an HTTP request, respond to a click on the document, etc.)   
+Examples of such side effects include browser events like Window resize, global mouse / keyboard events
+(that you don't listen to in your views), websocket messages, etc.  
 
-Side effects are managed by so-called "Effect Managers". They are 
-external modules that encapsulate the non-pure, low-level stuff. You interact with them via 
-"Commands" and "Subscriptions".
+Management of side effects is done through Commands, Tasks, and Subscriptions. 
 
 ### Commands
 
-Commands encapsulate side effects. They are declarative : you create a Command, and then 
-tell the runtime to execute it, and to notify you with a Message when it's done. You never 
-excecute commands yourself.
+Let's say you want to send an HTTP request, and be notified when the response comes back. 
+
+In tea-cup, this goes like :
+1. create a `Cmd` object that describes the HTTP request (could be anything else of course)
+2. instruct tea-cup to actually do the job, and _execute_ your `Cmd` 
+3. get the result as a `Msg`, passed to your `update` function
 
 It's part of the `update` function's job to return the commands, if any (along with 
-the new `Model`).
-
-```typescript jsx
-function update(msg:Msg, model:Model): [Model, Cmd<Msg>] 
-```
-
-> Commands are usually returned by calls to Effect Managers. You can
-implement your own `Cmd` subclasses for encapsulating side effects or calls
-to native APIs and the like, but this is usually better done with Tasks, which 
-are composable. 
+the new `Model`). Depending on what happened, at every update, you may return Commands
+in order to trigger side effects, and have those re-enter your update loop as Messages.
 
 ### Tasks
 
-A `Task` is a asynchronous unit of work that may either succeed, or fail. It can perform
+A `Task` is an asynchronous unit of work that may either succeed, or fail. It can perform
 side effects, like sending HTTP requests, accessing the Local Storage etc. 
 
-Like Commands, Tasks are declarative :  you don't execute them yourself. It's the runtime's job.
+Like Commands, Tasks are declarative :  you don't execute them yourself, this is the runtime's job.
 
-In order to request for execution of a Task, you need to turn it into a Command, and 
-return it from your update function : 
+In order to actually execute a Task, you need to turn it into a Command (and 
+return it from your update function) : 
 
 ```typescript jsx
 // create a task that fetches 
@@ -283,7 +274,7 @@ cleanly available in your TEA loop.
     
 ### Subscriptions
 
-Subscriptions allow you to be notified of events happening _outside_ of your program, and 
+Subscriptions allow you to be notified of events happening outside of your program, and 
 turn them into `Msg`s that you handle in `update`. Such events can be global 
 keyboard or mouse events on the document, web socket messages, etc.
 
