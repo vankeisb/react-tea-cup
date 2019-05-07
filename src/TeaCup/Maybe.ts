@@ -69,3 +69,17 @@ export function maybeOf<T>(t:T | undefined | null): Maybe<T> {
         return just(t);
     }
 }
+
+/**
+ * Apply a function if all the arguments are `Just` a value.
+ * @param m1 First Maybe
+ * @param m2 Second Maybe
+ * @param func the function applied on the values of the Maybes
+ */
+export function map2<T1, T2, T3>(m1: Maybe<T1>, m2: Maybe<T2>, func:(a: T1, b: T2) => T3) : Maybe<T3> {
+    return m1.map((a) => {
+        return m2.map((b) => {
+            return new Just(func(a, b)) as Maybe<T3>
+        }).withDefault(nothing)
+    }).withDefault(nothing);
+}
