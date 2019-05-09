@@ -1,4 +1,4 @@
-import {just, Maybe, nothing} from "./Maybe";
+import {just, map2, Maybe, nothing} from "./Maybe";
 
 test("just with default", () => {
     expect(just(1).withDefault(2)).toBe(1);
@@ -34,7 +34,7 @@ test("switch nothing", () => {
 
 
 test("switch just", () => {
-    const m:Maybe<number> = just(1);
+    const m: Maybe<number> = just(1);
     switch (m.type) {
         case "Just":
             expect(m.value).toBe(1);
@@ -43,4 +43,13 @@ test("switch just", () => {
             fail("expected a Just");
             break;
     }
+});
+
+// MAP 2
+test("map2", () => {
+    // both maybe are 'just', result is 'just'
+    expect(map2(just(10), just(20), ((a, b) => a + b))).toEqual(just(30));
+    // one of the maybes is 'nothing', result is 'nothing'
+    expect(map2(just(10), nothing, ((a, b) => a + b))).toEqual(nothing);
+    expect(map2(nothing, just(10), ((a, b) => a + b))).toEqual(nothing);
 });
