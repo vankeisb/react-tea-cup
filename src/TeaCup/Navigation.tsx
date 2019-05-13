@@ -351,12 +351,12 @@ export class RouteDef<R> implements RouteBase<R> {
 
     static splitPath(path:string): ReadonlyArray<string> {
         const p = RouteDef.sanitizePath(path);
-        return p === "" ? [] : p.split("/");
+        return p === "" ? [] : p.split("/").map(decodeURI);
     }
 
     checkRoute(pathname: string, query: QueryParams): Maybe<R> {
         // extract path parts from location and split
-        const parts = RouteDef.splitPath(decodeURI(pathname));
+        const parts = RouteDef.splitPath(pathname);
         if (parts.length === this.pathElems.length) {
             // map every individual part, bail out if
             // something cannot be converted
