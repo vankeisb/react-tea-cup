@@ -23,7 +23,7 @@ export class Http {
      * @param d the decoder
      */
     static jsonBody<R>(t: Task<Error,Response>, d:Decoder<R>): Task<Error,R> {
-        return Http.ifOk(t, r => Task.fromPromise(r.json()).andThen((json:any) => {
+        return Http.ifOk(t, r => Task.fromPromise(() => r.json()).andThen((json:any) => {
             const decoded: Result<string,R> = d.decodeValue(json);
             switch (decoded.tag) {
                 case "Ok":
@@ -39,7 +39,7 @@ export class Http {
      * @param t the fetch task
      */
     static stringBody(t: Task<Error,Response>): Task<Error,string> {
-        return Http.ifOk(t, response => Task.fromPromise(response.text()))
+        return Http.ifOk(t, response => Task.fromPromise(() => response.text()))
     }
 
     /**
