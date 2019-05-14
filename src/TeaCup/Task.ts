@@ -49,10 +49,10 @@ export abstract class Task<E,R> {
 
     /**
      * Create a task from a Promise
-     * @param p the promise
+     * @param promiseSupplier a function that returns the promise (will be called on Task execution)
      */
-    static fromPromise<R>(p:Promise<R>): Task<any,R> {
-        return new TPromise(p);
+    static fromPromise<R>(promiseSupplier:PromiseSupplier<R>): Task<any,R> {
+        return new TPromise(promiseSupplier);
     }
 
     /**
@@ -81,17 +81,20 @@ export abstract class Task<E,R> {
 }
 
 
+export type PromiseSupplier<T> = () => Promise<T>;
+
+
 class TPromise<R> extends Task<any,R> {
 
-    private readonly p:Promise<R>;
+    private readonly p:PromiseSupplier<R>;
 
-    constructor(p:Promise<R>) {
+    constructor(p:PromiseSupplier<R>) {
         super();
         this.p = p;
     }
 
     execute(callback: (r: Result<any, R>) => void): void {
-        this.p
+        this.p()
             .then(
                 (r:R) => callback(ok(r)),
                 (e:any) => callback(err(e))
