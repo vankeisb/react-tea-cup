@@ -24,6 +24,7 @@ export class DevTools<Model,Msg> {
     private program?: Program<Model,Msg>;
     private events: DevToolsEvent<Model,Msg>[] = [];
     private pausedOnEvent: number = -1;
+    private listeners: Array<(e:DevToolsEvent<Model,Msg>) => void> = []
 
     static init<Model,Msg>(window:Window): DevTools<Model,Msg> {
         const dt = new DevTools<Model,Msg>();
@@ -42,6 +43,7 @@ export class DevTools<Model,Msg> {
 
     onEvent(e:DevToolsEvent<Model, Msg>) : void {
         this.events.push(e);
+        this.listeners.forEach(l => l(e));
     }
 
     getEvents() : ReadonlyArray<DevToolsEvent<Model,Msg>> {
@@ -91,5 +93,9 @@ export class DevTools<Model,Msg> {
         if (this.pausedOnEvent >= 1) {
             this.travelTo(this.pausedOnEvent - 1);
         }
+    }
+
+    addListener(l:(e:DevToolsEvent<Model,Msg>) => void): void {
+        this.listeners.push(l);
     }
 }
