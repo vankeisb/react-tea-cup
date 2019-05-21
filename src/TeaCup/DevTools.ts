@@ -25,6 +25,13 @@ export class DevTools<Model,Msg> {
     private events: DevToolsEvent<Model,Msg>[] = [];
     private pausedOnEvent: number = -1;
 
+    static init<Model,Msg>(window:Window): DevTools<Model,Msg> {
+        const dt = new DevTools<Model,Msg>();
+        // @ts-ignore
+        window["teaCupDevTools"] = dt;
+        return dt;
+    }
+
     isPaused(): boolean {
         return this.pausedOnEvent !== -1;
     }

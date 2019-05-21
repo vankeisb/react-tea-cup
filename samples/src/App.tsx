@@ -665,12 +665,6 @@ function onUrlChange(l:Location) : Msg {
     }
 }
 
-
-const devTools: DevTools<Model,Msg> = new DevTools<Model, Msg>();
-// @ts-ignore
-window["teaCupDevTools"] = devTools;
-
-
 const App = () => (
     <ProgramWithNav
         init={init}
@@ -678,7 +672,7 @@ const App = () => (
         update={update}
         subscriptions={subscriptions}
         onUrlChange={onUrlChange}
-        devTools={devTools}
+        devTools={DevTools.init<Model,Msg>(window)}
     />
 );
 
