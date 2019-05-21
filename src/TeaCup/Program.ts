@@ -1,7 +1,8 @@
-import {Component, PureComponent, ReactNode} from 'react';
+import {Component, ReactNode} from 'react';
 import {Dispatcher} from "./Dispatcher";
 import {Cmd} from "./Cmd";
 import { Sub } from './Sub';
+import {DevToolsEvent, DevTools} from "./DevTools";
 
 
 /**
@@ -13,16 +14,13 @@ export interface ProgramProps<Model,Msg> {
     view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode
     update: (msg: Msg, model: Model) => [Model, Cmd<Msg>]
     subscriptions: (model: Model) => Sub<Msg>
-    debug?: boolean
+    devTools?: DevTools<Model,Msg>
 }
 
 interface ProgramState<Model> {
     currentModel: Model
     currentSub: Sub<any>
 }
-
-
-const noOpLog = (..._: any[]) => {};
 
 class Guid {
     static newGuid() {
@@ -39,44 +37,40 @@ class Guid {
  */
 export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, ProgramState<Model>> {
 
-    private count: number = 0;
-    private readonly uuid = Guid.newGuid();
+    readonly uuid = Guid.newGuid();
     private readonly bd: Dispatcher<Msg>;
+    private readonly devTools?: DevTools<Model, Msg>;
 
-    private logger() {
-        // @ts-ignore
-        const teaDebug: any = window["teaDebug"];
-        const debugEnabled = teaDebug || this.props.debug;
-        if (debugEnabled) {
-            this.count = this.count + 1;
-            const c = this.count;
-            return (...msgs: any[]) => {
-                const args = [this.uuid, "[dispatch-" + c + "]"].concat(msgs);
-                console.log(args);
-            }
-        } else {
-            return noOpLog;
+    private fireEvent(e:DevToolsEvent<Model,Msg>) {
+        if (this.devTools) {
+            this.devTools.onEvent(e);
         }
     }
 
-
     dispatch(msg:Msg) {
 
-        const debug = this.logger();
+        if (this.devTools && this.devTools.isPaused()) {
+            // do not process messages if we are paused
+            return;
+        }
 
         this.setState((state, props) => {
 
-            debug(">>>", msg);
             const currentModel = state.currentModel;
             const updated = props.update(msg, currentModel);
-            debug("updated", updated, "previousModel", currentModel);
+            if (this.devTools) {
+                this.fireEvent({
+                    tag: "updated",
+                    msg: msg,
+                    modelBefore: currentModel,
+                    modelAfter: updated[0]
+                });
+            }
             const newSub = props.subscriptions(updated[0]);
             const prevSub = state.currentSub;
-            debug("new sub obtained", newSub);
 
             const d = this.dispatch.bind(this);
 
-            debug("releasing previous sub", prevSub, "initializing", newSub);
             newSub.init(d);
             prevSub.release();
 
@@ -84,9 +78,9 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
             // make sure that this dispatch is done
             setTimeout(() => {
                 // console.log("dispatch: processing commands");
-                debug("performing command", updated[1]);
+                // debug("performing command", updated[1]);
                 updated[1].execute(d);
-                debug("<<<  done");
+                // debug("<<<  done");
             }, 0);
 
             return {
@@ -98,11 +92,19 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
 
     }
 
-
-
     constructor(props: Readonly<ProgramProps<Model, Msg>>) {
         super(props);
+        this.devTools = this.props.devTools;
+        if (this.devTools) {
+            this.devTools.connected(this);
+        }
         const mac = props.init();
+        if (this.devTools) {
+            this.fireEvent({
+                tag: "init",
+                model: mac[0]
+            });
+        }
         const sub = props.subscriptions(mac[0]);
         this.state = {
             currentModel: mac[0],
@@ -128,5 +130,21 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         return this.props.view(this.bd, model);
     }
 
+    setModel(model: Model, withSubs: boolean) {
+        this.setState((state,props) => {
+            let newSub: Sub<Msg>;
+            if (withSubs) {
+                newSub = this.props.subscriptions(model);
+            } else {
+                newSub = Sub.none();
+            }
+            newSub.init(this.bd);
+            state.currentSub.release();
+            return {
+                currentModel: model,
+                currentSub: newSub
+            }
+        });
+    }
 
 }

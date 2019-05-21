@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    DevTools,
     Cmd,
     Dispatcher,
     ProgramWithNav,
@@ -665,6 +666,11 @@ function onUrlChange(l:Location) : Msg {
 }
 
 
+const devTools: DevTools<Model,Msg> = new DevTools<Model, Msg>();
+// @ts-ignore
+window["teaCupDevTools"] = devTools;
+
+
 const App = () => (
     <ProgramWithNav
         init={init}
@@ -672,6 +678,7 @@ const App = () => (
         update={update}
         subscriptions={subscriptions}
         onUrlChange={onUrlChange}
+        devTools={devTools}
     />
 );
 
