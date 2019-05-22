@@ -40,6 +40,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
     readonly uuid = Guid.newGuid();
     private readonly bd: Dispatcher<Msg>;
     private readonly devTools?: DevTools<Model, Msg>;
+    private count: number = 0;
 
     private fireEvent(e:DevToolsEvent<Model,Msg>) {
         if (this.devTools) {
@@ -56,11 +57,15 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
 
         this.setState((state, props) => {
 
+            this.count++;
+            const count = this.count;
             const currentModel = state.currentModel;
             const updated = props.update(msg, currentModel);
             if (this.devTools) {
                 this.fireEvent({
                     tag: "updated",
+                    msgNum: count,
+                    time: new Date().getTime(),
                     msg: msg,
                     modelBefore: currentModel,
                     modelAfter: updated[0]
@@ -88,8 +93,6 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
                 currentSub: newSub
             }
         });
-
-
     }
 
     constructor(props: Readonly<ProgramProps<Model, Msg>>) {
@@ -102,6 +105,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         if (this.devTools) {
             this.fireEvent({
                 tag: "init",
+                time: new Date().getTime(),
                 model: mac[0]
             });
         }
