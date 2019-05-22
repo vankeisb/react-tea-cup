@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    DevTools,
     Cmd,
     Dispatcher,
     ProgramWithNav,
@@ -664,7 +665,6 @@ function onUrlChange(l:Location) : Msg {
     }
 }
 
-
 const App = () => (
     <ProgramWithNav
         init={init}
@@ -672,6 +672,7 @@ const App = () => (
         update={update}
         subscriptions={subscriptions}
         onUrlChange={onUrlChange}
+        devTools={DevTools.init<Model,Msg>(window)}
     />
 );
 

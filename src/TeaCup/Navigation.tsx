@@ -8,6 +8,7 @@ import * as React from 'react';
 import {Component, createRef, ReactNode, RefObject} from "react";
 import {just, Maybe, maybeOf, nothing} from "./Maybe";
 import {List} from "./List";
+import {DevTools} from "./DevTools";
 
 
 /**
@@ -19,6 +20,7 @@ export interface NavProps<Model,Msg> {
     readonly view: (dispatch: Dispatcher<Msg>, m:Model) => ReactNode,
     readonly update: (msg:Msg, model: Model) => [Model, Cmd<Msg>]
     readonly subscriptions: (model: Model) => Sub<Msg>
+    readonly devTools?: DevTools<Model,Msg>
 }
 
 
@@ -43,6 +45,7 @@ export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model,Msg>, a
                 view={this.props.view}
                 update={this.props.update}
                 subscriptions={this.props.subscriptions}
+                devTools={this.props.devTools}
                 ref={this.ref}/>
         )
     }

@@ -46,7 +46,6 @@ export function view(d:Dispatcher<Msg>, model: Model) {
 
 
 export function update(msg: Msg, model: Model) : [Model, Cmd<Msg>] {
-    console.log("update", msg, model);
     switch (msg.type) {
         case "clicked":
             return [ model, randomize() ];
