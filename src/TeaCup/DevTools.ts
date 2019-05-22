@@ -59,6 +59,7 @@ export class DevTools<Model,Msg> {
     }
 
     travelTo(evtNum: number) {
+        console.log("travling to " + evtNum);
         if (this.program) {
             const evt: DevToolsEvent<Model, Msg> = this.events[evtNum];
             if (evt) {
@@ -79,6 +80,7 @@ export class DevTools<Model,Msg> {
     }
 
     resume() {
+        console.log("resuming");
         if (this.program) {
             if (this.events.length > 0) {
                 const lastEvent = this.events[this.events.length -1];
