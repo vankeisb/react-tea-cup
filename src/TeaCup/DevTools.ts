@@ -1,4 +1,5 @@
 import {Program} from "./Program";
+import {Cmd} from "./Cmd";
 
 
 export interface HasTime {
@@ -25,6 +26,7 @@ export interface Updated<Model,Msg> extends HasTime, HasTag {
     readonly msg: Msg
     readonly modelBefore: Model
     readonly modelAfter: Model
+    readonly cmd: Cmd<Msg>
 }
 
 export class DevTools<Model,Msg> {
@@ -59,7 +61,6 @@ export class DevTools<Model,Msg> {
     }
 
     travelTo(evtNum: number) {
-        console.log("travling to " + evtNum);
         if (this.program) {
             const evt: DevToolsEvent<Model, Msg> = this.events[evtNum];
             if (evt) {
@@ -80,7 +81,6 @@ export class DevTools<Model,Msg> {
     }
 
     resume() {
-        console.log("resuming");
         if (this.program) {
             if (this.events.length > 0) {
                 const lastEvent = this.events[this.events.length -1];
