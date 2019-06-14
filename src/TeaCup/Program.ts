@@ -68,7 +68,8 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
                     time: new Date().getTime(),
                     msg: msg,
                     modelBefore: currentModel,
-                    modelAfter: updated[0]
+                    modelAfter: updated[0],
+                    cmd: updated[1]
                 });
             }
             const newSub = props.subscriptions(updated[0]);

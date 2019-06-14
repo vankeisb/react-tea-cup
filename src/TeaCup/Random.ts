@@ -1,4 +1,5 @@
 import {Task} from './Task'
+import {ok, Result} from "./Result";
 
 /**
  * Generate Rantom numbers.
@@ -11,9 +12,26 @@ export class Random {
      * @param hi
      */
     static fromIntervalInclusive(lo: number, hi: number): Task<never, number> {
-        return Task.succeed(randomIntFromInterval(lo, hi));
+        return new RandomTask(lo, hi);
     }
 
+}
+
+
+class RandomTask extends Task<never,number> {
+
+    private readonly lo: number;
+    private readonly hi: number;
+
+    constructor(lo: number, hi: number) {
+        super();
+        this.lo = lo;
+        this.hi = hi;
+    }
+
+    execute(callback: (r: Result<never, number>) => void): void {
+        callback(ok(randomIntFromInterval(this.lo, this.hi)));
+    }
 }
 
 
