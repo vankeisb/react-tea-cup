@@ -4,9 +4,19 @@ test("just with default", () => {
     expect(just(1).withDefault(2)).toBe(1);
 });
 
+test("just with default supply", () => {
+    expect(just(1).withDefaultSupply(() => 2)).toBe(1);
+});
+
 test("nothing with default", () => {
     const m: Maybe<number> = nothing;
     expect(m.withDefault(1)).toBe(1);
+});
+
+
+test("nothing with default supply", () => {
+    const m: Maybe<number> = nothing;
+    expect(m.withDefaultSupply(() => 1)).toBe(1);
 });
 
 test("just map", () => {
@@ -45,7 +55,6 @@ test("switch just", () => {
     }
 });
 
-// MAP 2
 test("map2", () => {
     // both maybe are 'just', result is 'just'
     expect(map2(just(10), just(20), ((a, b) => a + b))).toEqual(just(30));
@@ -53,3 +62,4 @@ test("map2", () => {
     expect(map2(just(10), nothing, ((a, b) => a + b))).toEqual(nothing);
     expect(map2(nothing, just(10), ((a, b) => a + b))).toEqual(nothing);
 });
+

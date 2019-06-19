@@ -22,6 +22,10 @@ export class Just<T> {
     withDefault(_:T): T {
         return this.value;
     }
+
+    withDefaultSupply(f:(() => T)): T {
+        return this.value;
+    }
 }
 
 
@@ -48,6 +52,10 @@ export class Nothing<T> {
 
     withDefault(d:T): T {
         return d;
+    }
+
+    withDefaultSupply(f:(() => T)): T {
+        return f();
     }
 }
 
