@@ -91,6 +91,7 @@ expectRoute("/with/slashes/foo", withSlashes(just("foo")));
 expectRoute("/with/slashes/foo/bar", withSlashes(just("foo/bar")));
 expectRoute("/with/slashes/foo/bar/baz", withSlashes(just("foo/bar/baz")));
 expectRoute("/with-spaces/foo%20bar", withSpaces("foo bar"));
+expectRoute("/with-spaces/j%26-suis_un%2Bt%C3%A9st%3Dpourl%40Q%4089%23%20%C3%A8%20je%20suis%20f%C3%A0o%C3%A7", withSpaces("j&-suis_un+tést=pourl@Q@89# è je suis fàoç"));
 expectNotFound("/foo");
 expectNotFound("/songs/1");
 expectNotFound("/song");

@@ -354,7 +354,7 @@ export class RouteDef<R> implements RouteBase<R> {
 
     static splitPath(path:string): ReadonlyArray<string> {
         const p = RouteDef.sanitizePath(path);
-        return p === "" ? [] : p.split("/").map(decodeURI);
+        return p === "" ? [] : p.split("/").map(decodeURIComponent);
     }
 
     checkRoute(pathname: string, query: QueryParams): Maybe<R> {
