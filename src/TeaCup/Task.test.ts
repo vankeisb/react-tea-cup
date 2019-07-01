@@ -64,17 +64,17 @@ test("more complex stuff with err", done => {
 
 
 
-function attempt<E,R>(t:Task<E,R>, callback:(r:Result<E,R>) => void) {
+export function attempt<E,R>(t:Task<E,R>, callback:(r:Result<E,R>) => void) {
     Task.attempt(t, m => m).execute(callback)
 }
 
 
-function perform<R>(t:Task<never,R>, callback:(r:R) => void) {
+export function perform<R>(t:Task<never,R>, callback:(r:R) => void) {
     Task.perform(t, m => m).execute(callback)
 }
 
 
-function expectOk<R>(done: () => void, t:Task<never,R>, r:R) {
+export function expectOk<R>(done: () => void, t:Task<never,R>, r:R) {
     perform(t, result => {
         expect(result).toBe(r);
         done()
@@ -82,7 +82,7 @@ function expectOk<R>(done: () => void, t:Task<never,R>, r:R) {
 }
 
 
-function expectErr<E,R>(done: () => void, t:Task<E,R>, e:E) {
+export function expectErr<E,R>(done: () => void, t:Task<E,R>, e:E) {
     attempt(t, result => {
         result.match(
             (_:R) => fail("expected an error"),
