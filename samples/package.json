@@ -10,7 +10,7 @@
     "@types/react-dom": "16.0.11",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "react-scripts": "2.1.3",
+    "react-scripts": "3.0.1",
     "react-tea-cup": "file:..",
     "typescript": "3.2.4"
   },

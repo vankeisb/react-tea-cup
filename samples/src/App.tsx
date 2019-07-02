@@ -22,6 +22,7 @@ import * as Rand from './Samples/Rand'
 import * as ClassMsgs from './Samples/ClassMsgs'
 import * as Sful from './Samples/StatefulInView'
 import * as Rest from './Samples/Rest'
+import * as TimeSample from './Samples/TimeSample'
 
 
 enum Tab {
@@ -138,6 +139,7 @@ interface Samples {
     readonly clsm: ClassMsgs.Model
     readonly sful: Sful.Model
     readonly rest: Rest.Model
+    readonly time: TimeSample.Model
 }
 
 
@@ -150,11 +152,12 @@ type Msg
     | { type: "clsm", child: ClassMsgs.Msg }
     | { type: "sful", child: Sful.Msg }
     | { type: "rest", child: Rest.Msg }
+    | { type: "timeSample", child: TimeSample.Msg }
     | { type: "urlChange", location: Location }
     | { type: "newUrl", url: string }
     | { type: "noop" }
     | { type: "tabClicked", tab: Tab }
-    
+
 
 const NoOp: Msg = { type: "noop" };
 
@@ -168,6 +171,7 @@ function initSamples(): [Model, Cmd<Msg>] {
     const clsm = ClassMsgs.init();
     const sful = Sful.init();
     const rest = Rest.init();
+    const time = TimeSample.init();
     return [
         {
             tag: "samples",
@@ -179,7 +183,8 @@ function initSamples(): [Model, Cmd<Msg>] {
                 rand: rand[0],
                 clsm: clsm[0],
                 sful: sful[0],
-                rest: rest[0]
+                rest: rest[0],
+                time: time[0]
             }
         },
         Cmd.batch([
@@ -190,7 +195,8 @@ function initSamples(): [Model, Cmd<Msg>] {
             rand[1].map(mapRand),
             clsm[1].map(mapClsm),
             sful[1].map(mapSful),
-            rest[1].map(mapRest)
+            rest[1].map(mapRest),
+            time[1].map(mapTimeSample)
         ])
     ];
 }
@@ -305,6 +311,13 @@ function mapRest(m: Rest.Msg) : Msg {
     }
 }
 
+function mapTimeSample(m: TimeSample.Msg) : Msg {
+    return {
+        type: "timeSample",
+        child: m
+    }
+}
+
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
     switch (model.tag) {
@@ -323,9 +336,6 @@ function view(dispatch: Dispatcher<Msg>, model: Model) {
                     </p>
                 </div>
             )
-//            return viewTodos(dispatch, model, route.tab);
-//         case "todo":
-//             return viewTodo(dispatch, model, route.id)
     }
 }
 
@@ -538,6 +548,8 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
             {Sful.view(map(dispatch, mapSful), samples.sful)}
             <h2>Http / JSON</h2>
             {Rest.view(map(dispatch, mapRest), samples.rest)}
+            <h2>Time</h2>
+            {TimeSample.view(map(dispatch, mapTimeSample), samples.time)}
         </div>
     )
 }
@@ -615,6 +627,14 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                 }
             );
 
+        case "timeSample":
+            return mapSample(
+                (s:Samples) => {
+                    const macTime = TimeSample.update(msg.child, s.time);
+                    return [{...s, time: macTime[0]}, macTime[1].map(mapTimeSample)];
+                }
+            );
+
         case "urlChange":
             return init(msg.location);
 
@@ -644,12 +664,13 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 function subscriptions(model: Model) : Sub<Msg> {
     switch (model.tag) {
         case "samples":
-            const { counter, parentChild, raf } = model.samples;
+            const { counter, parentChild, raf, time } = model.samples;
             return Sub.batch(
                 [
                     Counter.subscriptions(counter).map(mapCounter),
                     ParentChild.subscriptions(parentChild).map(mapParentChild),
-                    Raf.subscriptions(raf).map(mapRaf)
+                    Raf.subscriptions(raf).map(mapRaf),
+                    TimeSample.subscriptions(time).map(mapTimeSample)
                 ]
             )
         default:
