@@ -1,6 +1,5 @@
-import {Task} from "./Task";
 import {Time} from "./Time";
-import {expectOk, perform} from "./Task.test";
+import {perform} from "./Task.test";
 
 const margin = 10;
 
@@ -23,7 +22,7 @@ test("in", done => {
         r => {
             const elapsed = r - now;
             expect(elapsed).toBeLessThan(timeout + margin);
-            expect(elapsed).toBeGreaterThan(timeout);
+            expect(elapsed).toBeGreaterThanOrEqual(timeout);
             done();
         }
     )
