@@ -12,6 +12,7 @@ script:
   - cd samples
   - npm install
   - npm test
+  - cd ..
 
 deploy:
   provider: npm
