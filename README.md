@@ -9,3 +9,4 @@ Want some TEA in your React ?
 * [Quickstart](doc/quickstart.md)  
 * [User Manual](doc/manual.md)
 * [Samples](./samples)
+* [Contribute](doc/contribute.md)
