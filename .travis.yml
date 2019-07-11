@@ -17,5 +17,6 @@ deploy:
   provider: npm
   email: "${CI_EMAIL}"
   api_key: "${CI_API_KEY}"
-#  on:
+  on:
+    all_branches: true
 #    tags: true
