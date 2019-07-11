@@ -12,11 +12,10 @@ script:
   - cd samples
   - npm install
   - npm test
-  - echo $CI_EMAIL
 
-#deploy:
-#  provider: npm
-#  email: "${CI_EMAIL}"
-#  api_key: "${CI_API_KEY}"
-#  on:
-#    tags: true
+deploy:
+  provider: npm
+  email: "${CI_EMAIL}"
+  api_key: "${CI_API_KEY}"
+  on:
+    tags: true
