@@ -12,3 +12,10 @@ script:
   - cd samples
   - npm install
   - npm test
+
+deploy:
+  provider: npm
+  email: "${env.CI_EMAIL}"
+  api_key: "${env.CI_API_KEY}"
+  on:
+    tags: true
