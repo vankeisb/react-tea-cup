@@ -55,6 +55,10 @@ export class Just<T> {
     orElse(e: Maybe<T>): Maybe<T> {
         return this;
     }
+
+    orElseSupply(f: () => Maybe<T>): Maybe<T> {
+        return this;
+    }
 }
 
 
@@ -89,6 +93,10 @@ export class Nothing<T> {
 
     orElse(e: Maybe<T>): Maybe<T> {
         return e;
+    }
+
+    orElseSupply(f: () => Maybe<T>): Maybe<T> {
+        return f();
     }
 }
 

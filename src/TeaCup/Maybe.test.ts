@@ -53,6 +53,16 @@ test("nothing or else", () => {
     expect(m.orElse(nothing)).toEqual(nothing);
 });
 
+test("just or else supply", () => {
+    expect(just(1).orElseSupply(() => just(13))).toEqual(just(1));
+});
+
+test("nothing or else supply", () => {
+    const m: Maybe<number> = nothing;
+    expect(m.orElseSupply(() => just(13))).toEqual(just(13));
+    expect(m.orElseSupply(() => nothing)).toEqual(nothing);
+});
+
 test("just map", () => {
     expect(just(1).map(i => i + 1).withDefault(10)).toBe(2);
     expect(just(1).map(i => i + 1).map(i => i + 2).withDefault(10)).toBe(4);
