@@ -65,3 +65,15 @@ test("ok withDefault", () => {
 test("err withDefault", () => {
     expect(err("boom").withDefault(13)).toEqual(13);
 });
+
+test("ok andThen ok", () => {
+    expect(ok(1).andThen(v => ok(v + 1))).toEqual(ok(2));
+});
+
+test("ok andThen err", () => {
+    expect(ok(1).andThen(v => err("boom"))).toEqual(err("boom"));
+});
+
+test("err andThen", () => {
+    expect(err("boom").andThen(v => ok(13))).toEqual(err("boom"));
+});

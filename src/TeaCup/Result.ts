@@ -52,7 +52,6 @@ export class Ok<E, R> {
         return just(this.value);
     }
 
-
     match<X>(onOk: (r: R) => X, onErr: (e: E) => X): X {
         return onOk(this.value);
     }
@@ -60,6 +59,11 @@ export class Ok<E, R> {
     withDefault(v: R): R {
         return this.value;
     }
+
+    andThen<R2>(f: (r: R) => Result<E, R2>): Result<E, R2> {
+        return f(this.value);
+    }
+
 }
 
 
@@ -88,8 +92,12 @@ export class Err<E, R> {
         return onErr(this.err);
     }
 
-    withDefault(v: R): R {
-        return v;
+    withDefault(r: R): R {
+        return r;
+    }
+
+    andThen<R2>(f: (r: R) => Result<E, R2>): Result<E, R2> {
+        return err(this.err);
     }
 }
 
