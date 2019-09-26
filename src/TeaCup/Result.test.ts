@@ -57,3 +57,11 @@ test("ok match", () => {
 test("err match", () => {
     expect(err("boom").match(v => 1, err => 13)).toEqual(13);
 });
+
+test("ok withDefault", () => {
+    expect(ok(1).withDefault(13)).toEqual(1);
+});
+
+test("err withDefault", () => {
+    expect(err("boom").withDefault(13)).toEqual(13);
+});
