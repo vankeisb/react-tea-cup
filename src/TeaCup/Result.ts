@@ -68,6 +68,11 @@ export class Ok<E, R> {
         return f(this.value);
     }
 
+    // orElse?
+    recover(f: ((e: E) => Result<E, R>)): Result<E, R> {
+        return this;
+    }
+
 }
 
 
@@ -107,6 +112,12 @@ export class Err<E, R> {
     andThen<R2>(f: (r: R) => Result<E, R2>): Result<E, R2> {
         return err(this.err);
     }
+
+    // orElse?
+    recover(f: ((e: E) => Result<E, R>)): Result<E, R> {
+        return f(this.err);
+    }
+
 }
 
 /**

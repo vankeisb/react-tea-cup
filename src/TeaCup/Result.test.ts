@@ -85,3 +85,11 @@ test("ok withDefaultSupply", () => {
 test("err withDefaultSupply", () => {
     expect(err("boom").withDefaultSupply(() => "hello")).toEqual("hello");
 });
+
+test("ok recover", () => {
+    expect(ok(1).recover(err => ok(13))).toEqual(ok(1));
+});
+
+test("err recover", () => {
+    expect(err("boom").recover(() => ok(13))).toEqual(ok(13));
+});
