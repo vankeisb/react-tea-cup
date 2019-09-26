@@ -77,3 +77,11 @@ test("ok andThen err", () => {
 test("err andThen", () => {
     expect(err("boom").andThen(v => ok(13))).toEqual(err("boom"));
 });
+
+test("ok withDefaultSupply", () => {
+    expect(ok(1).withDefaultSupply(() => 13)).toEqual(1);
+});
+
+test("err withDefaultSupply", () => {
+    expect(err("boom").withDefaultSupply(() => "hello")).toEqual("hello");
+});

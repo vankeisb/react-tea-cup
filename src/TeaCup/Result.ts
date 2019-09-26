@@ -60,6 +60,10 @@ export class Ok<E, R> {
         return this.value;
     }
 
+    withDefaultSupply(f: (() => R)): R {
+        return this.value;
+    }
+
     andThen<R2>(f: (r: R) => Result<E, R2>): Result<E, R2> {
         return f(this.value);
     }
@@ -94,6 +98,10 @@ export class Err<E, R> {
 
     withDefault(r: R): R {
         return r;
+    }
+
+    withDefaultSupply(f: (() => R)): R {
+        return f();
     }
 
     andThen<R2>(f: (r: R) => Result<E, R2>): Result<E, R2> {
