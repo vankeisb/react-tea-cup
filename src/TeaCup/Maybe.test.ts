@@ -23,7 +23,7 @@
  *
  */
 
-import {just, map2, Maybe, nothing} from "./Maybe";
+import { just, map2, Maybe, nothing } from "./Maybe";
 
 test("just with default", () => {
     expect(just(1).withDefault(2)).toBe(1);
@@ -38,10 +38,19 @@ test("nothing with default", () => {
     expect(m.withDefault(1)).toBe(1);
 });
 
-
 test("nothing with default supply", () => {
     const m: Maybe<number> = nothing;
     expect(m.withDefaultSupply(() => 1)).toBe(1);
+});
+
+test("just or else", () => {
+    expect(just(1).orElse(just(13))).toEqual(just(1));
+});
+
+test("nothing or else", () => {
+    const m: Maybe<number> = nothing;
+    expect(m.orElse(just(13))).toEqual(just(13));
+    expect(m.orElse(nothing)).toEqual(nothing);
 });
 
 test("just map", () => {
