@@ -23,7 +23,7 @@
  *
  */
 
-import { ok, err } from "./Result";
+import { ok, err, Result } from "./Result";
 import { just, nothing } from "./Maybe";
 
 test("ok map", () => {
@@ -86,10 +86,10 @@ test("err withDefaultSupply", () => {
     expect(err("boom").withDefaultSupply(() => "hello")).toEqual("hello");
 });
 
-test("ok recover", () => {
-    expect(ok(1).recover(err => ok(13))).toEqual(ok(1));
+test("ok orElse", () => {
+    expect(ok(1).orElse(err => ok(13))).toEqual(ok(1));
 });
 
-test("err recover", () => {
-    expect(err("boom").recover(() => ok(13))).toEqual(ok(13));
+test("err orElse", () => {
+    expect(err("boom").orElse(() => ok(13))).toEqual(ok(13));
 });
