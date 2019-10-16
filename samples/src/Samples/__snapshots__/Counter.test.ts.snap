@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Test Counter Testing view snapshot 1`] = `
+exports[`Test Counter view state snapshot 1`] = `
 <div
   className="counter"
 >

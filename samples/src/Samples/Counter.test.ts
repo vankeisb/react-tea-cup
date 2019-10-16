@@ -23,13 +23,13 @@
  *
  */
 
-import { view } from "./Counter";
+import { view, Msg } from "./Counter";
 import { mount, shallow } from 'enzyme'
 
 
 describe("Test Counter", () => {
 
-    describe("Testing view", () => {
+    describe("view state", () => {
 
         const noop = () => { }
 
@@ -40,7 +40,7 @@ describe("Test Counter", () => {
         });
 
         test("render buttons", () => {
-            const wrapper = shallow(view(noop, 1))
+            const wrapper = shallow(view(noop, 1));
             expect(wrapper.find('.counter > button')).toHaveLength(2);
             expect(wrapper.find('.counter > button').at(0)).toHaveText('-');
             expect(wrapper.find('.counter > button').at(1)).toHaveText('+');
@@ -52,5 +52,27 @@ describe("Test Counter", () => {
         });
     });
 
+    describe("clicks generate messages", () => {
+
+        var captured: Msg | undefined;
+        const captureMsg = (msg: Msg) => captured = msg
+
+        beforeEach(() => {
+            captured = undefined;
+        });
+
+        test("decrement", () => {
+            const wrapper = shallow(view(captureMsg, 1))
+            wrapper.find('.counter > button').at(0).simulate('click')
+            expect(captured).toEqual({ type: "dec" })
+        });
+
+        test("increment", () => {
+            const wrapper = shallow(view(captureMsg, 1))
+            wrapper.find('.counter > button').at(1).simulate('click')
+            expect(captured).toEqual({ type: "inc" })
+        });
+
+    });
 });
 
