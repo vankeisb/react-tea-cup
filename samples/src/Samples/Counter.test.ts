@@ -23,6 +23,34 @@
  *
  */
 
-test("hey hoo", () => {
-    expect(1).toBe(1)
+import { view } from "./Counter";
+import { mount, shallow } from 'enzyme'
+
+
+describe("Test Counter", () => {
+
+    describe("Testing view", () => {
+
+        const noop = () => { }
+
+        test("render counter", () => {
+            const wrapper = shallow(view(noop, 13))
+            expect(wrapper.find('.counter')).toExist();
+            expect(wrapper.find('.counter > span')).toHaveText("13");
+        });
+
+        test("render buttons", () => {
+            const wrapper = shallow(view(noop, 1))
+            expect(wrapper.find('.counter > button')).toHaveLength(2);
+            expect(wrapper.find('.counter > button').at(0)).toHaveText('-');
+            expect(wrapper.find('.counter > button').at(1)).toHaveText('+');
+        });
+
+        test("snapshot", () => {
+            const wrapper = shallow(view(noop, 1313))
+            expect(wrapper).toMatchSnapshot();
+        });
+    });
+
 });
+
