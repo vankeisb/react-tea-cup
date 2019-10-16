@@ -23,8 +23,9 @@
  *
  */
 
-import { view, Msg } from "./Counter";
-import { mount, shallow } from 'enzyme'
+import { view, Msg, update } from "./Counter";
+import { shallow } from 'enzyme';
+
 
 
 describe("Test Counter", () => {
@@ -62,17 +63,30 @@ describe("Test Counter", () => {
         });
 
         test("decrement", () => {
-            const wrapper = shallow(view(captureMsg, 1))
-            wrapper.find('.counter > button').at(0).simulate('click')
-            expect(captured).toEqual({ type: "dec" })
+            const wrapper = shallow(view(captureMsg, 1));
+            wrapper.find('.counter > button').at(0).simulate('click');
+            expect(captured).toEqual({ type: "dec" });
         });
 
         test("increment", () => {
-            const wrapper = shallow(view(captureMsg, 1))
-            wrapper.find('.counter > button').at(1).simulate('click')
-            expect(captured).toEqual({ type: "inc" })
+            const wrapper = shallow(view(captureMsg, 1));
+            wrapper.find('.counter > button').at(1).simulate('click');
+            expect(captured).toEqual({ type: "inc" });
         });
 
     });
+
+    describe("messages update state", () => {
+        test("decrement", () => {
+            const [newState, cmd] = update({ type: "dec" }, 13);
+            expect(newState).toBe(12);
+        });
+
+        test("increment", () => {
+            const [newState, cmd] = update({ type: "inc" }, 13);
+            expect(newState).toBe(14);
+        });
+    });
+
 });
 
