@@ -36,7 +36,7 @@ describe("Test Rand", () => {
         test("triggers message", () => {
             const [state, cmd] = init();
             expect(state).toEqual(nothing);
-            expect(cmd).not.toEqual(Cmd.none);
+            expect(cmd).not.toEqual(Cmd.none());
         });
 
     });
@@ -88,7 +88,20 @@ describe("Test Rand", () => {
         });
     });
 
-    describe("messages update state", () => {
+    describe("message updates state", () => {
+
+        test("clicked", () => {
+            const [newState, cmd] = update({ type: "clicked" }, just(13));
+            expect(newState).toEqual(just(13));
+            expect(cmd).not.toEqual(Cmd.none());
+        });
+
+        test("random-received", () => {
+            const [newState, cmd] = update({ type: "random-received", value: 1313 }, just(13));
+            expect(newState).toEqual(just(1313));
+            expect(cmd).toEqual(Cmd.none());
+        });
+
     });
 
 });
