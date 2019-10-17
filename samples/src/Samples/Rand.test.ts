@@ -73,7 +73,19 @@ describe("Test Rand", () => {
         });
     });
 
-    describe("clicks generate messages", () => {
+    describe("click generate message", () => {
+        var captured: Msg | undefined;
+        const captureMsg = (msg: Msg) => captured = msg
+
+        beforeEach(() => {
+            captured = undefined;
+        });
+
+        test("clicked message", () => {
+            const wrapper = shallow(view(captureMsg, nothing));
+            wrapper.find('div > button').at(0).simulate('click');
+            expect(captured).toEqual({ type: "clicked" });
+        });
     });
 
     describe("messages update state", () => {
