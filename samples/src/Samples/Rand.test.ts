@@ -23,13 +23,23 @@
  *
  */
 
-import { view, Msg, update } from "./Rand";
+import { view, Msg, update, init } from "./Rand";
 import { shallow } from 'enzyme';
-import { Nothing, nothing, just } from "../../../src/TeaCup";
+import { Nothing, nothing, just, Cmd, Task } from "../../../src/TeaCup";
 
 
 
 describe("Test Rand", () => {
+
+    describe("init state", () => {
+
+        test("triggers message", () => {
+            const [state, cmd] = init();
+            expect(state).toEqual(nothing);
+            expect(cmd).not.toEqual(Cmd.none);
+        });
+
+    });
 
     describe("view state", () => {
 
