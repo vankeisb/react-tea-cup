@@ -164,7 +164,7 @@ describe("Test TimeSample", () => {
         const [initialState, _cmd] = init();
 
         const msgFromCmd = async (cmd: Cmd<Msg>) => {
-            return new Promise((resolve, reject) => {
+            return new Promise<Msg>((resolve, reject) => {
                 const captureMsg = (msg: Msg) => {
                     resolve(msg);
                 };

@@ -28,7 +28,6 @@ import { shallow, mount } from 'enzyme';
 import { Nothing, nothing, just, Cmd, Task } from "../../../src/TeaCup";
 
 
-
 describe("Test Rest", () => {
 
     describe("init state", () => {
@@ -78,6 +77,15 @@ describe("Test Rest", () => {
             captured = undefined;
         });
 
+        const msgFromCmd = async (cmd: Cmd<Msg>) => {
+            return new Promise<Msg>((resolve, reject) => {
+                const captureMsg = (msg: Msg) => {
+                    resolve(msg);
+                };
+                cmd.execute(captureMsg);
+            });
+        }
+
         test('click list commits', () => {
             const loaded: Model = {
                 tag: "loaded",
@@ -89,6 +97,32 @@ describe("Test Rest", () => {
             const [newState, cmd] = captured!(loaded)
             expect(newState).toEqual({ tag: 'loading' });
             expect(cmd).not.toEqual(Cmd.none());
+        });
+
+        test('click list commits with loading', () => {
+            const loaded: Model = {
+                tag: "loaded",
+                commits: [{ sha: "13131313", author: "Toto" }]
+            }
+            const wrapper = mount(view(captureMsg, loaded));
+            wrapper.find('div > button').simulate('click');
+
+            const [newState, cmd] = captured!(loaded)
+            expect(newState).toEqual({ tag: 'loading' });
+            expect(cmd).not.toEqual(Cmd.none());
+
+            const mockedCommits = [{ sha: "13131313", commit: { author: { name: "Toto" } } }];
+
+            jest.autoMockOff();
+            fetchMock.resetMocks();
+            fetchMock.once(JSON.stringify(mockedCommits));
+
+            msgFromCmd(cmd).then((msg: Msg) => {
+                const [newState, cmd1] = msg(loaded);
+                expect(cmd1).toEqual(Cmd.none());
+                expect(newState).toEqual({ tag: 'loaded', commits: [{ sha: '13131313', author: 'Toto' }] })
+            })
+
         });
 
         test('click errored', () => {

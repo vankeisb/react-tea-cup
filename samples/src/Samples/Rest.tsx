@@ -137,7 +137,6 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
     )
 }
 
-
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     return msg(model);
 }
