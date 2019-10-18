@@ -129,12 +129,32 @@ describe("Test TimeSample", () => {
 
     });
 
-    describe("click generate message", () => {
+    describe("clicking generates messages", () => {
         var captured: Msg | undefined;
         const captureMsg = (msg: Msg) => captured = msg
 
         beforeEach(() => {
             captured = undefined;
+        });
+
+        const [initialState, _cmd] = init();
+
+        test("get current time", () => {
+            const wrapper = mount(view(captureMsg, initialState));
+            wrapper.find('div > button').at(0).simulate('click');
+            expect(captured).toEqual({ tag: "get-cur-time" });
+        });
+
+        test("get in", () => {
+            const wrapper = mount(view(captureMsg, initialState));
+            wrapper.find('div > button').at(1).simulate('click');
+            expect(captured).toEqual({ tag: "get-in" });
+        });
+
+        test("toggle tick", () => {
+            const wrapper = mount(view(captureMsg, initialState));
+            wrapper.find('div > button').at(2).simulate('click');
+            expect(captured).toEqual({ tag: "toggle-tick" });
         });
 
     });
