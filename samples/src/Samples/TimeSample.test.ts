@@ -161,9 +161,53 @@ describe("Test TimeSample", () => {
 
     describe("message updates state", () => {
 
-        // test("clicked", () => {
-        //     const [newState, cmd] = update({ type: "clicked" }, just(13));
-        // });
+        const [initialState, _cmd] = init();
+
+        const msgFromCmd = async (cmd: Cmd<Msg>) => {
+            return new Promise((resolve, reject) => {
+                const captureMsg = (msg: Msg) => {
+                    resolve(msg);
+                };
+                cmd.execute(captureMsg);
+            });
+        }
+
+        test("get-cur-time", () => {
+            const [newState, cmd] = update({ tag: "get-cur-time" }, initialState);
+            expect(newState.currentTime).toBe(-1);
+            msgFromCmd(cmd).then(msg => {
+                expect(msg).toHaveProperty('tag', 'got-cur-time')
+            });
+        });
+
+        test("get-in", () => {
+            const [newState, cmd] = update({ tag: "get-in" }, initialState);
+            expect(newState.inTime).toBe(false);
+            expect(newState.inProgress).toBe(true);
+            msgFromCmd(cmd).then(msg => {
+                expect(msg).toHaveProperty('tag', 'got-in')
+            });
+        });
+
+        test("toggle-tick", () => {
+            const [newState, cmd] = update({ tag: "toggle-tick" }, initialState);
+            expect(newState.ticking).toBe(!initialState.ticking);
+            expect(cmd).toEqual(Cmd.none())
+        });
+
+        test("got-tick 1", () => {
+            const [newState, cmd] = update({ tag: "got-tick", isFirst: true }, initialState);
+            expect(newState.ticks1).toBe(initialState.ticks1 + 1);
+            expect(newState.ticks2).toBe(initialState.ticks2);
+            expect(cmd).toEqual(Cmd.none())
+        });
+
+        test("got-tick 2", () => {
+            const [newState, cmd] = update({ tag: "got-tick", isFirst: false }, initialState);
+            expect(newState.ticks1).toBe(initialState.ticks1);
+            expect(newState.ticks2).toBe(initialState.ticks2 + 1);
+            expect(cmd).toEqual(Cmd.none())
+        });
 
     });
 
