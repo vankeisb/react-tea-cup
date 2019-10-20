@@ -76,5 +76,22 @@ describe("Test ParentChild", () => {
             })
         });
     });
+
+    describe("messages update state", () => {
+
+        const [initialState, _cmd] = init();
+
+        test("decrement first counter", () => {
+            const [newState, cmd] = update({
+                childIndex: 0,
+                childMsg: { type: 'dec' }
+            }, initialState);
+            expect(newState[0]).toBe(initialState[0] - 1);
+            expect(newState[1]).toBe(initialState[1]);
+            expect(newState[1]).toBe(initialState[2]);
+        });
+
+    });
+
 });
 
