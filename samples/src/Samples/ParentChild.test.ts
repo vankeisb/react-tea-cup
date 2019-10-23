@@ -24,8 +24,11 @@
  */
 
 import { view, Msg, update, init, Model } from "./ParentChild";
-import { shallow, mount } from 'enzyme';
-import { Nothing, nothing, just, Cmd, Task } from "../../../src/TeaCup";
+import { mount } from 'enzyme';
+import { extendJest, Testing } from "./Testing";
+
+extendJest(expect);
+const testing = new Testing<Msg>();
 
 
 describe("Test ParentChild", () => {
@@ -42,35 +45,28 @@ describe("Test ParentChild", () => {
 
     describe("view state", () => {
 
-        const noop = () => { }
         const [initialState, _cmd] = init();
 
         test("snapshot initial", () => {
-            const wrapper = mount(view(noop, initialState))
+            const wrapper = mount(view(testing.noop, initialState))
             expect(wrapper).toMatchSnapshot();
         });
 
         test("three counters", () => {
-            const wrapper = mount(view(noop, initialState))
+            const wrapper = mount(view(testing.noop, initialState))
             expect(wrapper.find('.counter')).toHaveLength(3);
         });
 
     });
 
     describe("clicking generates messages", () => {
-        var captured: Msg | undefined;
-        const captureMsg = (msg: Msg) => captured = msg
-
-        beforeEach(() => {
-            captured = undefined;
-        });
 
         const [initialState, _cmd] = init();
 
         test('decrement first child', () => {
-            const wrapper = mount(view(captureMsg, initialState))
+            const wrapper = mount(view(testing.dispatcher(), initialState))
             wrapper.find('.counter > button').at(0).simulate('click')
-            expect(captured).toEqual({
+            expect(testing.dispatched()).toEqual({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
             })
