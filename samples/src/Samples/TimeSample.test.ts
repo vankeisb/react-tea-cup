@@ -135,19 +135,19 @@ describe("Test TimeSample", () => {
         const [initialState, _cmd] = init();
 
         test("get current time", () => {
-            const wrapper = mount(view(testing.dispatcher(), initialState));
+            const wrapper = mount(view(testing.dispatcher, initialState));
             wrapper.find('div > button').at(0).simulate('click');
             expect(testing).toHaveDispatchedMsg({ tag: "get-cur-time" });
         });
 
         test("get in", () => {
-            const wrapper = mount(view(testing.dispatcher(), initialState));
+            const wrapper = mount(view(testing.dispatcher, initialState));
             wrapper.find('div > button').at(1).simulate('click');
             expect(testing).toHaveDispatchedMsg({ tag: "get-in" });
         });
 
         test("toggle tick", () => {
-            const wrapper = mount(view(testing.dispatcher(), initialState));
+            const wrapper = mount(view(testing.dispatcher, initialState));
             wrapper.find('div > button').at(2).simulate('click');
             expect(testing).toHaveDispatchedMsg({ tag: "toggle-tick" });
         });
@@ -161,7 +161,7 @@ describe("Test TimeSample", () => {
         test("get-cur-time", () => {
             const [newState, cmd] = update({ tag: "get-cur-time" }, initialState);
             expect(newState.currentTime).toBe(-1);
-            testing.dispatchedFrom(cmd)
+            testing.dispatchFrom(cmd)
                 .then(msg => {
                     expect(msg).toHaveProperty('tag', 'got-cur-time')
                 });
@@ -171,7 +171,7 @@ describe("Test TimeSample", () => {
             const [newState, cmd] = update({ tag: "get-in" }, initialState);
             expect(newState.inTime).toBe(false);
             expect(newState.inProgress).toBe(true);
-            testing.dispatchedFrom(cmd)
+            testing.dispatchFrom(cmd)
                 .then(msg => {
                     expect(msg).toHaveProperty('tag', 'got-in')
                 });

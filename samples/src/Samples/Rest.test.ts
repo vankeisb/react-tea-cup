@@ -78,10 +78,10 @@ describe("Test Rest", () => {
                 tag: "loaded",
                 commits: [{ sha: "13131313", author: "Toto" }]
             }
-            const wrapper = mount(view(testing.dispatcher(), loaded));
+            const wrapper = mount(view(testing.dispatcher, loaded));
             wrapper.find('div > button').simulate('click');
 
-            const [newState, cmd] = testing.dispatched()!(loaded)
+            const [newState, cmd] = testing.dispatched!(loaded)
             expect(newState).toEqual({ tag: 'loading' });
             expect(cmd).not.toEqual(Cmd.none());
         });
@@ -91,10 +91,10 @@ describe("Test Rest", () => {
                 tag: "loaded",
                 commits: [{ sha: "13131313", author: "Toto" }]
             }
-            const wrapper = mount(view(testing.dispatcher(), loaded));
+            const wrapper = mount(view(testing.dispatcher, loaded));
             wrapper.find('div > button').simulate('click');
 
-            const [newState, cmd] = testing.dispatched()!(loaded)
+            const [newState, cmd] = testing.dispatched!(loaded)
             expect(newState).toEqual({ tag: 'loading' });
             expect(cmd).not.toEqual(Cmd.none());
 
@@ -104,7 +104,7 @@ describe("Test Rest", () => {
             fetchMock.resetMocks();
             fetchMock.once(JSON.stringify(mockedCommits));
 
-            testing.dispatchedFrom(cmd)
+            testing.dispatchFrom(cmd)
                 .then((msg: Msg) => {
                     const [newState, cmd1] = msg(loaded);
                     expect(cmd1).toEqual(Cmd.none());
@@ -117,10 +117,10 @@ describe("Test Rest", () => {
                 tag: "load-error",
                 error: new Error('boom')
             }
-            const wrapper = mount(view(testing.dispatcher(), errored));
+            const wrapper = mount(view(testing.dispatcher, errored));
             wrapper.find('div > button').simulate('click');
 
-            const [newState, cmd] = testing.dispatched()!(errored)
+            const [newState, cmd] = testing.dispatched!(errored)
             expect(newState).toEqual({ tag: 'loading' });
             expect(cmd).not.toEqual(Cmd.none());
         });

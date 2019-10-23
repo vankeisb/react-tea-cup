@@ -76,9 +76,9 @@ describe("Test Rand", () => {
     describe("click generate message", () => {
 
         test("clicked message", () => {
-            const wrapper = shallow(view(testing.dispatcher(), nothing));
+            const wrapper = shallow(view(testing.dispatcher, nothing));
             wrapper.find('div > button').at(0).simulate('click');
-            expect(testing.dispatched()).toEqual({ type: "clicked" });
+            expect(testing).toHaveDispatchedMsg({ type: "clicked" });
         });
     });
 

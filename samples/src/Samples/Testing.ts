@@ -30,7 +30,7 @@ import diff from "jest-diff";
 export function extendJest<M>(expect: jest.Expect) {
     expect.extend({
         toHaveDispatchedMsg(received: Testing<M>, expected: M) {
-            const pass = this.equals(received.dispatched(), expected);
+            const pass = this.equals(received.dispatched, expected);
 
             const message = pass
                 ? () => this.utils.matcherHint('toHaveDispatchedMsg', this.utils.printExpected(expected), this.utils.printReceived(received))
@@ -62,25 +62,25 @@ declare global {
 }
 
 export class Testing<M> {
-    private dispatchedMsg: M | undefined;
+    private _dispatched: M | undefined;
 
     public Testing() {
     }
 
     public readonly noop: Dispatcher<M> = () => { }
 
-    public dispatcher(): Dispatcher<M> {
-        this.dispatchedMsg = undefined;
+    public get dispatcher(): Dispatcher<M> {
+        this._dispatched = undefined;
         return (msg: M) => {
-            this.dispatchedMsg = msg;
+            this._dispatched = msg;
         }
     }
 
-    public dispatched(): M | undefined {
-        return this.dispatchedMsg;
+    public get dispatched(): M | undefined {
+        return this._dispatched;
     }
 
-    public dispatchedFrom(cmd: Cmd<M>): Promise<M> {
+    public dispatchFrom(cmd: Cmd<M>): Promise<M> {
         return new Promise<M>((resolve, reject) => {
             const dispatchedMsg = (msg: M) => {
                 resolve(msg);

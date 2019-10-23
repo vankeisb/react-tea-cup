@@ -57,13 +57,13 @@ describe("Test Counter", () => {
     describe("clicks generate messages", () => {
 
         test("decrement", () => {
-            const wrapper = shallow(view(testing.dispatcher(), 1));
+            const wrapper = shallow(view(testing.dispatcher, 1));
             wrapper.find('.counter > button').at(0).simulate('click');
             expect(testing).toHaveDispatchedMsg({ type: "dec" });
         });
 
         test("increment", () => {
-            const wrapper = shallow(view(testing.dispatcher(), 1));
+            const wrapper = shallow(view(testing.dispatcher, 1));
             wrapper.find('.counter > button').at(1).simulate('click');
             expect(testing).toHaveDispatchedMsg({ type: "inc" });
         });

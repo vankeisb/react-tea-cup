@@ -64,9 +64,9 @@ describe("Test ParentChild", () => {
         const [initialState, _cmd] = init();
 
         test('decrement first child', () => {
-            const wrapper = mount(view(testing.dispatcher(), initialState))
+            const wrapper = mount(view(testing.dispatcher, initialState))
             wrapper.find('.counter > button').at(0).simulate('click')
-            expect(testing.dispatched()).toEqual({
+            expect(testing).toHaveDispatchedMsg({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
             })
