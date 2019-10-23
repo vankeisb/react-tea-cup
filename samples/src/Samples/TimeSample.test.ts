@@ -158,30 +158,23 @@ describe("Test TimeSample", () => {
 
         const [initialState, _cmd] = init();
 
-        const msgFromCmd = async (cmd: Cmd<Msg>) => {
-            return new Promise<Msg>((resolve, reject) => {
-                const captureMsg = (msg: Msg) => {
-                    resolve(msg);
-                };
-                cmd.execute(captureMsg);
-            });
-        }
-
         test("get-cur-time", () => {
             const [newState, cmd] = update({ tag: "get-cur-time" }, initialState);
             expect(newState.currentTime).toBe(-1);
-            msgFromCmd(cmd).then(msg => {
-                expect(msg).toHaveProperty('tag', 'got-cur-time')
-            });
+            testing.dispatchedFrom(cmd)
+                .then(msg => {
+                    expect(msg).toHaveProperty('tag', 'got-cur-time')
+                });
         });
 
         test("get-in", () => {
             const [newState, cmd] = update({ tag: "get-in" }, initialState);
             expect(newState.inTime).toBe(false);
             expect(newState.inProgress).toBe(true);
-            msgFromCmd(cmd).then(msg => {
-                expect(msg).toHaveProperty('tag', 'got-in')
-            });
+            testing.dispatchedFrom(cmd)
+                .then(msg => {
+                    expect(msg).toHaveProperty('tag', 'got-in')
+                });
         });
 
         test("toggle-tick", () => {

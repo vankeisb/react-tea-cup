@@ -24,13 +24,13 @@
  *
  */
 
-import { Dispatcher } from "react-tea-cup";
+import { Dispatcher, Cmd } from "react-tea-cup";
 import diff from "jest-diff";
 
 export function extendJest<M>(expect: jest.Expect) {
     expect.extend({
         toHaveDispatchedMsg(received: Testing<M>, expected: M) {
-            const pass = this.equals(received.getDispatched(), expected);
+            const pass = this.equals(received.dispatched(), expected);
 
             const message = pass
                 ? () => this.utils.matcherHint('toHaveDispatchedMsg', this.utils.printExpected(expected), this.utils.printReceived(received))
@@ -62,7 +62,7 @@ declare global {
 }
 
 export class Testing<M> {
-    private dispatched: M | undefined;
+    private dispatchedMsg: M | undefined;
 
     public Testing() {
     }
@@ -70,13 +70,22 @@ export class Testing<M> {
     public readonly noop: Dispatcher<M> = () => { }
 
     public dispatcher(): Dispatcher<M> {
-        this.dispatched = undefined;
+        this.dispatchedMsg = undefined;
         return (msg: M) => {
-            this.dispatched = msg;
+            this.dispatchedMsg = msg;
         }
     }
 
-    public getDispatched(): M | undefined {
-        return this.dispatched;
+    public dispatched(): M | undefined {
+        return this.dispatchedMsg;
+    }
+
+    public dispatchedFrom(cmd: Cmd<M>): Promise<M> {
+        return new Promise<M>((resolve, reject) => {
+            const dispatchedMsg = (msg: M) => {
+                resolve(msg);
+            };
+            cmd.execute(dispatchedMsg);
+        });
     }
 }
