@@ -25,8 +25,11 @@
 
 import { view, Msg, update } from "./Counter";
 import { shallow } from 'enzyme';
+import diff from "jest-diff";
+import { Testing, extendJest } from "./Testing";
 
-
+extendJest(expect);
+const testing = new Testing<Msg>();
 
 describe("Test Counter", () => {
 
@@ -55,23 +58,16 @@ describe("Test Counter", () => {
 
     describe("clicks generate messages", () => {
 
-        var captured: Msg | undefined;
-        const captureMsg = (msg: Msg) => captured = msg
-
-        beforeEach(() => {
-            captured = undefined;
-        });
-
         test("decrement", () => {
-            const wrapper = shallow(view(captureMsg, 1));
+            const wrapper = shallow(view(testing.dispatcher(), 1));
             wrapper.find('.counter > button').at(0).simulate('click');
-            expect(captured).toEqual({ type: "dec" });
+            expect(testing).toHaveDispatchedMsg({ type: "dec" });
         });
 
         test("increment", () => {
-            const wrapper = shallow(view(captureMsg, 1));
+            const wrapper = shallow(view(testing.dispatcher(), 1));
             wrapper.find('.counter > button').at(1).simulate('click');
-            expect(captured).toEqual({ type: "inc" });
+            expect(testing).toHaveDispatchedMsg({ type: "inc" });
         });
 
     });
