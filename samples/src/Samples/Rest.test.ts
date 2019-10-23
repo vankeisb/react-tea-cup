@@ -31,7 +31,6 @@ import { extendJest, Testing } from "./Testing";
 extendJest(expect);
 const testing = new Testing<Msg>();
 
-
 describe("Test Rest", () => {
 
     describe("init state", () => {

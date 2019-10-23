@@ -25,9 +25,11 @@
 
 import { view, Msg, update, init } from "./Rand";
 import { shallow } from 'enzyme';
-import { Nothing, nothing, just, Cmd, Task } from "../../../src/TeaCup";
+import { nothing, just, Cmd } from "../../../src/TeaCup";
+import { extendJest, Testing } from "./Testing";
 
-
+extendJest(expect);
+const testing = new Testing<Msg>();
 
 describe("Test Rand", () => {
 
@@ -43,48 +45,40 @@ describe("Test Rand", () => {
 
     describe("view state", () => {
 
-        const noop = () => { }
-
         test("render nothing", () => {
-            const wrapper = shallow(view(noop, nothing))
+            const wrapper = shallow(view(testing.noop, nothing))
             expect(wrapper.find('div > p')).toHaveText('This is a random number :');
         });
 
         test("render something", () => {
-            const wrapper = shallow(view(noop, just(13)));
+            const wrapper = shallow(view(testing.noop, just(13)));
             expect(wrapper.find('div > p')).toIncludeText('13');
         });
 
         test("render button", () => {
-            const wrapper = shallow(view(noop, just(13)));
+            const wrapper = shallow(view(testing.noop, just(13)));
             expect(wrapper.find('div > p')).toIncludeText('13');
             expect(wrapper.find('div > button')).toHaveLength(1);
             expect(wrapper.find('div > button')).toHaveText('Randomize');
         });
 
         test("snapshot nothing", () => {
-            const wrapper = shallow(view(noop, nothing))
+            const wrapper = shallow(view(testing.noop, nothing))
             expect(wrapper).toMatchSnapshot();
         });
 
         test("snapshot", () => {
-            const wrapper = shallow(view(noop, just(13)))
+            const wrapper = shallow(view(testing.noop, just(13)))
             expect(wrapper).toMatchSnapshot();
         });
     });
 
     describe("click generate message", () => {
-        var captured: Msg | undefined;
-        const captureMsg = (msg: Msg) => captured = msg
-
-        beforeEach(() => {
-            captured = undefined;
-        });
 
         test("clicked message", () => {
-            const wrapper = shallow(view(captureMsg, nothing));
+            const wrapper = shallow(view(testing.dispatcher(), nothing));
             wrapper.find('div > button').at(0).simulate('click');
-            expect(captured).toEqual({ type: "clicked" });
+            expect(testing.dispatched()).toEqual({ type: "clicked" });
         });
     });
 
