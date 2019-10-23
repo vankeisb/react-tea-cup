@@ -67,6 +67,8 @@ export class Testing<M> {
     public Testing() {
     }
 
+    public readonly noop: Dispatcher<M> = () => { }
+
     public dispatcher(): Dispatcher<M> {
         this.dispatched = undefined;
         return (msg: M) => {

@@ -35,23 +35,21 @@ describe("Test Counter", () => {
 
     describe("view state", () => {
 
-        const noop = () => { }
-
         test("render counter", () => {
-            const wrapper = shallow(view(noop, 13))
+            const wrapper = shallow(view(testing.noop, 13))
             expect(wrapper.find('.counter')).toExist();
             expect(wrapper.find('.counter > span')).toHaveText("13");
         });
 
         test("render buttons", () => {
-            const wrapper = shallow(view(noop, 1));
+            const wrapper = shallow(view(testing.noop, 1));
             expect(wrapper.find('.counter > button')).toHaveLength(2);
             expect(wrapper.find('.counter > button').at(0)).toHaveText('-');
             expect(wrapper.find('.counter > button').at(1)).toHaveText('+');
         });
 
         test("snapshot", () => {
-            const wrapper = shallow(view(noop, 1313))
+            const wrapper = shallow(view(testing.noop, 1313))
             expect(wrapper).toMatchSnapshot();
         });
     });
