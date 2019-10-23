@@ -23,9 +23,13 @@
  *
  */
 
-import { view, Msg, update, init, Model } from "./Rest";
-import { shallow, mount } from 'enzyme';
-import { Nothing, nothing, just, Cmd, Task } from "../../../src/TeaCup";
+import { view, Msg, init, Model } from "./Rest";
+import { mount } from 'enzyme';
+import { Cmd } from "../../../src/TeaCup";
+import { extendJest, Testing } from "./Testing";
+
+extendJest(expect);
+const testing = new Testing<Msg>();
 
 
 describe("Test Rest", () => {
@@ -41,11 +45,10 @@ describe("Test Rest", () => {
 
     describe("view state", () => {
 
-        const noop = () => { }
         const [initialState, _cmd] = init();
 
         test("snapshot initial", () => {
-            const wrapper = mount(view(noop, initialState))
+            const wrapper = mount(view(testing.noop, initialState))
             expect(wrapper).toMatchSnapshot();
         });
 
@@ -54,7 +57,7 @@ describe("Test Rest", () => {
                 tag: "loaded",
                 commits: [{ sha: "13131313", author: "Toto" }]
             }
-            const wrapper = mount(view(noop, loaded))
+            const wrapper = mount(view(testing.noop, loaded))
             expect(wrapper).toMatchSnapshot();
         });
 
@@ -63,38 +66,23 @@ describe("Test Rest", () => {
                 tag: "load-error",
                 error: new Error('boom')
             }
-            const wrapper = mount(view(noop, errored))
+            const wrapper = mount(view(testing.noop, errored))
             expect(wrapper).toMatchSnapshot();
         });
 
     });
 
     describe("clicking generates messages which update", () => {
-        var captured: Msg | undefined;
-        const captureMsg = (msg: Msg) => captured = msg
-
-        beforeEach(() => {
-            captured = undefined;
-        });
-
-        const msgFromCmd = async (cmd: Cmd<Msg>) => {
-            return new Promise<Msg>((resolve, reject) => {
-                const captureMsg = (msg: Msg) => {
-                    resolve(msg);
-                };
-                cmd.execute(captureMsg);
-            });
-        }
 
         test('click list commits', () => {
             const loaded: Model = {
                 tag: "loaded",
                 commits: [{ sha: "13131313", author: "Toto" }]
             }
-            const wrapper = mount(view(captureMsg, loaded));
+            const wrapper = mount(view(testing.dispatcher(), loaded));
             wrapper.find('div > button').simulate('click');
 
-            const [newState, cmd] = captured!(loaded)
+            const [newState, cmd] = testing.dispatched()!(loaded)
             expect(newState).toEqual({ tag: 'loading' });
             expect(cmd).not.toEqual(Cmd.none());
         });
@@ -104,10 +92,10 @@ describe("Test Rest", () => {
                 tag: "loaded",
                 commits: [{ sha: "13131313", author: "Toto" }]
             }
-            const wrapper = mount(view(captureMsg, loaded));
+            const wrapper = mount(view(testing.dispatcher(), loaded));
             wrapper.find('div > button').simulate('click');
 
-            const [newState, cmd] = captured!(loaded)
+            const [newState, cmd] = testing.dispatched()!(loaded)
             expect(newState).toEqual({ tag: 'loading' });
             expect(cmd).not.toEqual(Cmd.none());
 
@@ -117,12 +105,12 @@ describe("Test Rest", () => {
             fetchMock.resetMocks();
             fetchMock.once(JSON.stringify(mockedCommits));
 
-            msgFromCmd(cmd).then((msg: Msg) => {
-                const [newState, cmd1] = msg(loaded);
-                expect(cmd1).toEqual(Cmd.none());
-                expect(newState).toEqual({ tag: 'loaded', commits: [{ sha: '13131313', author: 'Toto' }] })
-            })
-
+            testing.dispatchedFrom(cmd)
+                .then((msg: Msg) => {
+                    const [newState, cmd1] = msg(loaded);
+                    expect(cmd1).toEqual(Cmd.none());
+                    expect(newState).toEqual({ tag: 'loaded', commits: [{ sha: '13131313', author: 'Toto' }] })
+                })
         });
 
         test('click errored', () => {
@@ -130,10 +118,10 @@ describe("Test Rest", () => {
                 tag: "load-error",
                 error: new Error('boom')
             }
-            const wrapper = mount(view(captureMsg, errored));
+            const wrapper = mount(view(testing.dispatcher(), errored));
             wrapper.find('div > button').simulate('click');
 
-            const [newState, cmd] = captured!(errored)
+            const [newState, cmd] = testing.dispatched()!(errored)
             expect(newState).toEqual({ tag: 'loading' });
             expect(cmd).not.toEqual(Cmd.none());
         });

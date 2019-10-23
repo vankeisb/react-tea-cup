@@ -24,8 +24,8 @@
  */
 
 import { view, Msg, update, init } from "./TimeSample";
-import { shallow, mount } from 'enzyme';
-import { Nothing, nothing, just, Cmd, Task } from "../../../src/TeaCup";
+import { mount } from 'enzyme';
+import { Cmd } from "../../../src/TeaCup";
 import { extendJest, Testing } from "./Testing";
 
 extendJest(expect);
