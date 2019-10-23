@@ -24,29 +24,19 @@
  *
  */
 
-import { Dispatcher, Cmd } from "react-tea-cup";
-import diff from "jest-diff";
+import { Dispatcher } from "./Dispatcher";
+import { Cmd } from "./Cmd";
 
 export function extendJest<M>(expect: jest.Expect) {
     expect.extend({
         toHaveDispatchedMsg(received: Testing<M>, expected: M) {
             const pass = this.equals(received.dispatched, expected);
 
-            const message = pass
-                ? () => this.utils.matcherHint('toHaveDispatchedMsg', this.utils.printExpected(expected), this.utils.printReceived(received))
-                : () => {
-                    const diffString = diff(expected, received, {
-                        expand: this.expand,
-                    });
-                    return (
-                        this.utils.matcherHint('toHaveDispatchedMsg', undefined, undefined) +
-                        '\n\n' +
-                        (diffString && diffString.includes('- Expect')
-                            ? `Difference:\n\n${diffString}`
-                            : `Expected: ${this.utils.printExpected(expected)}\n` +
-                            `Received: ${this.utils.printReceived(received)}`)
-                    );
-                };
+            const message = () =>
+                this.utils.matcherHint('toBe', undefined, undefined) +
+                '\n\n' +
+                `Expected: ${this.utils.printExpected(expected)}\n` +
+                `Received: ${this.utils.printReceived(received.dispatched)}`
 
             return { actual: received, message, pass };
         }

@@ -25,8 +25,7 @@
 
 import { view, Msg, update } from "./Counter";
 import { shallow } from 'enzyme';
-import diff from "jest-diff";
-import { Testing, extendJest } from "./Testing";
+import { extendJest, Testing } from "react-tea-cup";
 
 extendJest(expect);
 const testing = new Testing<Msg>();

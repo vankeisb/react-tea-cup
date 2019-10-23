@@ -25,7 +25,7 @@
 
 import { view, Msg, update, init, Model } from "./ParentChild";
 import { mount } from 'enzyme';
-import { extendJest, Testing } from "./Testing";
+import { extendJest, Testing } from "react-tea-cup";
 
 extendJest(expect);
 const testing = new Testing<Msg>();
