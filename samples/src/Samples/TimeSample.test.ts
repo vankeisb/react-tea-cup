@@ -26,8 +26,10 @@
 import { view, Msg, update, init } from "./TimeSample";
 import { shallow, mount } from 'enzyme';
 import { Nothing, nothing, just, Cmd, Task } from "../../../src/TeaCup";
+import { extendJest, Testing } from "./Testing";
 
-
+extendJest(expect);
+const testing = new Testing<Msg>();
 
 describe("Test TimeSample", () => {
 
@@ -42,27 +44,26 @@ describe("Test TimeSample", () => {
 
     describe("view state", () => {
 
-        const noop = () => { }
         const [initialState, _cmd] = init();
 
         describe("render initial state", () => {
 
             test("current time", () => {
-                const wrapper = mount(view(noop, initialState))
+                const wrapper = mount(view(testing.noop, initialState))
 
                 expect(wrapper.find('div').at(0)).toIncludeText('Current time :');
                 expect(wrapper.find('div > button').at(0)).toHaveText('Get current time');
             });
 
             test("trigger in", () => {
-                const wrapper = mount(view(noop, initialState))
+                const wrapper = mount(view(testing.noop, initialState))
 
                 expect(wrapper.find('div').at(1)).toIncludeText('In :');
                 expect(wrapper.find('div > button').at(1)).toHaveText('Trigger in');
             });
 
             test("ticks", () => {
-                const wrapper = mount(view(noop, initialState))
+                const wrapper = mount(view(testing.noop, initialState))
 
                 expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 :');
                 expect(wrapper.find('div').at(2)).toIncludeText(', ticks2 :');
@@ -70,7 +71,7 @@ describe("Test TimeSample", () => {
             });
 
             test("snapshot initial", () => {
-                const wrapper = mount(view(noop, initialState))
+                const wrapper = mount(view(testing.noop, initialState))
                 expect(wrapper).toMatchSnapshot();
             });
 
@@ -94,34 +95,34 @@ describe("Test TimeSample", () => {
             }
 
             test("current time", () => {
-                const wrapper = mount(view(noop, state1))
+                const wrapper = mount(view(testing.noop, state1))
                 expect(wrapper.find('div').at(0)).toIncludeText('Current time : 1313');
             });
 
             test("trigger in", () => {
-                const wrapper = mount(view(noop, state1))
+                const wrapper = mount(view(testing.noop, state1))
                 expect(wrapper.find('div').at(1)).toIncludeText('In :true');
             });
 
             test("trigger in progress", () => {
-                const wrapper = mount(view(noop, state2))
+                const wrapper = mount(view(testing.noop, state2))
                 expect(wrapper.find('div').at(1)).toIncludeText('In :...');
             });
 
             test("ticks", () => {
-                const wrapper = mount(view(noop, state1))
+                const wrapper = mount(view(testing.noop, state1))
                 expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 : 13');
                 expect(wrapper.find('div').at(2)).toIncludeText('ticks2 : 131313');
                 expect(wrapper.find('div > button').at(2)).toIncludeText('stop ticking');
             });
 
             test("snapshot state1", () => {
-                const wrapper = mount(view(noop, state1))
+                const wrapper = mount(view(testing.noop, state1))
                 expect(wrapper).toMatchSnapshot();
             });
 
             test("snapshot state2", () => {
-                const wrapper = mount(view(noop, state2))
+                const wrapper = mount(view(testing.noop, state2))
                 expect(wrapper).toMatchSnapshot();
             });
 
@@ -130,31 +131,25 @@ describe("Test TimeSample", () => {
     });
 
     describe("clicking generates messages", () => {
-        var captured: Msg | undefined;
-        const captureMsg = (msg: Msg) => captured = msg
-
-        beforeEach(() => {
-            captured = undefined;
-        });
 
         const [initialState, _cmd] = init();
 
         test("get current time", () => {
-            const wrapper = mount(view(captureMsg, initialState));
+            const wrapper = mount(view(testing.dispatcher(), initialState));
             wrapper.find('div > button').at(0).simulate('click');
-            expect(captured).toEqual({ tag: "get-cur-time" });
+            expect(testing).toHaveDispatchedMsg({ tag: "get-cur-time" });
         });
 
         test("get in", () => {
-            const wrapper = mount(view(captureMsg, initialState));
+            const wrapper = mount(view(testing.dispatcher(), initialState));
             wrapper.find('div > button').at(1).simulate('click');
-            expect(captured).toEqual({ tag: "get-in" });
+            expect(testing).toHaveDispatchedMsg({ tag: "get-in" });
         });
 
         test("toggle tick", () => {
-            const wrapper = mount(view(captureMsg, initialState));
+            const wrapper = mount(view(testing.dispatcher(), initialState));
             wrapper.find('div > button').at(2).simulate('click');
-            expect(captured).toEqual({ tag: "toggle-tick" });
+            expect(testing).toHaveDispatchedMsg({ tag: "toggle-tick" });
         });
 
     });
