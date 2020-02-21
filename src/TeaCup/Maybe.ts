@@ -59,6 +59,14 @@ export class Just<T> {
     orElseSupply(f: () => Maybe<T>): Maybe<T> {
         return this;
     }
+
+    forEach(f: (t:T) => void): void {
+        f(this.value);
+    }
+
+    andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
+        return f(this.value)
+    }
 }
 
 
@@ -98,6 +106,14 @@ export class Nothing<T> {
     orElseSupply(f: () => Maybe<T>): Maybe<T> {
         return f();
     }
+
+    forEach(f: (t:T) => void): void {
+    }
+
+    andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
+        return nothing;
+    }
+
 }
 
 
