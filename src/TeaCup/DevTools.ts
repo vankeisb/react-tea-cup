@@ -133,4 +133,20 @@ export class DevTools<Model,Msg> {
     observe(l:(e:DevToolsEvent<Model,Msg>) => void): void {
         this.listener = l;
     }
+
+    lastEvent(): DevToolsEvent<Model, Msg> {
+        return this.events[this.events.length - 1];
+    }
+
+    lastModel(): Model {
+        const e = this.lastEvent();
+        switch (e.tag) {
+            case "init": {
+                return e.model;
+            }
+            case "updated": {
+                return e.modelAfter;
+            }
+        }
+    }
 }
