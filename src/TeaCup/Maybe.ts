@@ -113,7 +113,6 @@ export class Nothing<T> {
     andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
         return nothing;
     }
-
 }
 
 
