@@ -98,5 +98,4 @@ export class ListWithSelection<T> {
     length(): number {
         return this.toArray().length;
     }
-
 }

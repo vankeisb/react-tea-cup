@@ -25,13 +25,35 @@
 
 import {ListWithSelection} from "./ListWithSelection";
 
-test("empty", () => {
-    const l: ListWithSelection<string> = ListWithSelection.empty();
-    expect(l.length()).toBe(0);
-});
+describe("ListWithSelection", () => {
 
-test("no selection", () => {
-    const l: ListWithSelection<string> = ListWithSelection.fromArray(["a", "b", "c"]);
-    expect(l.length()).toBe(3);
-    expect(l.getSelected())
-})
+    test("empty", () => {
+        const l: ListWithSelection<string> = ListWithSelection.empty();
+        expect(l.length()).toBe(0);
+    });
+
+    test("no selection", () => {
+        const l: ListWithSelection<string> = ListWithSelection.fromArray(["a", "b", "c"]);
+        expect(l.length()).toBe(3);
+        expect(l.getSelected().type === "Nothing").toBe(true);
+        expect(l.getSelectedIndex().type === "Nothing").toBe(true);
+    });
+
+    test("selection by index", () => {
+        const l: ListWithSelection<string> = ListWithSelection
+            .fromArray(["a", "b", "c"])
+            .selectIndex(1);
+        expect(l.length()).toBe(3);
+        expect(l.getSelectedIndex().withDefault(-1)).toBe(1);
+        expect(l.isSelected("b")).toBe(true);
+    });
+
+    test("to array", () => {
+        const l: ListWithSelection<string> = ListWithSelection
+            .fromArray(["a", "b", "c"])
+            .selectIndex(0);
+        expect(l.toArray()).toStrictEqual(["a", "b", "c"]);
+    });
+
+
+});

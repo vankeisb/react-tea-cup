@@ -67,10 +67,6 @@ export class Just<T> {
     andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
         return f(this.value)
     }
-
-    isNothing(): boolean {
-        return false;
-    }
 }
 
 
@@ -116,10 +112,6 @@ export class Nothing<T> {
 
     andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
         return nothing;
-    }
-
-    isNothing(): boolean {
-        return true;
     }
 }
 
