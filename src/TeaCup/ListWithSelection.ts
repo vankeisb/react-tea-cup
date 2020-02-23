@@ -92,7 +92,7 @@ export class ListWithSelection<T> {
     }
 
     getSelectedIndex(): Maybe<number> {
-        return this.sel.map(t => this.l1.length)
+        return this.sel.map(() => this.l1.length)
     }
 
     length(): number {
