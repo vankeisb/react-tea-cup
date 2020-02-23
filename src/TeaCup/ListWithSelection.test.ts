@@ -23,22 +23,37 @@
  *
  */
 
-export * from './Cmd'
-export * from './Dispatcher'
-export * from './Memo'
-export * from './Program'
-export * from './Random'
-export * from './Result'
-export * from './Task'
-export * from './Sub'
-export * from './Animation'
-export * from './Maybe'
-export * from './List'
-export * from './Navigation'
-export * from './Decode'
-export * from './Http'
-export * from './DevTools'
-export * from './Tuple'
-export * from './Either'
-export * from './Time'
-export * from './ListWithSelection'
+import {ListWithSelection} from "./ListWithSelection";
+
+describe("ListWithSelection", () => {
+
+    test("empty", () => {
+        const l: ListWithSelection<string> = ListWithSelection.empty();
+        expect(l.length()).toBe(0);
+    });
+
+    test("no selection", () => {
+        const l: ListWithSelection<string> = ListWithSelection.fromArray(["a", "b", "c"]);
+        expect(l.length()).toBe(3);
+        expect(l.getSelected().type === "Nothing").toBe(true);
+        expect(l.getSelectedIndex().type === "Nothing").toBe(true);
+    });
+
+    test("selection by index", () => {
+        const l: ListWithSelection<string> = ListWithSelection
+            .fromArray(["a", "b", "c"])
+            .selectIndex(1);
+        expect(l.length()).toBe(3);
+        expect(l.getSelectedIndex().withDefault(-1)).toBe(1);
+        expect(l.isSelected("b")).toBe(true);
+    });
+
+    test("to array", () => {
+        const l: ListWithSelection<string> = ListWithSelection
+            .fromArray(["a", "b", "c"])
+            .selectIndex(0);
+        expect(l.toArray()).toStrictEqual(["a", "b", "c"]);
+    });
+
+
+});
