@@ -60,6 +60,14 @@ export class Just<T> {
         return this;
     }
 
+    forEach(f: (t:T) => void): void {
+        f(this.value);
+    }
+
+    andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
+        return f(this.value)
+    }
+
     isNothing(): boolean {
         return false;
     }
@@ -101,6 +109,13 @@ export class Nothing<T> {
 
     orElseSupply(f: () => Maybe<T>): Maybe<T> {
         return f();
+    }
+
+    forEach(f: (t:T) => void): void {
+    }
+
+    andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
+        return nothing;
     }
 
     isNothing(): boolean {
