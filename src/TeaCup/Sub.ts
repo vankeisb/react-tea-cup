@@ -33,7 +33,7 @@ export abstract class Sub<Msg> {
         return new SubNone()
     }
 
-    static batch<Msg>(subs: Array<Sub<Msg>>) {
+    static batch<Msg>(subs: Array<Sub<Msg>>): Sub<Msg> {
         return new BatchSub(subs);
     }
 
