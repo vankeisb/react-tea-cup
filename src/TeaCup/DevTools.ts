@@ -24,7 +24,9 @@
  */
 
 import {Program} from "./Program";
-import {Cmd} from "./Cmd";
+import {Cmd, noCmd} from "./Cmd";
+import {just, nothing} from "./Maybe";
+import {err, ok} from "./Result";
 
 
 export interface HasTime {
@@ -52,6 +54,42 @@ export interface Updated<Model,Msg> extends HasTime, HasTag {
     readonly modelBefore: Model
     readonly modelAfter: Model
     readonly cmd: Cmd<Msg>
+}
+
+const snapshotKey = "teaCupSnapshot";
+
+function restore(v: any): object {
+    if (!v) {
+        return v;
+    }
+    if (Array.isArray(v)) {
+        return v.map(restore);
+    }
+    if (typeof v === "object") {
+        if (v.type === "Just") {
+            return just(restore(v.value));
+        }
+        if (v.type === "Nothing") {
+            return nothing;
+        }
+        if (v.tag === "Ok") {
+            return ok(restore(v.value));
+        }
+        if (v.tag === "Err") {
+            return err(restore(v.value));
+        }
+        const r: {[k: string]: object} = {};
+        Object.keys(v).forEach(k => { r[k] = restore(v[k]); });
+        return r;
+    }
+    if (typeof v === "string" && v.endsWith("Z")) {
+        try {
+            return new Date(v);
+            // eslint-disable-next-line no-empty
+        } catch (e) {
+        }
+    }
+    return v;
 }
 
 export class DevTools<Model,Msg> {
@@ -148,5 +186,45 @@ export class DevTools<Model,Msg> {
                 return e.modelAfter;
             }
         }
+    }
+
+    snapshot() {
+        localStorage.setItem(snapshotKey, JSON.stringify(this.lastModel()));
+        console.log(
+              "******************************************************************\n"
+            + "*** The current application state has been saved to local storage.\n"
+            + "*** The application will now load with this initial state.\n"
+            + "*** Call 'teaCupDevTools.clearSnapshot()' to restore normal loading.\n"
+            + "*******************************************************************"
+        );
+    }
+
+    initFromSnapshot(): [Model, Cmd<Msg>]|undefined {
+        const json = localStorage.getItem(snapshotKey);
+        if (json) {
+            try {
+                // @ts-ignore
+                const model = restore(JSON.parse(json)) as Model;
+                console.log(
+                      "**********************************************************************************************\n"
+                    + "*** The application has initialized from a state saved by calling 'teaCupDevTools.snapshot()'.\n"
+                    + "*** Call 'teaCupDevTools.clearSnapshot()' if you want to restore normal loading.\n"
+                    + "**********************************************************************************************"
+                );
+                return noCmd(model);
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.log("*** Error restoring state from local storage: ", e);
+            }
+        }
+    }
+
+    clearSnapshot() {
+        localStorage.removeItem(snapshotKey);
+        console.log(
+              "***********************************************************************\n"
+            + "*** Application state cleared, the application will now start normally.\n"
+            + "***********************************************************************"
+        );
     }
 }
