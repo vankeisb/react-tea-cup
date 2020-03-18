@@ -85,7 +85,6 @@ function restore(v: any): object {
     if (typeof v === "string" && v.endsWith("Z")) {
         try {
             return new Date(v);
-            // eslint-disable-next-line no-empty
         } catch (e) {
         }
     }
@@ -213,7 +212,6 @@ export class DevTools<Model,Msg> {
                 );
                 return noCmd(model);
             } catch (e) {
-                // eslint-disable-next-line no-console
                 console.log("*** Error restoring state from local storage: ", e);
             }
         }
