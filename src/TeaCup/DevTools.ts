@@ -191,11 +191,11 @@ export class DevTools<Model,Msg> {
     snapshot() {
         localStorage.setItem(snapshotKey, JSON.stringify(this.lastModel()));
         console.log(
-              "******************************************************************\n"
+              "********************************************************************\n"
             + "*** The current application state has been saved to local storage.\n"
             + "*** The application will now load with this initial state.\n"
             + "*** Call 'teaCupDevTools.clearSnapshot()' to restore normal loading.\n"
-            + "*******************************************************************"
+            + "********************************************************************"
         );
     }
 
