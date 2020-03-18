@@ -127,7 +127,7 @@ export class Program<Model,Msg> extends Component<ProgramProps<Model,Msg>, Progr
         if (this.devTools) {
             this.devTools.connected(this);
         }
-        const mac = props.init();
+        const mac = (this.devTools && this.devTools.initFromSnapshot()) || props.init();
         if (this.devTools) {
             this.fireEvent({
                 tag: "init",
