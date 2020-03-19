@@ -6,9 +6,7 @@ install:
   - npm install
 
 script:
-  - npm run compile
-  - npm run test
-  - npm install
+  - ./build.sh
   - cd samples
   - npm install
   - npm test
