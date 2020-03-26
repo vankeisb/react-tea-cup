@@ -25,14 +25,7 @@
 
 import {Program} from "./Program";
 import {Cmd, noCmd} from "./Cmd";
-import {Just, just, Nothing, nothing} from "./Maybe";
-import {Err, err, Ok, ok} from "./Result";
 import {ObjectSerializer} from "./ObjectSerializer";
-import {Dict} from "./Dict";
-import {Either, Left, Right} from "./Either";
-import {List} from "./List";
-import {ListWithSelection} from "./ListWithSelection";
-import {Tuple} from "./Tuple";
 
 
 export interface HasTime {
@@ -181,7 +174,7 @@ export class DevTools<Model,Msg> {
         if (json) {
             try {
                 // @ts-ignore
-                const model = TEACUP_SERIALIZER.deserialize(json) as Model;
+                const model = this.objectSerializer.deserialize(json) as Model;
                 console.log(
                       "**********************************************************************************************\n"
                     + "*** The application has initialized from a state saved by calling 'teaCupDevTools.snapshot()'.\n"
