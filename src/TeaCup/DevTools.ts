@@ -25,8 +25,7 @@
 
 import {Program} from "./Program";
 import {Cmd, noCmd} from "./Cmd";
-import {just, nothing} from "./Maybe";
-import {err, ok} from "./Result";
+import {ObjectSerializer} from "./ObjectSerializer";
 
 
 export interface HasTime {
@@ -58,48 +57,20 @@ export interface Updated<Model,Msg> extends HasTime, HasTag {
 
 const snapshotKey = "teaCupSnapshot";
 
-function restore(v: any): object {
-    if (!v) {
-        return v;
-    }
-    if (Array.isArray(v)) {
-        return v.map(restore);
-    }
-    if (typeof v === "object") {
-        if (v.type === "Just") {
-            return just(restore(v.value));
-        }
-        if (v.type === "Nothing") {
-            return nothing;
-        }
-        if (v.tag === "Ok") {
-            return ok(restore(v.value));
-        }
-        if (v.tag === "Err") {
-            return err(restore(v.value));
-        }
-        const r: {[k: string]: object} = {};
-        Object.keys(v).forEach(k => { r[k] = restore(v[k]); });
-        return r;
-    }
-    if (typeof v === "string" && v.endsWith("Z")) {
-        try {
-            return new Date(v);
-        } catch (e) {
-        }
-    }
-    return v;
-}
-
 export class DevTools<Model,Msg> {
 
     private program?: Program<Model,Msg>;
     private events: DevToolsEvent<Model,Msg>[] = [];
     private pausedOnEvent: number = -1;
     private listener?: (e:DevToolsEvent<Model,Msg>) => void;
+    private objectSerializer: ObjectSerializer;
 
-    static init<Model,Msg>(window:Window): DevTools<Model,Msg> {
-        const dt = new DevTools<Model,Msg>();
+    constructor(objectSerializer: ObjectSerializer) {
+        this.objectSerializer = objectSerializer;
+    }
+
+    static init<Model,Msg>(window:Window, objectSerializer?: ObjectSerializer): DevTools<Model,Msg> {
+        const dt = new DevTools<Model,Msg>(objectSerializer || ObjectSerializer.withTeaCupClasses());
         // @ts-ignore
         window["teaCupDevTools"] = dt;
         return dt;
@@ -188,7 +159,7 @@ export class DevTools<Model,Msg> {
     }
 
     snapshot() {
-        localStorage.setItem(snapshotKey, JSON.stringify(this.lastModel()));
+        localStorage.setItem(snapshotKey, this.objectSerializer.serialize(this.lastModel()));
         console.log(
               "********************************************************************\n"
             + "*** The current application state has been saved to local storage.\n"
@@ -203,7 +174,7 @@ export class DevTools<Model,Msg> {
         if (json) {
             try {
                 // @ts-ignore
-                const model = restore(JSON.parse(json)) as Model;
+                const model = this.objectSerializer.deserialize(json) as Model;
                 console.log(
                       "**********************************************************************************************\n"
                     + "*** The application has initialized from a state saved by calling 'teaCupDevTools.snapshot()'.\n"
