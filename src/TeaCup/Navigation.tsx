@@ -289,7 +289,9 @@ export class QueryParams {
             }
         });
 
-        return new QueryParams(store, maybeOf(hash).map(h => h.startsWith("#") ? h.substring(1) : h));
+        return new QueryParams(store,
+            hash === '' ? nothing : maybeOf(hash).map(h => h.startsWith("#") ? h.substring(1) : h)
+        );
     }
 
 }
