@@ -122,6 +122,10 @@ expectNotFound("/songs/1");
 expectNotFound("/song");
 expectNotFound("/song/abc");
 expectNotFound("/song/123/foo");
+expectSettingRouteHash("/settings#blah", just("blah"));
+expectSettingRouteHash("/settings", nothing);
+expectSettingRouteHash("/settings?hello", nothing);
+expectSettingRouteHash("/settings?hello#blah", just("blah"));
 
 
 
@@ -165,6 +169,24 @@ function locFromUrl(url:string): Loc {
     }
 }
 
+function locationFromLoc(url: string, loc: Loc): Location {
+    return {
+        ancestorOrigins: null as unknown as DOMStringList,
+        assign(url: string): void {},
+        hash: url.includes('#') ? url.split('#')[1] : '',
+        host: '',
+        hostname: '',
+        href: '',
+        origin: '',
+        pathname: loc.pathname,
+        port: '',
+        protocol: '',
+        reload(): void {},
+        replace(url: string): void {},
+        search: ''
+    };
+}
+
 function expectRoute(url:string, route: MyRoute) {
     return test(url, () => {
         const loc = locFromUrl(url);
@@ -179,4 +201,21 @@ function expectNotFound(url:string) {
     })
 }
 
+
+function expectSettingRouteHash(url: string, hash: Maybe<string>){
+    return test(url + " (hash)", () => {
+        const loc = locFromUrl(url);
+        const location: Location = locationFromLoc(url, loc);
+        const route: Maybe<MyRoute> = router.parseLocation(location);
+        route
+            .map(r => {
+                if (r.type === 'settings') {
+                    return expect(r.section).toEqual(hash);
+                }
+                throw new Error('Not the settings route!');
+            })
+            .withDefaultSupply(() => { throw new Error('Invalid Route!') });
+    });
+
+}
 
