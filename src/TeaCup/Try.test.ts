@@ -23,25 +23,36 @@
  *
  */
 
-export * from './Cmd'
-export * from './Dispatcher'
-export * from './Memo'
-export * from './Program'
-export * from './Random'
-export * from './Result'
-export * from './Task'
-export * from './Sub'
-export * from './Animation'
-export * from './Maybe'
-export * from './List'
-export * from './Navigation'
-export * from './Decode'
-export * from './Http'
-export * from './DevTools'
-export * from './Tuple'
-export * from './Either'
-export * from './Time'
-export * from './Dict'
-export * from './ListWithSelection'
-export * from './ObjectSerializer'
-export * from './Try'
+import {Try} from "./Try";
+
+test("try without exception", () => {
+    expect(
+        Try(() => "yalla").withDefault("neh")
+    ).toBe("yalla");
+});
+
+function throwErr(): string {
+    throw new Error("ouch");
+}
+
+function throwString(): string {
+    throw "ouch";
+}
+
+test("throw Error", () => {
+    expect(
+        Try(throwErr).match(
+            () => "neh",
+            err => err.message
+        )
+    ).toBe("ouch");
+});
+
+test("throw string", () => {
+    expect(
+        Try(throwString).match(
+            () => "neh",
+            err => err.message
+        )
+    ).toBe("ouch");
+});
