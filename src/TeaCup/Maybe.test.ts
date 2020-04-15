@@ -107,3 +107,11 @@ test("map2", () => {
     expect(map2(nothing, just(10), ((a, b) => a + b))).toEqual(nothing);
 });
 
+
+test("To native", () => {
+    const obj = { groovy: "baby"};
+    let mbObj = just(obj);
+    expect(mbObj.toNative()).toEqual(obj)
+    mbObj = nothing;
+    expect(mbObj.toNative()).toEqual(undefined)
+})

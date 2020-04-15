@@ -67,6 +67,10 @@ export class Just<T> {
     andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
         return f(this.value)
     }
+
+    toNative(): T | undefined {
+        return this.value;
+    }
 }
 
 
@@ -112,6 +116,10 @@ export class Nothing<T> {
 
     andThen<T2>(f: (t:T) => Maybe<T2>): Maybe<T2> {
         return nothing;
+    }
+
+    toNative(): T | undefined {
+        return undefined;
     }
 }
 
