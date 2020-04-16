@@ -71,6 +71,14 @@ export class Just<T> {
     toNative(): T | undefined {
         return this.value;
     }
+
+    isJust(): boolean {
+        return true;
+    }
+
+    isNothing(): boolean {
+        return false;
+    }
 }
 
 
@@ -120,6 +128,14 @@ export class Nothing<T> {
 
     toNative(): T | undefined {
         return undefined;
+    }
+
+    isJust(): boolean {
+        return false;
+    }
+
+    isNothing(): boolean {
+        return true;
     }
 }
 
