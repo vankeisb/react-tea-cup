@@ -55,6 +55,85 @@ export interface Updated<Model,Msg> extends HasTime, HasTag {
     readonly cmd: Cmd<Msg>
 }
 
+interface ReduxMsg {
+    type: string;
+};
+
+function defaultTeaCupToReduxMessage(msg: any): ReduxMsg {
+    const { tag, type, ...others } = msg;
+    return {
+        type: type || tag,
+        ...others,
+    }
+}
+
+interface ReduxDevToolsMessage {
+    readonly type: 'DISPATCH' | 'ACTION' | 'IMPORT' | 'EXPORT' | 'UPDATE' | 'START' | 'STOP';
+    readonly payload?: {
+        readonly type: 'JUMP_TO_STATE' | 'JUMP_TO_ACTION' | 'TOGGLE_ACTION' | 'REORDER_ACTION' | 'IMPORT_STATE' | 'LOCK_CHANGES' | 'PAUSE_RECORDING';
+        readonly index: number;
+        readonly actionId: number;
+    }
+    readonly state?: any;
+}
+
+interface ReduxDevtools {
+    subscribe(listener: (message: ReduxDevToolsMessage) => void): void;
+    unsubscribe(): void;
+    send(action: string | ReduxMsg, state: any): void;
+    init(state: any): void;
+    error(message: string): void;
+}
+
+export interface ReduxDevToolsOptions {
+    readonly teaCuptoReduxMessage: (msg: any) => ReduxMsg;
+    readonly name?: string;
+    readonly actionsCreators?: any; // TODO
+    readonly latency?: number;
+    readonly maxAge?: number;
+    readonly trace?: boolean;
+    readonly traceLimit?: number;
+    readonly serialize?: boolean | {
+        date?: boolean;
+        regex?: boolean;
+        undefined?: boolean;
+        error?: boolean;
+        symbol?: boolean;
+        map?: boolean;
+        set?: boolean;
+        function?: boolean | Function;
+    };
+    actionSanitizer?(action: any, id: number): any;
+    stateSanitizer?(state: any, index?: number): any;
+    readonly actionsBlacklist?: string | string[];
+    readonly actionsWhitelist?: string | string[];
+    predicate?(state: any, action: any): boolean;
+    readonly shouldRecordChanges?: boolean;
+    readonly pauseActionType?: string;
+    readonly autoPause?: boolean;
+    readonly shouldStartLocked?: boolean;
+    readonly shouldHotReload?: boolean;
+    readonly shouldCatchErrors?: boolean;
+    readonly features?: {
+        readonly pause?: boolean;
+        readonly lock?: boolean;
+        readonly persist?: boolean;
+        readonly export?: boolean | "custom";
+        readonly import?: boolean | "custom";
+        readonly jump?: boolean;
+        readonly skip?: boolean;
+        readonly reorder?: boolean;
+        readonly dispatch?: boolean;
+        readonly test?: boolean;
+    };
+}
+
+interface ReduxDevToolsExtension {
+    (options?: ReduxDevToolsOptions): ReduxDevtools;
+    connect(options?: ReduxDevToolsOptions): ReduxDevtools;
+    disconnect(): void;
+}
+
 const snapshotKey = "teaCupSnapshot";
 
 export class DevTools<Model,Msg> {
@@ -64,15 +143,31 @@ export class DevTools<Model,Msg> {
     private pausedOnEvent: number = -1;
     private listener?: (e:DevToolsEvent<Model,Msg>) => void;
     private objectSerializer: ObjectSerializer;
+    private reduxDevTools?: ReduxDevtools;
+    private teaCuptoReduxMessage?: (msg: any) => ReduxMsg;
 
     constructor(objectSerializer: ObjectSerializer) {
         this.objectSerializer = objectSerializer;
     }
 
-    static init<Model,Msg>(window:Window, objectSerializer?: ObjectSerializer): DevTools<Model,Msg> {
+    static init<Model,Msg>(window:Window, objectSerializer?: ObjectSerializer, reduxDevToolsOptions?: ReduxDevToolsOptions): DevTools<Model,Msg> {
         const dt = new DevTools<Model,Msg>(objectSerializer || ObjectSerializer.withTeaCupClasses());
         // @ts-ignore
         window["teaCupDevTools"] = dt;
+        const reduxDevtoolsExtension: ReduxDevToolsExtension = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
+        if (reduxDevtoolsExtension) {
+            dt.reduxDevTools = reduxDevtoolsExtension.connect(reduxDevToolsOptions);
+            dt.teaCuptoReduxMessage = reduxDevToolsOptions?.teaCuptoReduxMessage || defaultTeaCupToReduxMessage;
+            dt.reduxDevTools.subscribe((message: ReduxDevToolsMessage) => {
+                if (message.type === 'DISPATCH' && message.state) {
+                    // console.log('DISPATCH', message.payload);
+                    if (message.payload?.type === 'JUMP_TO_ACTION' || message.payload?.type === 'JUMP_TO_STATE') {
+                        // console.log('travelling to ', message.payload.actionId);
+                        dt.travelTo(message.payload.actionId);
+                    }
+                }
+            });
+        }
         return dt;
     }
 
@@ -85,6 +180,16 @@ export class DevTools<Model,Msg> {
     }
 
     onEvent(e:DevToolsEvent<Model, Msg>) : void {
+        if (this.reduxDevTools && this.teaCuptoReduxMessage) {
+            if (e.tag === 'init') {
+                // console.log(e);
+                this.reduxDevTools.init(e.model);
+            } else if (e.tag === 'updated') {
+                // console.log(e);
+                const action = this.teaCuptoReduxMessage(e.msg);
+                this.reduxDevTools.send(action, e.modelAfter);
+            }
+        }
         this.events.push(e);
         this.listener && this.listener(e);
     }
