@@ -57,12 +57,14 @@ export interface Updated<Model,Msg> extends HasTime, HasTag {
 
 const snapshotKey = "teaCupSnapshot";
 
+export type DevToolsListener<Model,Msg> = (e:DevToolsEvent<Model,Msg>) => void;
+
 export class DevTools<Model,Msg> {
 
     private program?: Program<Model,Msg>;
     private events: DevToolsEvent<Model,Msg>[] = [];
     private pausedOnEvent: number = -1;
-    private listener?: (e:DevToolsEvent<Model,Msg>) => void;
+    private listeners: DevToolsListener<Model, Msg>[] = [];
     private objectSerializer: ObjectSerializer;
 
     constructor(objectSerializer: ObjectSerializer) {
@@ -86,11 +88,7 @@ export class DevTools<Model,Msg> {
 
     onEvent(e:DevToolsEvent<Model, Msg>) : void {
         this.events.push(e);
-        this.listener && this.listener(e);
-    }
-
-    getEvents() : ReadonlyArray<DevToolsEvent<Model,Msg>> {
-        return this.events;
+        this.listeners.forEach(l => l(e))
     }
 
     travelTo(evtNum: number) {
@@ -138,8 +136,12 @@ export class DevTools<Model,Msg> {
         }
     }
 
-    observe(l:(e:DevToolsEvent<Model,Msg>) => void): void {
-        this.listener = l;
+    addListener(l: DevToolsListener<Model, Msg>): void {
+        this.listeners.push(l);
+    }
+
+    removeListener(l: DevToolsListener<Model, Msg>): void {
+        this.listeners = this.listeners.filter(x => x !== l);
     }
 
     lastEvent(): DevToolsEvent<Model, Msg> {
