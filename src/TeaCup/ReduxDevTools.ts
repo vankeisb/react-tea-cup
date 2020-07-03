@@ -23,47 +23,56 @@
  *
  */
 
-import {DevTools} from "./DevTools";
+import { DevTools } from './DevTools';
 
 interface ReduxMsg {
-    type: string;
-};
+  type: string;
+}
 
 function defaultTeaCupToReduxMessage(msg: any): ReduxMsg {
-    const { tag, type, ...others } = msg;
-    return {
-        type: type || tag,
-        ...others,
-    }
+  const { tag, type, ...others } = msg;
+  return {
+    type: type || tag,
+    ...others,
+  };
 }
 
 interface ReduxDevToolsMessage {
-    readonly type: 'DISPATCH' | 'ACTION' | 'IMPORT' | 'EXPORT' | 'UPDATE' | 'START' | 'STOP';
-    readonly payload?: {
-        readonly type: 'JUMP_TO_STATE' | 'JUMP_TO_ACTION' | 'TOGGLE_ACTION' | 'REORDER_ACTION' | 'IMPORT_STATE' | 'LOCK_CHANGES' | 'PAUSE_RECORDING';
-        readonly index: number;
-        readonly actionId: number;
-    }
-    readonly state?: any;
+  readonly type: 'DISPATCH' | 'ACTION' | 'IMPORT' | 'EXPORT' | 'UPDATE' | 'START' | 'STOP';
+  readonly payload?: {
+    readonly type:
+      | 'JUMP_TO_STATE'
+      | 'JUMP_TO_ACTION'
+      | 'TOGGLE_ACTION'
+      | 'REORDER_ACTION'
+      | 'IMPORT_STATE'
+      | 'LOCK_CHANGES'
+      | 'PAUSE_RECORDING';
+    readonly index: number;
+    readonly actionId: number;
+  };
+  readonly state?: any;
 }
 
 interface ReduxDevtools {
-    subscribe(listener: (message: ReduxDevToolsMessage) => void): void;
-    unsubscribe(): void;
-    send(action: string | ReduxMsg, state: any): void;
-    init(state: any): void;
-    error(message: string): void;
+  subscribe(listener: (message: ReduxDevToolsMessage) => void): void;
+  unsubscribe(): void;
+  send(action: string | ReduxMsg, state: any): void;
+  init(state: any): void;
+  error(message: string): void;
 }
 
 export interface ReduxDevToolsOptions {
-    readonly teacupToReduxMessage: (msg: any) => ReduxMsg;
-    readonly name?: string;
-    readonly actionsCreators?: any; // TODO
-    readonly latency?: number;
-    readonly maxAge?: number;
-    readonly trace?: boolean;
-    readonly traceLimit?: number;
-    readonly serialize?: boolean | {
+  readonly teacupToReduxMessage: (msg: any) => ReduxMsg;
+  readonly name?: string;
+  readonly actionsCreators?: any; // TODO
+  readonly latency?: number;
+  readonly maxAge?: number;
+  readonly trace?: boolean;
+  readonly traceLimit?: number;
+  readonly serialize?:
+    | boolean
+    | {
         date?: boolean;
         regex?: boolean;
         undefined?: boolean;
@@ -72,63 +81,66 @@ export interface ReduxDevToolsOptions {
         map?: boolean;
         set?: boolean;
         function?: boolean | Function;
-    };
-    actionSanitizer?(action: any, id: number): any;
-    stateSanitizer?(state: any, index?: number): any;
-    readonly actionsBlacklist?: string | string[];
-    readonly actionsWhitelist?: string | string[];
-    predicate?(state: any, action: any): boolean;
-    readonly shouldRecordChanges?: boolean;
-    readonly pauseActionType?: string;
-    readonly autoPause?: boolean;
-    readonly shouldStartLocked?: boolean;
-    readonly shouldHotReload?: boolean;
-    readonly shouldCatchErrors?: boolean;
-    readonly features?: {
-        readonly pause?: boolean;
-        readonly lock?: boolean;
-        readonly persist?: boolean;
-        readonly export?: boolean | "custom";
-        readonly import?: boolean | "custom";
-        readonly jump?: boolean;
-        readonly skip?: boolean;
-        readonly reorder?: boolean;
-        readonly dispatch?: boolean;
-        readonly test?: boolean;
-    };
+      };
+  actionSanitizer?(action: any, id: number): any;
+  stateSanitizer?(state: any, index?: number): any;
+  readonly actionsBlacklist?: string | string[];
+  readonly actionsWhitelist?: string | string[];
+  predicate?(state: any, action: any): boolean;
+  readonly shouldRecordChanges?: boolean;
+  readonly pauseActionType?: string;
+  readonly autoPause?: boolean;
+  readonly shouldStartLocked?: boolean;
+  readonly shouldHotReload?: boolean;
+  readonly shouldCatchErrors?: boolean;
+  readonly features?: {
+    readonly pause?: boolean;
+    readonly lock?: boolean;
+    readonly persist?: boolean;
+    readonly export?: boolean | 'custom';
+    readonly import?: boolean | 'custom';
+    readonly jump?: boolean;
+    readonly skip?: boolean;
+    readonly reorder?: boolean;
+    readonly dispatch?: boolean;
+    readonly test?: boolean;
+  };
 }
 
 interface ReduxDevToolsExtension {
-    (options?: ReduxDevToolsOptions): ReduxDevtools;
-    connect(options?: ReduxDevToolsOptions): ReduxDevtools;
-    disconnect(): void;
+  (options?: ReduxDevToolsOptions): ReduxDevtools;
+  connect(options?: ReduxDevToolsOptions): ReduxDevtools;
+  disconnect(): void;
 }
 
-export function withReduxDevTools<Model,Msg>(dt: DevTools<Model, Msg>, options?: ReduxDevToolsOptions): DevTools<Model, Msg> {
-    const reduxDevtoolsExtension: ReduxDevToolsExtension = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
-    if (reduxDevtoolsExtension) {
-        const reduxDevTools = reduxDevtoolsExtension.connect(options);
-        reduxDevTools.subscribe((message: ReduxDevToolsMessage) => {
-            if (message.type === 'DISPATCH' && message.state) {
-                // console.log('DISPATCH', message.payload);
-                if (message.payload?.type === 'JUMP_TO_ACTION' || message.payload?.type === 'JUMP_TO_STATE') {
-                    // console.log('travelling to ', message.payload.actionId);
-                    dt.travelTo(message.payload.actionId);
-                }
-            }
-        });
-        const teacupToReduxMessage = options?.teacupToReduxMessage || defaultTeaCupToReduxMessage;
-        dt.addListener(e => {
-            switch (e.tag) {
-                case "init":
-                    reduxDevTools.init(e.model);
-                    break;
-                case "updated":
-                    const action = teacupToReduxMessage(e.msg);
-                    reduxDevTools.send(action, e.modelAfter);
-                    break;
-            }
-        });
-    }
-    return dt;
+export function withReduxDevTools<Model, Msg>(
+  dt: DevTools<Model, Msg>,
+  options?: ReduxDevToolsOptions,
+): DevTools<Model, Msg> {
+  const reduxDevtoolsExtension: ReduxDevToolsExtension = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
+  if (reduxDevtoolsExtension) {
+    const reduxDevTools = reduxDevtoolsExtension.connect(options);
+    reduxDevTools.subscribe((message: ReduxDevToolsMessage) => {
+      if (message.type === 'DISPATCH' && message.state) {
+        // console.log('DISPATCH', message.payload);
+        if (message.payload?.type === 'JUMP_TO_ACTION' || message.payload?.type === 'JUMP_TO_STATE') {
+          // console.log('travelling to ', message.payload.actionId);
+          dt.travelTo(message.payload.actionId);
+        }
+      }
+    });
+    const teacupToReduxMessage = options?.teacupToReduxMessage || defaultTeaCupToReduxMessage;
+    dt.addListener((e) => {
+      switch (e.tag) {
+        case 'init':
+          reduxDevTools.init(e.model);
+          break;
+        case 'updated':
+          const action = teacupToReduxMessage(e.msg);
+          reduxDevTools.send(action, e.modelAfter);
+          break;
+      }
+    });
+  }
+  return dt;
 }

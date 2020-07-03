@@ -23,36 +23,34 @@
  *
  */
 
-import {Try} from "./Try";
+import { Try } from './Try';
 
-test("try without exception", () => {
-    expect(
-        Try(() => "yalla").withDefault("neh")
-    ).toBe("yalla");
+test('try without exception', () => {
+  expect(Try(() => 'yalla').withDefault('neh')).toBe('yalla');
 });
 
 function throwErr(): string {
-    throw new Error("ouch");
+  throw new Error('ouch');
 }
 
 function throwString(): string {
-    throw "ouch";
+  throw 'ouch';
 }
 
-test("throw Error", () => {
-    expect(
-        Try(throwErr).match(
-            () => "neh",
-            err => err.message
-        )
-    ).toBe("ouch");
+test('throw Error', () => {
+  expect(
+    Try(throwErr).match(
+      () => 'neh',
+      (err) => err.message,
+    ),
+  ).toBe('ouch');
 });
 
-test("throw string", () => {
-    expect(
-        Try(throwString).match(
-            () => "neh",
-            err => err.message
-        )
-    ).toBe("ouch");
+test('throw string', () => {
+  expect(
+    Try(throwString).match(
+      () => 'neh',
+      (err) => err.message,
+    ),
+  ).toBe('ouch');
 });
