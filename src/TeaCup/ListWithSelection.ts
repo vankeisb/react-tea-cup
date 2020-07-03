@@ -23,79 +23,75 @@
  *
  */
 
-import {just, Maybe, nothing} from "./Maybe";
+import { just, Maybe, nothing } from './Maybe';
 
 export class ListWithSelection<T> {
-    private readonly l1: ReadonlyArray<T>;
-    private readonly l2: ReadonlyArray<T>;
-    private readonly sel: Maybe<T>;
+  private readonly l1: ReadonlyArray<T>;
+  private readonly l2: ReadonlyArray<T>;
+  private readonly sel: Maybe<T>;
 
-    private constructor(l1: ReadonlyArray<T>, l2: ReadonlyArray<T>, sel: Maybe<T>) {
-        this.l1 = l1;
-        this.l2 = l2;
-        this.sel = sel;
-    }
+  private constructor(l1: ReadonlyArray<T>, l2: ReadonlyArray<T>, sel: Maybe<T>) {
+    this.l1 = l1;
+    this.l2 = l2;
+    this.sel = sel;
+  }
 
-    static fromArray<T>(a: ReadonlyArray<T>): ListWithSelection<T> {
-        return new ListWithSelection(a, [], nothing);
-    }
+  static fromArray<T>(a: ReadonlyArray<T>): ListWithSelection<T> {
+    return new ListWithSelection(a, [], nothing);
+  }
 
-    static empty<T>(): ListWithSelection<T> {
-        return new ListWithSelection([], [], nothing);
-    }
+  static empty<T>(): ListWithSelection<T> {
+    return new ListWithSelection([], [], nothing);
+  }
 
-    toArray(): ReadonlyArray<T> {
-        return this.l1
-            .concat(
-                this.sel.map(t => [t]).withDefault([])
-            )
-            .concat(this.l2);
-    }
+  toArray(): ReadonlyArray<T> {
+    return this.l1.concat(this.sel.map((t) => [t]).withDefault([])).concat(this.l2);
+  }
 
-    select(f:(item:T, index:number, arr: ReadonlyArray<T>) => boolean): ListWithSelection<T> {
-        const l = this.toArray();
-        const l1 = [];
-        const l2 = [];
-        let sel: Maybe<T> = nothing;
-        for (let i = 0; i < l.length; i++) {
-            switch (sel.type) {
-                case "Nothing": {
-                    // nothing selected yet, we need to test
-                    const selected = f(l[i], i, l);
-                    if (selected) {
-                        sel = just(l[i]);
-                    } else {
-                        l1.push(l[i]);
-                    }
-                    break;
-                }
-                case "Just": {
-                    // selection done already, feed into l2
-                    l2.push(l[i]);
-                    break;
-                }
-            }
+  select(f: (item: T, index: number, arr: ReadonlyArray<T>) => boolean): ListWithSelection<T> {
+    const l = this.toArray();
+    const l1 = [];
+    const l2 = [];
+    let sel: Maybe<T> = nothing;
+    for (let i = 0; i < l.length; i++) {
+      switch (sel.type) {
+        case 'Nothing': {
+          // nothing selected yet, we need to test
+          const selected = f(l[i], i, l);
+          if (selected) {
+            sel = just(l[i]);
+          } else {
+            l1.push(l[i]);
+          }
+          break;
         }
-        return new ListWithSelection<T>(l1, l2, sel);
+        case 'Just': {
+          // selection done already, feed into l2
+          l2.push(l[i]);
+          break;
+        }
+      }
     }
+    return new ListWithSelection<T>(l1, l2, sel);
+  }
 
-    selectIndex(index: number): ListWithSelection<T> {
-        return this.select((item, i) => i === index);
-    }
+  selectIndex(index: number): ListWithSelection<T> {
+    return this.select((item, i) => i === index);
+  }
 
-    isSelected(item: T): boolean {
-        return this.sel.map(t => t === item).withDefault(false)
-    }
+  isSelected(item: T): boolean {
+    return this.sel.map((t) => t === item).withDefault(false);
+  }
 
-    getSelected(): Maybe<T> {
-        return this.sel;
-    }
+  getSelected(): Maybe<T> {
+    return this.sel;
+  }
 
-    getSelectedIndex(): Maybe<number> {
-        return this.sel.map(() => this.l1.length)
-    }
+  getSelectedIndex(): Maybe<number> {
+    return this.sel.map(() => this.l1.length);
+  }
 
-    length(): number {
-        return this.toArray().length;
-    }
+  length(): number {
+    return this.toArray().length;
+  }
 }

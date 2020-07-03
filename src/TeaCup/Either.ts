@@ -1,4 +1,3 @@
-
 /*
  * MIT License
  *
@@ -27,78 +26,70 @@
 /**
  * Either left, or right.
  */
-export type Either<A,B> = Left<A,B> | Right<A,B>
+export type Either<A, B> = Left<A, B> | Right<A, B>;
 
+export class Left<A, B> {
+  readonly tag = 'Left';
+  readonly value: A;
 
-export class Left<A,B> {
+  constructor(value: A) {
+    this.value = value;
+  }
 
-    readonly tag = "Left";
-    readonly value:A;
+  isLeft(): boolean {
+    return true;
+  }
 
-    constructor(value: A) {
-        this.value = value;
-    }
+  isRight(): boolean {
+    return !this.isLeft();
+  }
 
-    isLeft(): boolean {
-        return true;
-    }
+  mapLeft<C>(f: (a: A) => C): Either<C, B> {
+    return new Left(f(this.value));
+  }
 
-    isRight(): boolean {
-        return !this.isLeft();
-    }
+  mapRight<C>(f: (b: B) => C): Either<A, C> {
+    return new Left(this.value);
+  }
 
-    mapLeft<C>(f:(a:A) => C): Either<C,B> {
-        return new Left(f(this.value));
-    }
-
-    mapRight<C>(f:(b:B) => C): Either<A,C> {
-        return new Left(this.value);
-    }
-
-    match<R>(onLeft: (a:A) => R, onRight: (b:B) => R): R {
-        return onLeft(this.value);
-    }
-
+  match<R>(onLeft: (a: A) => R, onRight: (b: B) => R): R {
+    return onLeft(this.value);
+  }
 }
 
+export class Right<A, B> {
+  readonly tag = 'Right';
+  readonly value: B;
 
-export class Right<A,B> {
+  constructor(value: B) {
+    this.value = value;
+  }
 
-    readonly tag = "Right";
-    readonly value:B;
+  isLeft(): boolean {
+    return false;
+  }
 
-    constructor(value: B) {
-        this.value = value;
-    }
+  isRight(): boolean {
+    return !this.isLeft();
+  }
 
-    isLeft(): boolean {
-        return false;
-    }
+  mapLeft<C>(f: (a: A) => C): Either<C, B> {
+    return new Right(this.value);
+  }
 
-    isRight(): boolean {
-        return !this.isLeft();
-    }
+  mapRight<C>(f: (b: B) => C): Either<A, C> {
+    return new Right(f(this.value));
+  }
 
-    mapLeft<C>(f:(a:A) => C): Either<C,B> {
-        return new Right(this.value);
-    }
-
-    mapRight<C>(f:(b:B) => C): Either<A,C> {
-        return new Right(f(this.value));
-    }
-
-    match<R>(onLeft: (a:A) => R, onRight: (b:B) => R): R {
-        return onRight(this.value);
-    }
-
+  match<R>(onLeft: (a: A) => R, onRight: (b: B) => R): R {
+    return onRight(this.value);
+  }
 }
 
-export function left<A,B>(a:A): Either<A,B> {
-    return new Left(a);
+export function left<A, B>(a: A): Either<A, B> {
+  return new Left(a);
 }
 
-
-export function right<A,B>(b:B): Either<A,B> {
-    return new Right(b);
+export function right<A, B>(b: B): Either<A, B> {
+  return new Right(b);
 }
-
