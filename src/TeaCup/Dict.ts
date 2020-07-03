@@ -23,74 +23,74 @@
  *
  */
 
-import {Tuple} from "./Tuple";
-import {Maybe, maybeOf} from "./Maybe";
+import { Tuple } from './Tuple';
+import { Maybe, maybeOf } from './Maybe';
 
 export class Dict<T> {
-    private readonly d: { [id: string]: T };
+  private readonly d: { [id: string]: T };
 
-    private constructor(d: { [p: string]: T }) {
-        this.d = d;
-    }
+  private constructor(d: { [p: string]: T }) {
+    this.d = d;
+  }
 
-    static empty<T>(): Dict<T> {
-        return new Dict<T>({});
-    }
+  static empty<T>(): Dict<T> {
+    return new Dict<T>({});
+  }
 
-    static fromList<T>(entries: readonly Tuple<string, T>[]): Dict<T> {
-        const newD: { [id: string]: T } = {};
-        entries.forEach(e => {
-            newD[e.a] = e.b;
-        });
-        return new Dict<T>(newD);
-    }
+  static fromList<T>(entries: readonly Tuple<string, T>[]): Dict<T> {
+    const newD: { [id: string]: T } = {};
+    entries.forEach((e) => {
+      newD[e.a] = e.b;
+    });
+    return new Dict<T>(newD);
+  }
 
-    put(key: string, value: T): Dict<T> {
-        const newD = { ...this.d };
-        newD[key] = value;
-        return new Dict<T>(newD);
-    }
+  put(key: string, value: T): Dict<T> {
+    const newD = { ...this.d };
+    newD[key] = value;
+    return new Dict<T>(newD);
+  }
 
-    get(key: string): Maybe<T> {
-        return maybeOf(this.d[key]);
-    }
+  get(key: string): Maybe<T> {
+    return maybeOf(this.d[key]);
+  }
 
-    exists(key: string): boolean {
-        return this.d[key] !== undefined;
-    }
+  exists(key: string): boolean {
+    return this.d[key] !== undefined;
+  }
 
-    remove(key: string): Dict<T> {
-        if (this.d[key]) {
-            const newD = { ...this.d };
-            delete newD[key];
-            return new Dict<T>(newD);
-        }
-        return this;
+  remove(key: string): Dict<T> {
+    if (this.d[key]) {
+      const newD = { ...this.d };
+      delete newD[key];
+      return new Dict<T>(newD);
     }
+    return this;
+  }
 
-    keys(): readonly string[] {
-        return Object.keys(this.d);
-    }
+  keys(): readonly string[] {
+    return Object.keys(this.d);
+  }
 
-    size(): number {
-        return this.keys().length;
-    }
+  size(): number {
+    return this.keys().length;
+  }
 
-    isEmpty(): boolean {
-        return this.size() === 0;
-    }
+  isEmpty(): boolean {
+    return this.size() === 0;
+  }
 
-    toList(): readonly Tuple<string, T>[] {
-        return this.keys().map(k => new Tuple(k, this.d[k]));
-    }
+  toList(): readonly Tuple<string, T>[] {
+    return this.keys().map((k) => new Tuple(k, this.d[k]));
+  }
 
-    filter(f: (t: Tuple<string, T>) => boolean): Dict<T> {
-        return Dict.fromList(this.toList().filter(f));
-    }
+  filter(f: (t: Tuple<string, T>) => boolean): Dict<T> {
+    return Dict.fromList(this.toList().filter(f));
+  }
 
-    update(key: string, f: (v: Maybe<T>) => Maybe<T>): Dict<T> {
-        return f(this.get(key))
-            .map(value => this.put(key, value))
-            .withDefaultSupply(() => this.remove(key));
-    }
+  update(key: string, f: (v: Maybe<T>) => Maybe<T>): Dict<T> {
+    return f(this.get(key))
+      .map((value) => this.put(key, value))
+      .withDefaultSupply(() => this.remove(key));
+  }
 }

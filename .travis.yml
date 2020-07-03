@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "lts/dubnium"
+  - 'lts/dubnium'
 
 install:
   - npm install
@@ -14,8 +14,8 @@ script:
 
 deploy:
   provider: npm
-  email: "${CI_EMAIL}"
-  api_key: "${CI_API_KEY}"
+  email: '${CI_EMAIL}'
+  api_key: '${CI_API_KEY}'
   skip_cleanup: true
   on:
     tags: true

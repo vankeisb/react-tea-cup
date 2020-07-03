@@ -1,6 +1,6 @@
 {
   "name": "react-tea-cup",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "description": "Put some TEA in your React.",
   "author": "Rémi Van Keisbelck <remi@rvkb.com>",
   "license": "MIT",
@@ -13,12 +13,14 @@
   "scripts": {
     "test": "jest",
     "test-watch": "jest --watch",
+    "prettify": "prettier --write .",
     "compile": "rimraf dist && tsc",
     "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
   },
   "devDependencies": {
     "@types/jest": "24.0.15",
     "jest": "24.7.1",
+    "prettier": "2.0.5",
     "rimraf": "^2.6.3",
     "ts-jest": "24.0.2",
     "typescript": "^3.2.4"

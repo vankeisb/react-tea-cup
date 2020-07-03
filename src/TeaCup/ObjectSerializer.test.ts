@@ -23,90 +23,81 @@
  *
  */
 
-import {ObjectSerializer} from "./ObjectSerializer";
+import { ObjectSerializer } from './ObjectSerializer';
 
 class Customer {
-    readonly name: string;
-    readonly address?: Address;
-    readonly orders: Order[];
-    readonly optionalStuff?: string = undefined;
-    readonly birthDate: Date;
-    readonly anyThing: any = { yolo: true };
+  readonly name: string;
+  readonly address?: Address;
+  readonly orders: Order[];
+  readonly optionalStuff?: string = undefined;
+  readonly birthDate: Date;
+  readonly anyThing: any = { yolo: true };
 
-    constructor(name: string, birthDate: Date, address: Address, orders: Order[]) {
-        this.name = name;
-        this.address = address;
-        this.orders = orders;
-        this.birthDate = birthDate;
-    }
+  constructor(name: string, birthDate: Date, address: Address, orders: Order[]) {
+    this.name = name;
+    this.address = address;
+    this.orders = orders;
+    this.birthDate = birthDate;
+  }
 
-    hasTooManyOrders(): boolean {
-        return this.orders.length > 2;
-    }
+  hasTooManyOrders(): boolean {
+    return this.orders.length > 2;
+  }
 
-    livesInNice(): boolean {
-        return this.address?.isInNice() === true;
-    }
+  livesInNice(): boolean {
+    return this.address?.isInNice() === true;
+  }
 }
 
 class Address {
-    readonly street: string;
-    readonly city: string;
+  readonly street: string;
+  readonly city: string;
 
-    constructor(street: string, city: string) {
-        this.street = street;
-        this.city = city;
-    }
+  constructor(street: string, city: string) {
+    this.street = street;
+    this.city = city;
+  }
 
-    isInNice(): boolean {
-        return this.city === "nice";
-    }
+  isInNice(): boolean {
+    return this.city === 'nice';
+  }
 }
 
 class Order {
-    readonly product: string;
-    readonly price: number;
+  readonly product: string;
+  readonly price: number;
 
+  constructor(product: string, price: number) {
+    this.product = product;
+    this.price = price;
+  }
 
-    constructor(product: string, price: number) {
-        this.product = product;
-        this.price = price;
-    }
-
-    isExpensive(): boolean {
-        return this.price > 250;
-    }
+  isExpensive(): boolean {
+    return this.price > 250;
+  }
 }
 
-const birthDate: Date = new Date(Date.parse("2019-01-01T00:00:00.000Z"));
+const birthDate: Date = new Date(Date.parse('2019-01-01T00:00:00.000Z'));
 
-const customer: Customer = new Customer(
-    "John",
-    birthDate,
-    new Address("rue du quai", "marseille"),
-    [
-        new Order("Gode", 300),
-        new Order("React for dummies", 10),
-        new Order("Tea", 100)
-    ]
-);
+const customer: Customer = new Customer('John', birthDate, new Address('rue du quai', 'marseille'), [
+  new Order('Gode', 300),
+  new Order('React for dummies', 10),
+  new Order('Tea', 100),
+]);
 
-test("roundtrip customer", () => {
-    const s: ObjectSerializer = ObjectSerializer
-        .withClasses([Customer, Address, Order]);
-    const str: string = s.serialize(customer);
-    const c: Customer = s.deserialize(str) as Customer;
-    expect(c.name).toBe("John");
-    expect(c.birthDate.toISOString()).toBe(birthDate.toISOString());
-    expect(c.hasTooManyOrders()).toBe(true);
-    expect(c.livesInNice()).toBe(false);
-    expect(c.address?.street).toBe("rue du quai");
-    expect(c.address?.city).toBe("marseille");
-    expect(c.orders[0].isExpensive()).toBe(true);
-    expect(c.orders[0].product).toBe("Gode");
-    expect(c.orders[1].isExpensive()).toBe(false);
-    expect(c.optionalStuff).toBeUndefined();
-    expect(c.anyThing.yolo).toBe(true);
+test('roundtrip customer', () => {
+  const s: ObjectSerializer = ObjectSerializer.withClasses([Customer, Address, Order]);
+  const str: string = s.serialize(customer);
+  const c: Customer = s.deserialize(str) as Customer;
+  expect(c.name).toBe('John');
+  expect(c.birthDate.toISOString()).toBe(birthDate.toISOString());
+  expect(c.hasTooManyOrders()).toBe(true);
+  expect(c.livesInNice()).toBe(false);
+  expect(c.address?.street).toBe('rue du quai');
+  expect(c.address?.city).toBe('marseille');
+  expect(c.orders[0].isExpensive()).toBe(true);
+  expect(c.orders[0].product).toBe('Gode');
+  expect(c.orders[1].isExpensive()).toBe(false);
+  expect(c.optionalStuff).toBeUndefined();
+  expect(c.anyThing.yolo).toBe(true);
 });
-
-
