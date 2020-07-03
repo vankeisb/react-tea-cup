@@ -37,7 +37,8 @@ import {
     Router,
     route0,
     str,
-    route1, route2, int, just, Maybe, nothing, maybeOf, QueryParams
+    route1, route2, int, just, Maybe, nothing, maybeOf, QueryParams,
+    withReduxDevTools,
 } from "react-tea-cup";
 import * as Counter from './Samples/Counter'
 import * as ParentChild from './Samples/ParentChild'
@@ -718,7 +719,7 @@ const App = () => (
         update={update}
         subscriptions={subscriptions}
         onUrlChange={onUrlChange}
-        devTools={DevTools.init<Model,Msg>(window)}
+        devTools={withReduxDevTools(DevTools.init<Model,Msg>(window))}
     />
 );
 
