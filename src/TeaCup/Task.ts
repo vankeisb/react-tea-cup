@@ -111,8 +111,8 @@ export abstract class Task<E, R> {
   }
 }
 
-class TLambda<R> extends Task<Error,R> {
-  private readonly f:() => R;
+class TLambda<R> extends Task<Error, R> {
+  private readonly f: () => R;
 
   constructor(f: () => R) {
     super();
@@ -121,12 +121,11 @@ class TLambda<R> extends Task<Error,R> {
 
   execute(callback: (r: Result<Error, R>) => void): void {
     try {
-      callback(ok(this.f()))
+      callback(ok(this.f()));
     } catch (e) {
-      callback(err(e))
+      callback(err(e));
     }
   }
-
 }
 
 export type PromiseSupplier<T> = () => Promise<T>;

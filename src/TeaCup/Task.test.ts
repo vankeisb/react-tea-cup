@@ -81,13 +81,9 @@ test('more complex stuff with err', (done) => {
   );
 });
 
-test('from lambda', done => {
+test('from lambda', (done) => {
   const t: Task<Error, number> = Task.fromLambda(() => 123);
-  expectOk(
-      done,
-      t,
-      123
-  )
+  expectOk(done, t, 123);
 });
 
 export function attempt<E, R>(t: Task<E, R>, callback: (r: Result<E, R>) => void) {
@@ -101,8 +97,8 @@ export function perform<R>(t: Task<never, R>, callback: (r: R) => void) {
 export function expectOk<E, R>(done: () => void, t: Task<E, R>, r: R) {
   attempt(t, (result) => {
     result.match(
-        (res: R) => expect(res).toBe(r),
-        () => fail("expected a success"),
+      (res: R) => expect(res).toBe(r),
+      () => fail('expected a success'),
     );
     done();
   });
