@@ -99,3 +99,15 @@ export const Main = (props: MainProps) => {
 };
 ```
 
+# Redux DevTools
+
+> This is work in progress, use at your own risk !
+
+tea-cup's dev tools can also work with the [Redux dev tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd) extension, for a more "graphical experience" :
+
+![](redux-dev-tools.png)
+
+Hook it like this :
+
+      devTools={withReduxDevTools(DevTools.init<Model, Msg>(window, serializer))}
+
