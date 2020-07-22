@@ -80,6 +80,13 @@ export abstract class Task<E, R> {
   }
 
   /**
+   * Create a task from a supplier (lazy). Will return an error if the lambda throws an error.
+   */
+  static fromLambda<R>(lambda: () => R): Task<Error, R> {
+    return new TLambda(lambda);
+  }
+
+  /**
    * Map the ok result of this task
    * @param f the mapping function
    */
@@ -102,6 +109,24 @@ export abstract class Task<E, R> {
   andThen<R2>(f: (r: R) => Task<E, R2>): Task<E, R2> {
     return new TThen(this, f);
   }
+}
+
+class TLambda<R> extends Task<Error,R> {
+  private readonly f:() => R;
+
+  constructor(f: () => R) {
+    super();
+    this.f = f;
+  }
+
+  execute(callback: (r: Result<Error, R>) => void): void {
+    try {
+      callback(ok(this.f()))
+    } catch (e) {
+      callback(err(e))
+    }
+  }
+
 }
 
 export type PromiseSupplier<T> = () => Promise<T>;
