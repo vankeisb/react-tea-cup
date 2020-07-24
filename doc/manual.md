@@ -573,6 +573,10 @@ const fetchUserCmd: Cmd<Msg> =
 tea-cup ships with an `Animation` Effect Manager that allows to use `requestAnimationFrame`
 in your TEA loop.
 
+## Dev Tools
+
+tea-cup comes built-in with productivity / debugging tools. Explained [DevTools](./devtools.md).
+
 
 
 

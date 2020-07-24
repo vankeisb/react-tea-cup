@@ -23,96 +23,93 @@
  *
  */
 
-import {Task} from "./Task";
-import {Result} from "./Result";
+import { Task } from './Task';
+import { Result } from './Result';
 
-
-test("succeed", done => {
-    expectOk(done, Task.succeed(123), 123);
+test('succeed', (done) => {
+  expectOk(done, Task.succeed(123), 123);
 });
 
-
-test("fail", done => {
-    expectErr(done, Task.fail("wtf?"), "wtf?");
+test('fail', (done) => {
+  expectErr(done, Task.fail('wtf?'), 'wtf?');
 });
 
-
-test("map", done => {
-    expectOk(
-        done,
-        Task.succeed(1).map(i => i + 1),
-        2
-    )
+test('map', (done) => {
+  expectOk(
+    done,
+    Task.succeed(1).map((i) => i + 1),
+    2,
+  );
 });
 
-
-test("mapError", done => {
-    expectErr(
-        done,
-        Task.fail("wtf").mapError(s => s + " is wrong?"),
-        "wtf is wrong?"
-    )
+test('mapError', (done) => {
+  expectErr(
+    done,
+    Task.fail('wtf').mapError((s) => s + ' is wrong?'),
+    'wtf is wrong?',
+  );
 });
 
+test('andThen', (done) => {
+  expectOk(
+    done,
+    Task.succeed(1).andThen((i: number) => {
+      return Task.succeed(i + 10);
+    }),
+    11,
+  );
+});
 
-test("andThen", done => {
-    expectOk(
-        done,
-        Task.succeed(1).andThen((i:number) => {
-            return Task.succeed(i + 10)
-        }),
-        11
+test('more complex stuff', (done) => {
+  expectOk(
+    done,
+    Task.succeed('hello')
+      .map((s) => s + ' world')
+      .andThen((s) => Task.succeed(s + ' and').map((s) => s + ' people'))
+      .map((s) => s + ' and dolphins'),
+    'hello world and people and dolphins',
+  );
+});
+
+test('more complex stuff with err', (done) => {
+  expectErr(
+    done,
+    Task.fail('hello')
+      .mapError((s) => s + ' world')
+      .andThen((s) => Task.fail(s + ' foo')), // this should not appear ! second task never gets executed
+    'hello world',
+  );
+});
+
+test('from lambda', (done) => {
+  const t: Task<Error, number> = Task.fromLambda(() => 123);
+  expectOk(done, t, 123);
+});
+
+export function attempt<E, R>(t: Task<E, R>, callback: (r: Result<E, R>) => void) {
+  Task.attempt(t, (m) => m).execute(callback);
+}
+
+export function perform<R>(t: Task<never, R>, callback: (r: R) => void) {
+  Task.perform(t, (m) => m).execute(callback);
+}
+
+export function expectOk<E, R>(done: () => void, t: Task<E, R>, r: R) {
+  attempt(t, (result) => {
+    result.match(
+      (res: R) => expect(res).toBe(r),
+      () => fail('expected a success'),
     );
-});
-
-
-test("more complex stuff", done => {
-    expectOk(
-        done,
-        Task.succeed("hello")
-            .map(s => s + " world")
-            .andThen(s => Task.succeed(s + " and").map(s => s + " people"))
-            .map(s => s + " and dolphins"),
-        "hello world and people and dolphins"
-    )
-});
-
-test("more complex stuff with err", done => {
-    expectErr(
-        done,
-        Task.fail("hello")
-            .mapError(s => s + " world")
-            .andThen(s => Task.fail(s + " foo")), // this should not appear ! second task never gets executed
-        "hello world"
-    )
-});
-
-
-
-export function attempt<E,R>(t:Task<E,R>, callback:(r:Result<E,R>) => void) {
-    Task.attempt(t, m => m).execute(callback)
+    done();
+  });
 }
 
-
-export function perform<R>(t:Task<never,R>, callback:(r:R) => void) {
-    Task.perform(t, m => m).execute(callback)
-}
-
-
-export function expectOk<R>(done: () => void, t:Task<never,R>, r:R) {
-    perform(t, result => {
-        expect(result).toBe(r);
-        done()
-    })
-}
-
-
-export function expectErr<E,R>(done: () => void, t:Task<E,R>, e:E) {
-    attempt(t, result => {
-        result.match(
-            (_:R) => fail("expected an error"),
-            (err:E) => expect(err).toBe(e)
-        );
-        done()
-    })
+export function expectErr<E, R>(done: () => void, t: Task<E, R>, e: E) {
+  attempt(t, (result) => {
+    result.match(
+      (_: R) => fail('expected an error'),
+      (err: E) => expect(err).toBe(e),
+    );
+    done();
+  });
 }

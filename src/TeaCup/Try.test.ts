@@ -23,18 +23,34 @@
  *
  */
 
-/**
- * Dispatcher for Msgs.
- */
-export type Dispatcher<Msg> = (m: Msg) => void;
+import { Try } from './Try';
 
-/**
- * Map a dispatcher's Msg type, useful mostly for parent-child.
- * @param d the dispatcher
- * @param mapper the mapping function
- */
-export function map<P, C>(d: Dispatcher<P>, mapper: (c: C) => P): Dispatcher<C> {
-  return (c: C) => {
-    d(mapper(c));
-  };
+test('try without exception', () => {
+  expect(Try(() => 'yalla').withDefault('neh')).toBe('yalla');
+});
+
+function throwErr(): string {
+  throw new Error('ouch');
 }
+
+function throwString(): string {
+  throw 'ouch';
+}
+
+test('throw Error', () => {
+  expect(
+    Try(throwErr).match(
+      () => 'neh',
+      (err) => err.message,
+    ),
+  ).toBe('ouch');
+});
+
+test('throw string', () => {
+  expect(
+    Try(throwString).match(
+      () => 'neh',
+      (err) => err.message,
+    ),
+  ).toBe('ouch');
+});

@@ -23,18 +23,30 @@
  *
  */
 
-/**
- * Dispatcher for Msgs.
- */
-export type Dispatcher<Msg> = (m: Msg) => void;
+import { ListWithSelection } from './ListWithSelection';
 
-/**
- * Map a dispatcher's Msg type, useful mostly for parent-child.
- * @param d the dispatcher
- * @param mapper the mapping function
- */
-export function map<P, C>(d: Dispatcher<P>, mapper: (c: C) => P): Dispatcher<C> {
-  return (c: C) => {
-    d(mapper(c));
-  };
-}
+describe('ListWithSelection', () => {
+  test('empty', () => {
+    const l: ListWithSelection<string> = ListWithSelection.empty();
+    expect(l.length()).toBe(0);
+  });
+
+  test('no selection', () => {
+    const l: ListWithSelection<string> = ListWithSelection.fromArray(['a', 'b', 'c']);
+    expect(l.length()).toBe(3);
+    expect(l.getSelected().type === 'Nothing').toBe(true);
+    expect(l.getSelectedIndex().type === 'Nothing').toBe(true);
+  });
+
+  test('selection by index', () => {
+    const l: ListWithSelection<string> = ListWithSelection.fromArray(['a', 'b', 'c']).selectIndex(1);
+    expect(l.length()).toBe(3);
+    expect(l.getSelectedIndex().withDefault(-1)).toBe(1);
+    expect(l.isSelected('b')).toBe(true);
+  });
+
+  test('to array', () => {
+    const l: ListWithSelection<string> = ListWithSelection.fromArray(['a', 'b', 'c']).selectIndex(0);
+    expect(l.toArray()).toStrictEqual(['a', 'b', 'c']);
+  });
+});
