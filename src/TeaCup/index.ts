@@ -46,3 +46,4 @@ export * from './ObjectSerializer';
 export * from './Try';
 export * from './DevTools';
 export * from './ReduxDevTools';
+export * from './Testing';

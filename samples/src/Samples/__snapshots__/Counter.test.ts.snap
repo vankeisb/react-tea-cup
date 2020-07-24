@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test Counter view state snapshot 1`] = `
+<div
+  className="counter"
+>
+  <button
+    onClick={[Function]}
+  >
+    -
+  </button>
+  <span>
+    1313
+  </span>
+  <button
+    onClick={[Function]}
+  >
+    +
+  </button>
+</div>
+`;

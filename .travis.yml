@@ -7,10 +7,7 @@ install:
 
 script:
   - ./build.sh
-  - cd samples
-  - npm install
-  - npm test
-  - cd ..
+  - ( cd samples; ./build.sh )
 
 deploy:
   provider: npm

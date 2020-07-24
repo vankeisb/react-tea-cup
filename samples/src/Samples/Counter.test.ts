@@ -23,6 +23,63 @@
  *
  */
 
-test('hey hoo', () => {
-  expect(1).toBe(1);
+import { view, Msg, update } from "./Counter";
+import { shallow } from 'enzyme';
+import { extendJest, Testing } from "react-tea-cup";
+
+extendJest(expect);
+const testing = new Testing<Msg>();
+
+describe("Test Counter", () => {
+
+    describe("view state", () => {
+
+        test("render counter", () => {
+            const wrapper = shallow(view(testing.noop, 13))
+            expect(wrapper.find('.counter')).toExist();
+            expect(wrapper.find('.counter > span')).toHaveText("13");
+        });
+
+        test("render buttons", () => {
+            const wrapper = shallow(view(testing.noop, 1));
+            expect(wrapper.find('.counter > button')).toHaveLength(2);
+            expect(wrapper.find('.counter > button').at(0)).toHaveText('-');
+            expect(wrapper.find('.counter > button').at(1)).toHaveText('+');
+        });
+
+        test("snapshot", () => {
+            const wrapper = shallow(view(testing.noop, 1313))
+            expect(wrapper).toMatchSnapshot();
+        });
+    });
+
+    describe("clicks generate messages", () => {
+
+        test("decrement", () => {
+            const wrapper = shallow(view(testing.dispatcher, 1));
+            wrapper.find('.counter > button').at(0).simulate('click');
+            expect(testing).toHaveDispatchedMsg({ type: "dec" });
+        });
+
+        test("increment", () => {
+            const wrapper = shallow(view(testing.dispatcher, 1));
+            wrapper.find('.counter > button').at(1).simulate('click');
+            expect(testing).toHaveDispatchedMsg({ type: "inc" });
+        });
+
+    });
+
+    describe("messages update state", () => {
+        test("decrement", () => {
+            const [newState, cmd] = update({ type: "dec" }, 13);
+            expect(newState).toBe(12);
+        });
+
+        test("increment", () => {
+            const [newState, cmd] = update({ type: "inc" }, 13);
+            expect(newState).toBe(14);
+        });
+    });
+
 });
+

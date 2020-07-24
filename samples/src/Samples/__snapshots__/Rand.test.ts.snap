@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test Rand view state snapshot 1`] = `
+<div>
+  <p>
+    This is a random number :
+    13
+  </p>
+  <br />
+  <button
+    onClick={[Function]}
+  >
+    Randomize
+  </button>
+</div>
+`;
+
+exports[`Test Rand view state snapshot nothing 1`] = `
+<div>
+  <p>
+    This is a random number :
+  </p>
+  <br />
+  <button
+    onClick={[Function]}
+  >
+    Randomize
+  </button>
+</div>
+`;

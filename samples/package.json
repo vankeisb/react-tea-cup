@@ -4,10 +4,10 @@
   "private": false,
   "proxy": "https://api.github.com",
   "dependencies": {
-    "@types/jest": "23.3.13",
     "@types/node": "10.12.19",
     "@types/react": "16.7.22",
     "@types/react-dom": "16.0.11",
+    "jest-enzyme": "^7.1.1",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-scripts": "3.0.1",
@@ -28,5 +28,15 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "@types/enzyme": "^3.10.3",
+    "@types/enzyme-adapter-react-16": "^1.0.5",
+    "@types/jest": "^23.3.14",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.15.1",
+    "enzyme-to-json": "^3.4.2",
+    "jest-fetch-mock": "^2.1.2",
+    "ts-jest": "^24.1.0"
+  }
 }
