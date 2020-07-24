@@ -27,8 +27,8 @@ import { Http, nothing, Cmd, List, Maybe, Task, Result, noCmd, Dispatcher, Decod
 import * as React from 'react'
 
 export interface Commit {
-  readonly sha: string;
-  readonly author: string;
+    readonly sha: string;
+    readonly author: string;
 }
 
 
@@ -62,24 +62,23 @@ function gotCommits(response: Result<Error, ReadonlyArray<Commit>>): Msg {
             case "Err":
                 return noCmd({ tag: "load-error", error: response.err } as Model);
         }
-    }
-  };
+    };
 }
 
 const buttonClicked: Msg = () => [{ tag: 'loading' }, listCommits()];
 
 function listCommits(): Cmd<Msg> {
-  return Task.attempt(
-    Http.jsonBody(
-      Http.fetch('https://api.github.com/repos/vankeisb/react-tea-cup/commits'),
-      Decode.array(commitDecoder),
-    ),
-    gotCommits,
-  );
+    return Task.attempt(
+        Http.jsonBody(
+            Http.fetch('https://api.github.com/repos/vankeisb/react-tea-cup/commits'),
+            Decode.array(commitDecoder),
+        ),
+        gotCommits,
+    );
 }
 
 export function init(): [Model, Cmd<Msg>] {
-  return [{ tag: 'loading' }, listCommits()];
+    return [{ tag: 'loading' }, listCommits()];
 }
 
 
