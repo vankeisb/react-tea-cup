@@ -24,8 +24,7 @@
  *
  */
 
-import { Dispatcher } from "./Dispatcher";
-import { Cmd } from "./Cmd";
+import { Dispatcher, Cmd } from "tea-cup-core";
 
 export function extendJest<M>(expect: jest.Expect) {
     expect.extend({

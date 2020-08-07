@@ -24,7 +24,7 @@
  */
 
 import { Router, int, route0, route1, route2, route3, str, QueryParams, RouteDef } from './Navigation';
-import { just, Maybe, nothing } from './Maybe';
+import { just, Maybe, nothing } from 'tea-cup-core';
 
 type MyRoute =
   | { type: 'home' }

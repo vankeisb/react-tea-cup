@@ -1,7 +1,7 @@
 {
     "name": "tea-cup-parent",
     "private": true,
-    "workspaces": ["core", "samples"],
+    "workspaces": ["core", "tea-cup", "samples"],
     "devDependencies": {
         "@types/jest": "24.0.15",
         "jest": "24.7.1",

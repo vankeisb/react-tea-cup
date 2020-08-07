@@ -1,7 +1,7 @@
 {
-  "name": "react-tea-cup",
-  "version": "0.0.41",
-  "description": "Put some TEA in your React.",
+  "name": "tea-cup-core",
+  "version": "1.0.0",
+  "description": "react-tea-cup core classes and utilities (Maybe etc)",
   "author": "Rémi Van Keisbelck <remi@rvkb.com>",
   "license": "MIT",
   "repository": {
@@ -15,13 +15,6 @@
     "test": "jest",
     "test-watch": "jest --watch",
     "prettify": "prettier --write .",
-    "compile": "rimraf dist && tsc",
-    "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
-  },
-  "dependencies": {
-    "react": "^16.7.0"
-  },
-  "devDependencies": {
-    "@types/react": "^16.7.22"
+    "compile": "rimraf dist && tsc"
   }
 }

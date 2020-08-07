@@ -23,21 +23,10 @@
  *
  */
 
-export * from './Cmd';
-export * from './Dispatcher';
-export * from './Random';
-export * from './Result';
-export * from './Task';
-export * from './Sub';
-export * from './Animation';
-export * from './Maybe';
-export * from './List';
-export * from './Decode';
-export * from './Http';
-export * from './Tuple';
-export * from './Either';
-export * from './Time';
-export * from './Dict';
-export * from './ListWithSelection';
-export * from './ObjectSerializer';
-export * from './Try';
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  testPathIgnorePatterns: [
+    "node_modules",
+  ]
+};

@@ -24,9 +24,7 @@
  */
 
 import { Component, ReactNode } from 'react';
-import { Dispatcher } from './Dispatcher';
-import { Cmd } from './Cmd';
-import { Sub } from './Sub';
+import { Dispatcher, Cmd, Sub } from 'tea-cup-core';
 import { DevToolsEvent, DevTools } from './DevTools';
 
 /**
