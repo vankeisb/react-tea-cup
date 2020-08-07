@@ -10,8 +10,9 @@ script:
 
 deploy:
   provider: npm
+  script: ./deploy.sh
   email: '${CI_EMAIL}'
   api_key: '${CI_API_KEY}'
   skip_cleanup: true
   on:
-    tags: true
+    branch: feature/test-release
