@@ -1,7 +1,6 @@
-yarn install &&      \
-    cd core &&       \
-    yarn test &&     \
-    yarn compile &&  \
-    cd .. &&         \
-    cd samples &&    \
-    yarn test -- --watchAll=false
+cd core &&       \
+yarn test &&     \
+yarn compile &&  \
+cd .. &&         \
+cd samples &&    \
+yarn test -- --watchAll=false
