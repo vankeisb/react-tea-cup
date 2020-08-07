@@ -1,0 +1,20 @@
+{
+  "name": "tea-cup-core",
+  "version": "1.0.0-alpha",
+  "description": "react-tea-cup core classes and utilities (Maybe etc)",
+  "author": "Rémi Van Keisbelck <remi@rvkb.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:vankeisb/react-tea-cup.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "tsc-v": "tsc -v",
+    "test": "jest",
+    "test-watch": "jest --watch",
+    "prettify": "prettier --write .",
+    "compile": "rimraf dist && tsc"
+  }
+}

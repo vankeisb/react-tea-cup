@@ -1,3 +1,7 @@
-#!/usr/bin/env bash
-
-npm install && npm test && npm run compile
+yarn install &&     \
+cd core &&          \
+./build.sh &&       \
+cd ../tea-cup &&    \
+./build.sh &&       \
+cd ../samples &&    \
+yarn test -- --watchAll=false

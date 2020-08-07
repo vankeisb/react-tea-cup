@@ -23,7 +23,10 @@
  *
  */
 
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-};
+export * from 'tea-cup-core';
+export * from './Memo';
+export * from './Program';
+export * from './Navigation';
+export * from './DevTools';
+export * from './ReduxDevTools';
+export * from './Testing';

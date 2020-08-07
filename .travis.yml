@@ -3,14 +3,10 @@ node_js:
   - 'lts/dubnium'
 
 install:
-  - npm install
+  - yarn install
 
 script:
   - ./build.sh
-  - cd samples
-  - npm install
-  - npm test
-  - cd ..
 
 deploy:
   provider: npm

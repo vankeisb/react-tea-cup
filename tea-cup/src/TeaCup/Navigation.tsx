@@ -23,16 +23,10 @@
  *
  */
 
-import { Program, ProgramProps } from './Program';
-import { Cmd, noCmd } from './Cmd';
-import { Dispatcher } from './Dispatcher';
-import { Sub } from './Sub';
-import { Task } from './Task';
-import { Ok, Result } from './Result';
+import { Program } from './Program';
+import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-core';
 import * as React from 'react';
 import { Component, createRef, ReactNode, RefObject } from 'react';
-import { just, Maybe, maybeOf, nothing } from './Maybe';
-import { List } from './List';
 import { DevTools } from './DevTools';
 
 /**

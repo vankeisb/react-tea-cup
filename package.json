@@ -1,32 +1,13 @@
 {
-  "name": "react-tea-cup",
-  "version": "0.0.41",
-  "description": "Put some TEA in your React.",
-  "author": "Rémi Van Keisbelck <remi@rvkb.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:vankeisb/react-tea-cup.git"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "jest",
-    "test-watch": "jest --watch",
-    "prettify": "prettier --write .",
-    "compile": "rimraf dist && tsc",
-    "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
-  },
-  "devDependencies": {
-    "@types/jest": "24.0.15",
-    "jest": "24.7.1",
-    "prettier": "2.0.5",
-    "rimraf": "^2.6.3",
-    "ts-jest": "24.0.2",
-    "typescript": "^3.2.4"
-  },
-  "dependencies": {
-    "@types/react": "^16.7.22",
-    "react": "^16.7.0"
+    "name": "tea-cup-parent",
+    "private": true,
+    "workspaces": ["core", "tea-cup", "samples"],
+    "devDependencies": {
+        "@types/jest": "24.0.15",
+        "jest": "24.7.1",
+        "prettier": "2.0.5",
+        "rimraf": "^2.6.3",
+        "ts-jest": "24.0.2",
+        "typescript": "~3.8.3"
+      }
   }
-}
