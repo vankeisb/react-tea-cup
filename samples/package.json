@@ -11,7 +11,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-scripts": "3.0.1",
-    "react-tea-cup": "0.0.41"
+    "react-tea-cup": "1.0.0-alpha"
   },
   "scripts": {
     "start": "react-scripts start",
