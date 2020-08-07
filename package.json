@@ -1,0 +1,13 @@
+{
+    "name": "tea-cup-parent",
+    "private": true,
+    "workspaces": ["core", "samples"],
+    "devDependencies": {
+        "@types/jest": "24.0.15",
+        "jest": "24.7.1",
+        "prettier": "2.0.5",
+        "rimraf": "^2.6.3",
+        "ts-jest": "24.0.2",
+        "typescript": "~3.8.3"
+      }
+  }

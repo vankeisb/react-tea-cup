@@ -1,7 +1,7 @@
 {
   "name": "samples",
   "version": "0.0.1",
-  "private": false,
+  "private": true,
   "proxy": "https://api.github.com",
   "dependencies": {
     "@types/node": "10.12.19",
@@ -11,8 +11,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-scripts": "3.0.1",
-    "react-tea-cup": "file:..",
-    "typescript": "3.2.4"
+    "react-tea-cup": "0.0.41"
   },
   "scripts": {
     "start": "react-scripts start",

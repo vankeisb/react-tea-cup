@@ -18,16 +18,10 @@
     "compile": "rimraf dist && tsc",
     "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
   },
-  "devDependencies": {
-    "@types/jest": "24.0.15",
-    "jest": "24.7.1",
-    "prettier": "2.0.5",
-    "rimraf": "^2.6.3",
-    "ts-jest": "24.0.2",
-    "typescript": "~3.8.3"
-  },
   "dependencies": {
-    "@types/react": "^16.7.22",
     "react": "^16.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.7.22"
   }
 }
