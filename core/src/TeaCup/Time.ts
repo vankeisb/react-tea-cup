@@ -28,7 +28,7 @@ import { ok, Result } from './Result';
 import { Sub } from './Sub';
 
 const everySubs: Array<Array<EverySub<any>>> = [];
-const everyIntervals: Array<number> = [];
+const everyIntervals: Array<any> = [];
 
 function initIntervalForDelay(delay: number) {
   if (everyIntervals[delay] === undefined) {
