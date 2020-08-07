@@ -23,8 +23,8 @@
  *
  */
 
-import { Cmd, noCmd, ObjectSerializer } from "tea-cup-core";
-import { Program } from "./Program";
+import { Cmd, noCmd, ObjectSerializer } from 'tea-cup-core';
+import { Program } from './Program';
 
 export interface HasTime {
   readonly time: number;

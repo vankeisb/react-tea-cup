@@ -1,4 +1,3 @@
-
 /*
  * MIT License
  *
@@ -24,57 +23,56 @@
  *
  */
 
-import { Dispatcher, Cmd } from "tea-cup-core";
+import { Dispatcher, Cmd } from 'tea-cup-core';
 
 export function extendJest<M>(expect: jest.Expect) {
-    expect.extend({
-        toHaveDispatchedMsg(received: Testing<M>, expected: M) {
-            const pass = this.equals(received.dispatched, expected);
+  expect.extend({
+    toHaveDispatchedMsg(received: Testing<M>, expected: M) {
+      const pass = this.equals(received.dispatched, expected);
 
-            const message = () =>
-                this.utils.matcherHint('toBe', undefined, undefined) +
-                '\n\n' +
-                `Expected: ${this.utils.printExpected(expected)}\n` +
-                `Received: ${this.utils.printReceived(received.dispatched)}`
+      const message = () =>
+        this.utils.matcherHint('toBe', undefined, undefined) +
+        '\n\n' +
+        `Expected: ${this.utils.printExpected(expected)}\n` +
+        `Received: ${this.utils.printReceived(received.dispatched)}`;
 
-            return { actual: received, message, pass };
-        }
-    });
+      return { actual: received, message, pass };
+    },
+  });
 }
 
 declare global {
-    namespace jest {
-        interface Matchers<R> {
-            toHaveDispatchedMsg<M>(value: M): CustomMatcherResult;
-        }
+  namespace jest {
+    interface Matchers<R> {
+      toHaveDispatchedMsg<M>(value: M): CustomMatcherResult;
     }
+  }
 }
 
 export class Testing<M> {
-    private _dispatched: M | undefined;
+  private _dispatched: M | undefined;
 
-    public Testing() {
-    }
+  public Testing() {}
 
-    public readonly noop: Dispatcher<M> = () => { }
+  public readonly noop: Dispatcher<M> = () => {};
 
-    public get dispatcher(): Dispatcher<M> {
-        this._dispatched = undefined;
-        return (msg: M) => {
-            this._dispatched = msg;
-        }
-    }
+  public get dispatcher(): Dispatcher<M> {
+    this._dispatched = undefined;
+    return (msg: M) => {
+      this._dispatched = msg;
+    };
+  }
 
-    public get dispatched(): M | undefined {
-        return this._dispatched;
-    }
+  public get dispatched(): M | undefined {
+    return this._dispatched;
+  }
 
-    public dispatchFrom(cmd: Cmd<M>): Promise<M> {
-        return new Promise<M>((resolve, reject) => {
-            const dispatchedMsg = (msg: M) => {
-                resolve(msg);
-            };
-            cmd.execute(dispatchedMsg);
-        });
-    }
+  public dispatchFrom(cmd: Cmd<M>): Promise<M> {
+    return new Promise<M>((resolve, reject) => {
+      const dispatchedMsg = (msg: M) => {
+        resolve(msg);
+      };
+      cmd.execute(dispatchedMsg);
+    });
+  }
 }
