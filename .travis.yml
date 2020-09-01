@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - 'lts/dubnium'
+  - 'lts/erbium'
 
 install:
   - echo "//registry.npmjs.org/:_authToken=${CI_TOKEN}" > ~/.npmrc

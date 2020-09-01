@@ -47,7 +47,7 @@ interface ProgramState<Model> {
 class Guid {
   static newGuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = (Math.random() * 16) | 0,
+      const r = (Math.random() * 16) | 0,
         v = c == 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
@@ -155,7 +155,7 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, Pro
   }
 
   setModel(model: Model, withSubs: boolean) {
-    this.setState((state, props) => {
+    this.setState(state => {
       let newSub: Sub<Msg>;
       if (withSubs) {
         newSub = this.props.subscriptions(model);
