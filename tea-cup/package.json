@@ -1,6 +1,6 @@
 {
   "name": "react-tea-cup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Put some TEA in your React.",
   "author": "Rémi Van Keisbelck <remi@rvkb.com>",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
   },
   "dependencies": {
-    "tea-cup-core": "1.0.0",
+    "tea-cup-core": "1.0.1",
     "react": "^16.7.0"
   },
   "devDependencies": {
