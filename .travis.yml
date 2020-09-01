@@ -1,17 +1,17 @@
 language: node_js
 node_js:
-  - 'lts/dubnium'
+  - 'lts/erbium'
 
 install:
+  - echo "//registry.npmjs.org/:_authToken=${CI_TOKEN}" > ~/.npmrc
   - yarn install
 
 script:
   - ./build.sh
 
 deploy:
-  provider: npm
-  email: '${CI_EMAIL}'
-  api_key: '${CI_API_KEY}'
+  provider: script
+  script: ./deploy.sh
   skip_cleanup: true
   on:
-    tags: true
+    branch: feature/test-release
