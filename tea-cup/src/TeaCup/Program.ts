@@ -70,9 +70,6 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, Pro
   }
 
   dispatch(msg: Msg) {
-
-    debugger;
-
     if (this.devTools && this.devTools.isPaused()) {
       // do not process messages if we are paused
       return;
