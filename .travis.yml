@@ -3,7 +3,7 @@ node_js:
   - 'lts/erbium'
 
 install:
-  - echo "//registry.npmjs.org/:_authToken=${CI_TOKEN}" > ~/.npmrc
+#  - echo "//registry.npmjs.org/:_authToken=${CI_TOKEN}" > ~/.npmrc
   - yarn install
 
 script:
