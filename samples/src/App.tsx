@@ -645,14 +645,16 @@ function onUrlChange(l: Location): Msg {
 }
 
 const App = () => (
-  <ProgramWithNav
-    init={init}
-    view={view}
-    update={update}
-    subscriptions={subscriptions}
-    onUrlChange={onUrlChange}
-    devTools={withReduxDevTools(DevTools.init<Model, Msg>(window))}
-  />
+    <React.StrictMode>
+      <ProgramWithNav
+          init={init}
+          view={view}
+          update={update}
+          subscriptions={subscriptions}
+          onUrlChange={onUrlChange}
+          devTools={withReduxDevTools(DevTools.init<Model, Msg>(window))}
+      />
+    </React.StrictMode>
 );
 
 export default App;

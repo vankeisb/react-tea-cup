@@ -82,7 +82,6 @@ function viewAnim(text: String, t: number) {
       // height: "24px",
       // width: "12px"
       display: 'block',
-      'white-space': 'pre',
       fontSize: 32 + y1 + 'px',
     };
     return (
