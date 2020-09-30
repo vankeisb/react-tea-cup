@@ -62,6 +62,7 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, Pro
   private readonly bd: Dispatcher<Msg>;
   private readonly devTools?: DevTools<Model, Msg>;
   private count: number = 0;
+  private readonly initialCmd: Cmd<any>;
 
   private fireEvent(e: DevToolsEvent<Model, Msg>) {
     if (this.devTools) {
@@ -138,9 +139,13 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, Pro
     const d = this.dispatch.bind(this);
     this.bd = d;
     sub.init(d);
+    this.initialCmd = mac[1];
+  }
+
+  componentDidMount() {
     // trigger initial command
     setTimeout(() => {
-      mac[1].execute(d);
+      this.initialCmd.execute(this.bd);
     }, 0);
   }
 
