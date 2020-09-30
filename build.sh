@@ -4,4 +4,4 @@ cd core &&          \
 cd ../tea-cup &&    \
 ./build.sh &&       \
 cd ../samples &&    \
-yarn test -- --watchAll=false
+yarn test --watchAll=false
