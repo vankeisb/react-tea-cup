@@ -44,7 +44,7 @@ export interface NavProps<Model, Msg> {
 /**
  * Program that handles navigation (routing).
  */
-export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, any> {
+export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, never> {
   private listener: Maybe<EventListener>;
   private readonly ref: RefObject<Program<Model, Msg>> = createRef();
 
@@ -76,7 +76,7 @@ export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, 
     window.addEventListener('popstate', l);
   }
 
-  componentWillMount(): void {
+  componentWillUnmount() {
     if (this.listener.type === 'Just') {
       window.removeEventListener('popstate', this.listener.value);
       this.listener = nothing;
