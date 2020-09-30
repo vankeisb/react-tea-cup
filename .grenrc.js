@@ -1,7 +1,7 @@
 module.exports = {
     "dataSource": "prs",
-    "prefix": "",
+    "prefix": "v",
     "onlyMilestones": false,
-    "groupBy": false,
+    "groupBy": "label",
     "changelogFilename": "CHANGELOG.md"
 }
