@@ -76,7 +76,7 @@ export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, 
     window.addEventListener('popstate', l);
   }
 
-  componentWillMount(): void {
+  componentWillUnmount() {
     if (this.listener.type === 'Just') {
       window.removeEventListener('popstate', this.listener.value);
       this.listener = nothing;
