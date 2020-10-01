@@ -59,7 +59,7 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
   private count: number = 0;
   private readonly initialCmd: Cmd<any>;
   private currentModel: Model;
-  private currentSub: Sub<Msg>
+  private currentSub: Sub<Msg>;
 
   constructor(props: Readonly<ProgramProps<Model, Msg>>) {
     super(props);
