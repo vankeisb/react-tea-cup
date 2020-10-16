@@ -260,3 +260,8 @@ test('oneOf', () => {
 test('from string', () => {
   expect(num.decodeString('123')).toEqual(ok(123));
 });
+
+test('any value', () => {
+  const anyValue = { foo: 'bar' };
+  expect(Decode.value.decodeValue(anyValue)).toEqual(ok(anyValue));
+});

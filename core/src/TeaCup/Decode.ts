@@ -439,7 +439,7 @@ export class Decode {
   /**
    * Decoder for any value
    */
-  static value: Decoder<any> = new Decoder<any>((o) => o);
+  static value: Decoder<any> = new Decoder<any>((o) => ok(o));
 
   /**
    * Decoder for null
