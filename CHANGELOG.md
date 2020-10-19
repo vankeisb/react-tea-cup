@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.2 (19/10/2020)
+
+#### closed
+
+- [**closed**] fix decoder for any value [#30](https://github.com/vankeisb/react-tea-cup/pull/30)
+
+---
+
 ## v1.1.1 (01/10/2020)
 
 #### closed
