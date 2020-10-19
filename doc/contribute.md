@@ -16,3 +16,10 @@ We follow `git-flow`, so to release :
     // push develop, master, and tag
 
 Travis should deploy to npm on tag builds.
+
+## Gren
+
+GH releases and CHANGELOG.md are generated using `gren` :
+
+    yarn release:gh
+    yarn release:changelog

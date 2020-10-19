@@ -17,18 +17,276 @@
 ---
 
 ## v1.1.0 (01/10/2020)
+
+#### closed
+
 - [**closed**] Do not rely on state in Program [#25](https://github.com/vankeisb/react-tea-cup/pull/25)
 - [**closed**] fix #26 : use componentWillUnmount instead of componentWillMount [#28](https://github.com/vankeisb/react-tea-cup/pull/28)
 - [**closed**] dispatch initial cmd on mount [#23](https://github.com/vankeisb/react-tea-cup/pull/23)
 
 ---
 
-## v1.0.1 (01/10/2020)
+## v1.0.2 (01/09/2020)
+*No changelog for this release.*
 
 ---
 
-## v1.0.2 (01/10/2020)
+## v1.0.1 (01/09/2020)
+*No changelog for this release.*
 
 ---
 
-## v1.0.0 (01/10/2020)
+## v1.0.0 (07/08/2020)
+*No changelog for this release.*
+
+---
+
+## v1.0.0-alpha (07/08/2020)
+
+#### closed
+
+- [**closed**] Adding samples for testing [#7](https://github.com/vankeisb/react-tea-cup/pull/7)
+
+---
+
+## v0.0.41 (22/07/2020)
+
+#### dependencies
+
+- [**dependencies**] Bump lodash from 4.17.15 to 4.17.19 [#18](https://github.com/vankeisb/react-tea-cup/pull/18)
+
+---
+
+## v0.0.40 (03/07/2020)
+
+#### closed
+
+- [**closed**] Minimal connect of teaCup to redux dev tools [#17](https://github.com/vankeisb/react-tea-cup/pull/17)
+
+---
+
+## v0.0.39 (16/04/2020)
+
+#### closed
+
+- [**closed**] Added a way to transform Maybe to nativeJs [#16](https://github.com/vankeisb/react-tea-cup/pull/16)
+
+---
+
+## v0.0.38 (09/04/2020)
+*No changelog for this release.*
+
+---
+
+## v0.0.37 (05/04/2020)
+
+#### closed
+
+- [**closed**] fix empty hash in navigation [#15](https://github.com/vankeisb/react-tea-cup/pull/15)
+
+---
+
+## v0.0.36 (26/03/2020)
+*No changelog for this release.*
+
+---
+
+## v0.0.35 (19/03/2020)
+*No changelog for this release.*
+
+---
+
+## v0.0.34 (19/03/2020)
+*No changelog for this release.*
+
+---
+
+## v0.0.33 (19/03/2020)
+
+#### dependencies
+
+- [**dependencies**] Bump acorn from 5.7.3 to 5.7.4 [#14](https://github.com/vankeisb/react-tea-cup/pull/14)
+
+---
+
+## v0.0.32 (18/03/2020)
+
+#### closed
+
+- [**closed**] Add snapshot saving/restoring to dev tools [#13](https://github.com/vankeisb/react-tea-cup/pull/13)
+
+---
+
+## v0.0.31 (11/03/2020)
+*No changelog for this release.*
+
+---
+
+## v0.0.30 (23/02/2020)
+
+#### closed
+
+- [**closed**] list with selection [#12](https://github.com/vankeisb/react-tea-cup/pull/12)
+
+#### dependencies
+
+- [**dependencies**] Bump handlebars from 4.1.2 to 4.7.3 [#10](https://github.com/vankeisb/react-tea-cup/pull/10)
+- [**dependencies**] Bump lodash from 4.17.11 to 4.17.15 [#11](https://github.com/vankeisb/react-tea-cup/pull/11)
+
+---
+
+## v0.0.29 (21/02/2020)
+
+#### closed
+
+- [**closed**] [dev tools] quick access to last model and last event [#8](https://github.com/vankeisb/react-tea-cup/pull/8)
+- [**closed**] maybe forEach and andThen [#9](https://github.com/vankeisb/react-tea-cup/pull/9)
+
+---
+
+## v0.0.28 (27/09/2019)
+
+#### closed
+
+- [**closed**] Feature/comfort functions [#6](https://github.com/vankeisb/react-tea-cup/pull/6)
+
+---
+
+## v0.0.27 (11/07/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.26 (11/07/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.25 (11/07/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.24 (02/07/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.23 (01/07/2019)
+
+#### closed
+
+- [**closed**] use decode URI [#5](https://github.com/vankeisb/react-tea-cup/pull/5)
+
+---
+
+## v0.0.22 (19/06/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.21 (14/06/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.20 (14/06/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.19 (22/05/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.18 (16/05/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.17 (14/05/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.16 (13/05/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.15 (09/05/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.14 (09/05/2019)
+
+#### closed
+
+- [**closed**] Add map2 to Maybe [#4](https://github.com/vankeisb/react-tea-cup/pull/4)
+
+---
+
+## v0.0.13 (02/04/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.12 (02/04/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.11 (28/03/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.10 (28/03/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.9 (19/03/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.8 (12/03/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.7 (08/03/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.6 (08/03/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.5 (05/02/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.4 (31/01/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.3 (30/01/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.2 (29/01/2019)
+*No changelog for this release.*
+
+---
+
+## v0.0.1 (29/01/2019)
+*No changelog for this release.*
