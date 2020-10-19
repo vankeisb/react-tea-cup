@@ -179,6 +179,18 @@ export class Decode {
   }
 
   /**
+   * Decoder for optinal object fields
+   * @param key the name of the optinal field
+   * @param d the decoder for the field's value
+   */
+  static optionalField<T>(key: string, d: Decoder<T>): Decoder<T | undefined> {
+    return Decode.andThen(
+      (value) => value.map<Decoder<T | undefined>>(v => new Decoder<T>(() => d.decodeValue(v))).withDefault(Decode.succeed(undefined)),
+      Decode.maybe(Decode.field(key, Decode.value))
+    );
+  }
+
+  /**
    * Decoder for navigable object properties
    * @param keys a list of fields to navigate
    * @param d the decoder for the leaf value
@@ -439,7 +451,7 @@ export class Decode {
   /**
    * Decoder for any value
    */
-  static value: Decoder<any> = new Decoder<any>((o) => o);
+  static value: Decoder<any> = new Decoder<any>((o) => ok(o));
 
   /**
    * Decoder for null

@@ -260,3 +260,35 @@ test('oneOf', () => {
 test('from string', () => {
   expect(num.decodeString('123')).toEqual(ok(123));
 });
+
+test('any value', () => {
+  const anyValue = { foo: 'bar' };
+  expect(Decode.value.decodeValue(anyValue)).toEqual(ok(anyValue));
+});
+
+describe('optional field', () => {
+  test("is present", () => {
+    const value = { foo: 'bar', gnu: 13 };
+    expect(Decode.optionalField('gnu', Decode.num).decodeValue(value)).toEqual(ok(13));
+  })
+  test("is missing", () => {
+    const value = { foo: 'bar' };
+    expect(Decode.optionalField('gnu', Decode.num).decodeValue(value)).toEqual(ok(undefined));
+  })
+
+  test("typical use case", () => {
+    type MyType = {
+      foo: string;
+      gnu?: number;
+    }
+    const value = { foo: 'bar' };
+    const expected: MyType = {
+      foo: 'bar'
+    };
+    expect(Decode.map2(
+      (foo, gnu) => { return { foo, gnu } },
+      Decode.field('foo', Decode.str),
+      Decode.optionalField('gnu', Decode.num)).decodeValue(value)
+    ).toEqual(ok(expected));
+  })
+});
