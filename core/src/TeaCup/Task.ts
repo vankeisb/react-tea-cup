@@ -159,13 +159,13 @@ class TThen<E, R, R2, E2> extends Task<E | E2, R2> {
   }
 
   execute(callback: (r: Result<E | E2, R2>) => void): void {
-    this.task.execute((r: Result<E, R>) => {
+    this.task.execute((r: Result<E | E2, R>) => {
       r.match(
         (r: R) => {
           const next = this.f(r);
           next.execute(callback);
         },
-        (e: E) => {
+        (e: E | E2) => {
           callback(new Err(e));
         },
       );
