@@ -86,6 +86,28 @@ test('from lambda', (done) => {
   expectOk(done, t, 123);
 });
 
+test('Chaining type propagation 1', (done) => {
+  const t1: Task<string, never> = Task.fail('ok');
+  const t2: Task<number, never> = Task.fail(12);
+  const t: Task<string | number, string> = t1.andThen(() => t2)
+  expectErr(done, t, 'ok');
+});
+
+test('Chaining type propagation 2', (done) => {
+  const t1: Task<never, string> = Task.succeed('ok');
+  const t2: Task<number, never> = Task.fail(12);
+  const t: Task<never | number, never> = t1.andThen(() => t2)
+  expectErr(done, t, 12);
+});
+
+test('Chaining type propagation 3', (done) => {
+  const t1: Task<never, number> = Task.succeed(50);
+  const t2: Task<Error, string> = Task.fromLambda(() => 'string');
+  const t: Task<never | Error, string> = t1.andThen(() => t2)
+  expectOk(done, t, 'string');
+});
+
+
 export function attempt<E, R>(t: Task<E, R>, callback: (r: Result<E, R>) => void) {
   Task.attempt(t, (m) => m).execute(callback);
 }

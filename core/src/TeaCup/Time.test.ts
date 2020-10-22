@@ -24,7 +24,8 @@
  */
 
 import { Time } from './Time';
-import { perform } from './Task.test';
+import { expectErr, expectOk, perform } from './Task.test';
+import { Task } from './Task';
 
 const margin = 10;
 
@@ -46,3 +47,18 @@ test('in', (done) => {
     done();
   });
 });
+
+test('Time is chainable with success', (done) => {
+  const t1: Task<never, number> = Time.now();
+  const t2: Task<Error, string> = Task.fromLambda(() => 'test');
+  const t: Task<never|Error, string> = t1.andThen(() => t2);
+  expectOk(done, t, 'test')
+});
+
+test('Time is chainable with success', (done) => {
+  const err = new Error('test');
+  const t1: Task<never, number> = Time.now();
+  const t2: Task<Error, string> = Task.fromLambda(() => { throw err });
+  const t: Task<never|Error, string> = t1.andThen(() => t2);
+  expectErr(done, t, err);
+})

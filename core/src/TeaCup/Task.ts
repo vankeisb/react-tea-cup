@@ -106,7 +106,7 @@ export abstract class Task<E, R> {
    * Chain this task with another task
    * @param f a function that accepts the result of this task, and yields a new task
    */
-  andThen<R2>(f: (r: R) => Task<E, R2>): Task<E, R2> {
+  andThen<R2, E2>(f: (r: R) => Task<E2, R2>): Task<E | E2, R2> {
     return new TThen(this, f);
   }
 }
@@ -148,17 +148,17 @@ class TPromise<R> extends Task<any, R> {
   }
 }
 
-class TThen<E, R, R2> extends Task<E, R2> {
+class TThen<E, R, R2, E2> extends Task<E | E2, R2> {
   private readonly task: Task<E, R>;
-  private readonly f: (r: R) => Task<E, R2>;
+  private readonly f: (r: R) => Task<E2, R2>;
 
-  constructor(task: Task<E, R>, f: (r: R) => Task<E, R2>) {
+  constructor(task: Task<E, R>, f: (r: R) => Task<E2, R2>) {
     super();
     this.task = task;
     this.f = f;
   }
 
-  execute(callback: (r: Result<E, R2>) => void): void {
+  execute(callback: (r: Result<E | E2, R2>) => void): void {
     this.task.execute((r: Result<E, R>) => {
       r.match(
         (r: R) => {
