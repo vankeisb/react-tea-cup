@@ -26,6 +26,7 @@
 import { Cmd } from './Cmd';
 import { Dispatcher } from './Dispatcher';
 import { err, Err, ok, Ok, Result } from './Result';
+import {just, Maybe, nothing} from "./Maybe";
 
 /**
  * Base class for Tasks.
@@ -108,6 +109,58 @@ export abstract class Task<E, R> {
    */
   andThen<R2>(f: (r: R) => Task<E, R2>): Task<E, R2> {
     return new TThen(this, f);
+  }
+
+  /**
+   * Runs tasks in parallel
+   * @param f a function that maps the results of the 2 parallel tasks
+   * @param t the task to be run in parallel with this task
+   */
+  parallel<T2,R2>(f:(a: R, b: T2) => R2, t: Task<E, T2>): Task<E, R2> {
+    return new TParallel<E, R2, R, T2>(f, this, t);
+  }
+
+}
+
+class TParallel<E, R, A, B> extends Task<E, R> {
+
+  constructor(private readonly f: (a: A, b: B) => R, private readonly t1: Task<E, A>, private readonly t2: Task<E, B>) {
+    super();
+  }
+
+  execute(callback: (r: Result<E, R>) => void): void {
+    let ra: Maybe<A> = nothing;
+    let rb: Maybe<B> = nothing;
+    let error: Maybe<E> = nothing;
+
+    const done = () => {
+      if (error.type !== "Nothing" || ra.type === "Nothing" || rb.type === "Nothing") {
+        return;
+      }
+      callback(ok(this.f(ra.value, rb.value)));
+    }
+
+    function handle<X>(t: Task<E, X>, assign: (x: X) => void) {
+      t.execute((r: Result<E, X>) => {
+        switch (r.tag) {
+          case "Err": {
+            if (error?.isNothing()) {
+              callback(err(r.err));
+              error = just(r.err);
+            }
+            break;
+          }
+          case "Ok": {
+            assign(r.value);
+            done();
+            break;
+          }
+        }
+      });
+    }
+
+    handle(this.t1, x => ra = just(x));
+    handle(this.t2, x => rb = just(x));
   }
 }
 
