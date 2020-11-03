@@ -1,6 +1,6 @@
 {
   "name": "tea-cup-core",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "react-tea-cup core classes and utilities (Maybe etc)",
   "author": "Rémi Van Keisbelck <remi@rvkb.com>",
   "license": "MIT",
