@@ -25,6 +25,7 @@
 
 import { Task } from './Task';
 import { Result } from './Result';
+import { Time } from './Time';
 
 test('succeed', (done) => {
   expectOk(done, Task.succeed(123), 123);
@@ -84,6 +85,22 @@ test('more complex stuff with err', (done) => {
 test('from lambda', (done) => {
   const t: Task<Error, number> = Task.fromLambda(() => 123);
   expectOk(done, t, 123);
+});
+
+test('parallel', (done) => {
+  const t1 = Time.in(1000).map(() => 1);
+  const t2 = Time.in(2000).map(() => 2);
+  const t3 = Time.in(1000).map(() => 4);
+  const p = t1
+      .parallel(t2, (a, b) => a + b)
+      .parallel(t3, (a, b) => a + b);
+  const t = new Date().getTime();
+  perform(p, (x: number) => {
+    const elapsed = new Date().getTime() - t;
+    expect(x).toBe(7);
+    expect(elapsed < 2100).toBeTruthy();
+    done();
+  });
 });
 
 export function attempt<E, R>(t: Task<E, R>, callback: (r: Result<E, R>) => void) {
