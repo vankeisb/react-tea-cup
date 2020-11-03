@@ -7,6 +7,11 @@
         "prettier": "2.0.5",
         "rimraf": "^2.6.3",
         "ts-jest": "24.0.2",
-        "typescript": "~3.8.3"
-      }
-  }
+        "typescript": "~3.8.3",
+        "github-release-notes": "0.17.2"
+    },
+    "scripts": {
+        "release:gh": "gren release",
+        "release:changelog": "gren changelog --tags all --generate --override"
+    }
+}
