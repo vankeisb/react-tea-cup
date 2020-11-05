@@ -154,7 +154,43 @@ test('map8', () => {
       field('h', num),
     ).decodeValue(o),
   ).toEqual(ok(o));
+
 });
+
+describe('mapObject', () => {
+  type MyType = {
+    foo: string,
+    bar: number
+  };
+  const expected: MyType = {
+    foo: 'a foo',
+    bar: 13
+  }
+
+  test('simple', () => {
+    const value = { foo: 'a foo', bar: 13 }
+    expect(Decode.mapObject({
+      foo: Decode.str,
+      bar: Decode.num
+    }).decodeValue(value)).toEqual(ok(expected));
+  })
+
+  test('missing field', () => {
+    const value = { foo: 'a foo' }
+    expect(Decode.mapObject({
+      foo: Decode.str,
+      bar: Decode.num
+    }).decodeValue(value)).toEqual(err('path not found [bar] on {"foo":"a foo"}'));
+  })
+
+  test('superfluous field', () => {
+    const value = { foo: 'a foo', bar: 13, toto: true }
+    expect(Decode.mapObject({
+      foo: Decode.str,
+      bar: Decode.num
+    }).decodeValue(value)).toEqual(ok(expected));
+  })
+})
 
 test('andThen', () => {
   type Stuff = { readonly tag: 'stuff1'; readonly foo: string } | { readonly tag: 'stuff2'; readonly bar: string };

@@ -436,6 +436,22 @@ export class Decode {
     );
   }
 
+  /**
+   * Decoder for big objects, where map8() is not enough.
+   * @param dobject an object with decoders
+   */
+  static mapObject<T>(dobject: { [P in keyof T]: Decoder<T[P]> }): Decoder<T> {
+    const keys = Object.keys(dobject) as Array<keyof typeof dobject>
+    const partialDecoder: Decoder<Partial<T>> = keys.reduce((dacc, key) => Decode.andThen(object => {
+      const propertyDecoder = getProperty(dobject, key);
+      return Decode.map(property => {
+        object[key] = property;
+        return object;
+      }, Decode.field(key as string, propertyDecoder));
+    }, dacc), Decode.succeed({} as Partial<T>))
+    return Decode.map(v => v as T, partialDecoder);
+  }
+
   // Fancy Decoding
 
   /**
@@ -505,4 +521,8 @@ export class Decode {
       }
     });
   }
+}
+
+function getProperty<T, K extends keyof T>(o: T, key: K): T[K] {
+  return o[key];
 }
