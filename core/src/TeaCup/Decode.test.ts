@@ -192,6 +192,52 @@ describe('mapObject', () => {
   })
 })
 
+describe('mapArray', () => {
+  type MyType = [
+    string,
+    number
+  ]
+  const expected: MyType = [
+    'a foo',
+    13
+  ]
+
+  test('simple', () => {
+    const value = ['a foo', 13]
+    expect(Decode.mapArray([
+      Decode.str,
+      Decode.num
+    ]).decodeValue(value)).toEqual(ok(expected));
+  })
+
+  test('type mismatch', () => {
+    // TODO help the type system compile fail?
+    const value = ['a foo', 13]
+    expect(Decode.mapArray([
+      Decode.str,
+      Decode.str
+    ]).decodeValue(value)).toEqual(err('ran into decoder error at [1] : value is not a string : 13'));
+  })
+
+  test('missing item', () => {
+    // TODO help the type system compile fail?
+    const value = ['a foo']
+    expect(Decode.mapArray([
+      Decode.str,
+      Decode.num
+    ]).decodeValue(value)).toEqual(err('path not found [1] on [\"a foo\"]'));
+  })
+
+  test('too many items', () => {
+    // TODO help the type system compile fail?
+    const value = ['a foo', 13, true]
+    expect(Decode.mapArray([
+      Decode.str,
+      Decode.num
+    ]).decodeValue(value)).toEqual(ok(expected));
+  })
+})
+
 test('andThen', () => {
   type Stuff = { readonly tag: 'stuff1'; readonly foo: string } | { readonly tag: 'stuff2'; readonly bar: string };
 

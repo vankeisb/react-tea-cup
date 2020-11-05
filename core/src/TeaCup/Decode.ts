@@ -452,6 +452,14 @@ export class Decode {
     return Decode.map(v => v as T, partialDecoder);
   }
 
+  /**
+ * Decoder for big objects, where map8() is not enough.
+ * @param darray an array with decoders
+ */
+  static mapArray<T extends any[]>(darray: DecoderArray<T>): Decoder<T> {
+    return Decode.map(v => Object.values(v) as T, this.mapObject(darray));
+  }
+
   // Fancy Decoding
 
   /**
@@ -523,6 +531,9 @@ export class Decode {
   }
 }
 
+
 function getProperty<T, K extends keyof T>(o: T, key: K): T[K] {
   return o[key];
 }
+
+type DecoderArray<A extends any[]> = { [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }
