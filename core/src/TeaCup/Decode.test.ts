@@ -170,28 +170,52 @@ describe('mapObject', () => {
   test('simple', () => {
     const value = { foo: 'a foo', bar: 13 }
     expect(Decode.mapObject<MyType>({
-      foo: Decode.str,
-      bar: Decode.num
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.field('bar', Decode.num)
     }).decodeValue(value)).toEqual(ok(expected));
   })
+
+
+  test('simpler', () => {
+    const value = { foo: 'a foo', bar: 13 }
+    expect(Decode.mapObject<MyType>(Decode.mapFields({
+      foo: Decode.str,
+      bar: Decode.num
+    })).decodeValue(value)).toEqual(ok(expected));
+  })
+
 
   test('missing field', () => {
     const value = { foo: 'a foo' }
     expect(Decode.mapObject<MyType>({
-      foo: Decode.str,
-      bar: Decode.num
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.field('bar', Decode.num)
     }).decodeValue(value)).toEqual(err('path not found [bar] on {"foo":"a foo"}'));
   })
 
   test('superfluous field', () => {
     const value = { foo: 'a foo', bar: 13, toto: true }
     expect(Decode.mapObject<MyType>({
-      foo: Decode.str,
-      bar: Decode.num
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.field('bar', Decode.num)
     }).decodeValue(value)).toEqual(ok(expected));
   })
 
+  test('optional field', () => {
+    type MyType2 = {
+      foo: string,
+      bar?: number
+    };
+    const expected: MyType2 = {
+      foo: 'a foo',
+    }
 
+    const value = { foo: 'a foo', toto: true }
+    expect(Decode.mapObject<MyType2>({
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.optionalField('bar', Decode.num)
+    }).decodeValue(value)).toEqual(ok(expected));
+  })
 })
 
 describe('mapArray', () => {
@@ -391,5 +415,23 @@ describe('optional field', () => {
       Decode.field('foo', Decode.str),
       Decode.optionalField('gnu', Decode.num)).decodeValue(value)
     ).toEqual(ok(expected));
+  })
+
+  test('simpler optional field', () => {
+    type MyType2 = {
+      foo: string,
+      bar?: number
+    };
+    const expected: MyType2 = {
+      foo: 'a foo',
+    }
+
+    const value = { foo: 'a foo', toto: true }
+    expect(Decode.mapObject<MyType2>({
+      ...Decode.mapFields({
+        foo: Decode.str,
+      }),
+      bar: Decode.optionalField('bar', Decode.num)
+    }).decodeValue(value)).toEqual(ok(expected));
   })
 });

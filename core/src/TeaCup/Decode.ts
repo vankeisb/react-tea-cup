@@ -447,17 +447,31 @@ export class Decode {
       return Decode.map(property => {
         object[key] = property;
         return object;
-      }, Decode.field(key as string, propertyDecoder));
+      }, propertyDecoder);
     }, dacc), Decode.succeed({} as Partial<T>))
     return Decode.map(v => v as T, partialDecoder);
   }
 
   /**
- * Decoder for big objects, where map8() is not enough.
- * @param darray an array with decoders
- */
+   * Convenience, map docoders to field decoders
+   * @param dobject an object with decoders 
+   */
+  static mapFields<T>(decoders: DecoderObject<T>): DecoderObject<T> {
+    const keys = Object.keys(decoders) as Array<keyof typeof decoders>
+    const partial: Partial<DecoderObject<T>> = keys.reduce((acc, key) => {
+      const propertyDecoder = getProperty(decoders, key);
+      acc[key] = Decode.field(key as string, propertyDecoder);
+      return acc;
+    }, {} as Partial<DecoderObject<T>>)
+    return partial as DecoderObject<T>;
+  }
+
+  /**
+   * Decoder for big objects, where map8() is not enough.
+   * @param darray an array with decoders
+   */
   static mapArray<T extends any[]>(darray: DecoderArray<T>): Decoder<T> {
-    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(darray));
+    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(this.mapFields<T>(darray)));
   }
 
   // Fancy Decoding
