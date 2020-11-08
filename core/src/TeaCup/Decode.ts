@@ -550,10 +550,5 @@ function getProperty<T, K extends keyof T>(o: T, key: K): T[K] {
   return o[key];
 }
 
-
-type DecoderObject<T> = { [P in keyof T]: Decoder<T[P]> }
-type DecoderArray<A extends any[]> = { [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }
-
-// TODO need required?
-// type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>
-// type DecoderArray<A extends any[]> = Required<{ [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }>
+type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>
+type DecoderArray<A extends any[]> = Required<{ [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }>
