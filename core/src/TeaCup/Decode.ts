@@ -440,7 +440,7 @@ export class Decode {
    * Decoder for big objects, where map8() is not enough.
    * @param dobject an object with decoders
    */
-  static mapObject<T>(dobject: { [P in keyof T]: Decoder<T[P]> }): Decoder<T> {
+  static mapObject<T>(dobject: DecoderObject<T>): Decoder<T> {
     const keys = Object.keys(dobject) as Array<keyof typeof dobject>
     const partialDecoder: Decoder<Partial<T>> = keys.reduce((dacc, key) => Decode.andThen(object => {
       const propertyDecoder = getProperty(dobject, key);
@@ -457,7 +457,7 @@ export class Decode {
  * @param darray an array with decoders
  */
   static mapArray<T extends any[]>(darray: DecoderArray<T>): Decoder<T> {
-    return Decode.map(v => Object.values(v) as T, this.mapObject(darray));
+    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(darray));
   }
 
   // Fancy Decoding
@@ -536,4 +536,10 @@ function getProperty<T, K extends keyof T>(o: T, key: K): T[K] {
   return o[key];
 }
 
+
+type DecoderObject<T> = { [P in keyof T]: Decoder<T[P]> }
 type DecoderArray<A extends any[]> = { [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }
+
+// TODO need required?
+// type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>
+// type DecoderArray<A extends any[]> = Required<{ [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }>
