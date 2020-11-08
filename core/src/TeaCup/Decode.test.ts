@@ -217,9 +217,9 @@ describe('mapObject', () => {
     }).decodeValue(value)).toEqual(ok(expected));
 
     // the type system will compile fail this test:
-    expect(Decode.mapObject<MyType2>({
-      foo: Decode.field('foo', Decode.str),
-    }).decodeValue(value)).toEqual(ok(expected));
+    // expect(Decode.mapObject<MyType2>({
+    //   foo: Decode.field('foo', Decode.str),
+    // }).decodeValue(value)).toEqual(ok(expected));
   })
 })
 
