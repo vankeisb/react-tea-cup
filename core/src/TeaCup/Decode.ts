@@ -453,17 +453,19 @@ export class Decode {
   }
 
   /**
-   * Convenience, map docoders to field decoders
+   * Convenience, map decoder object to another decoder object
    * @param dobject an object with decoders 
+   * @param fun the mapper function
    */
-  static mapFields<T>(decoders: DecoderObject<T>): DecoderObject<T> {
+  static mapFields<T, T2>(decoders: DecoderObject<T>, fun: DecoderObjectMapper<T, T2>): DecoderObject<T2> {
     const keys = Object.keys(decoders) as Array<keyof typeof decoders>
-    const partial: Partial<DecoderObject<T>> = keys.reduce((acc, key) => {
+    const partial: Partial<DecoderObject<T2>> = keys.reduce((acc, key) => {
       const propertyDecoder = getProperty(decoders, key);
-      acc[key] = Decode.field(key as string, propertyDecoder);
+      const [key2, propertyDecoder2] = fun(key, propertyDecoder);
+      acc[key2] = propertyDecoder2;
       return acc;
-    }, {} as Partial<DecoderObject<T>>)
-    return partial as DecoderObject<T>;
+    }, {} as Partial<DecoderObject<T2>>)
+    return partial as DecoderObject<T2>;
   }
 
   /**
@@ -471,27 +473,17 @@ export class Decode {
    * @param dobject an object with decoders
    */
   static mapRequiredFields<T>(decoders: DecoderObject<T>): DecoderObject<T> {
-    const keys = Object.keys(decoders) as Array<keyof typeof decoders>
-    const partial: Partial<DecoderObject<T>> = keys.reduce((acc, key) => {
-      const propertyDecoder = getProperty(decoders, key);
-      acc[key] = Decode.field(key as string, propertyDecoder);
-      return acc;
-    }, {} as Partial<DecoderObject<T>>)
-    return partial as DecoderObject<T>;
+    return this.mapFields(decoders, (k: keyof T, d: Decoder<T[keyof T]>) => [k, Decode.field(k as string, d)]);
   }
 
   /**
   * Convenience, map docoders to optional field decoders
   * @param dobject an object with decoders
   */
-  static mapOptionalFields<T>(decoders: DecoderObject<T>): DecoderObjectWithOptionals<T> {
-    const keys = Object.keys(decoders) as Array<keyof typeof decoders>
-    const partial: Partial<DecoderObjectWithOptionals<T>> = keys.reduce((acc, key) => {
-      const propertyDecoder = getProperty(decoders, key);
-      acc[key] = Decode.optionalField(key as string, propertyDecoder);
-      return acc;
-    }, {} as Partial<DecoderObjectWithOptionals<T>>)
-    return partial as DecoderObjectWithOptionals<T>;
+  static mapOptionalFields<T>(decoders: DecoderObject<T>): DecoderObject<OptionalFields<T>> {
+    const mapper: DecoderObjectMapper<T, OptionalFields<T>> =
+      (k: keyof T, d: Decoder<T[keyof T]>) => [k, Decode.optionalField(k as string, d)]
+    return this.mapFields(decoders, mapper);
   }
 
   /**
@@ -499,7 +491,7 @@ export class Decode {
    * @param darray an array with decoders
    */
   static mapArray<T extends any[]>(darray: DecoderArray<T>): Decoder<T> {
-    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(this.mapFields<T>(darray)));
+    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(this.mapRequiredFields<T>(darray)));
   }
 
   // Fancy Decoding
@@ -578,6 +570,13 @@ function getProperty<T, K extends keyof T>(o: T, key: K): T[K] {
   return o[key];
 }
 
-type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>
-type DecoderObjectWithOptionals<T> = Required<{ [P in keyof T]: Decoder<T[P] | undefined> }>
-type DecoderArray<A extends any[]> = Required<{ [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }>
+export type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>
+export type DecoderArray<A extends any[]> = Required<{ [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }>
+
+export type OptionalFields<T> = {
+  [P in keyof T]: (T[P] | undefined);
+};
+
+export type DecoderObjectMapper<T, T2> =
+  (k: keyof T, d: Decoder<T[keyof T]>) => [keyof T2, Decoder<T2[keyof T2]>]
+

@@ -23,7 +23,7 @@
  *
  */
 
-import { Decode, Decoder } from './Decode';
+import { Decode, Decoder, DecoderObject } from './Decode';
 import { err, ok } from './Result';
 import { just, nothing } from './Maybe';
 const num = Decode.num;
@@ -178,7 +178,7 @@ describe('mapObject', () => {
 
   test('simpler', () => {
     const value = { foo: 'a foo', bar: 13 }
-    expect(Decode.mapObject<MyType>(Decode.mapFields({
+    expect(Decode.mapObject<MyType>(Decode.mapRequiredFields({
       foo: Decode.str,
       bar: Decode.num
     })).decodeValue(value)).toEqual(ok(expected));
@@ -231,12 +231,12 @@ describe('mapObject', () => {
       foo: 'a foo',
     }
 
-    const decoder = {
+    const decoder: DecoderObject<MyType2> = {
       ...Decode.mapRequiredFields({
         foo: Decode.str,
       }),
       ...Decode.mapOptionalFields({
-        bar: Decode.num
+        bar: Decode.num,
       })
     }
 
@@ -455,7 +455,7 @@ describe('optional field', () => {
 
     const value = { foo: 'a foo', toto: true }
     expect(Decode.mapObject<MyType2>({
-      ...Decode.mapFields({
+      ...Decode.mapRequiredFields({
         foo: Decode.str,
       }),
       bar: Decode.optionalField('bar', Decode.num)
