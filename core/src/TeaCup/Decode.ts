@@ -467,6 +467,34 @@ export class Decode {
   }
 
   /**
+   * Convenience, map docoders to required field decoders
+   * @param dobject an object with decoders
+   */
+  static mapRequiredFields<T>(decoders: DecoderObject<T>): DecoderObject<T> {
+    const keys = Object.keys(decoders) as Array<keyof typeof decoders>
+    const partial: Partial<DecoderObject<T>> = keys.reduce((acc, key) => {
+      const propertyDecoder = getProperty(decoders, key);
+      acc[key] = Decode.field(key as string, propertyDecoder);
+      return acc;
+    }, {} as Partial<DecoderObject<T>>)
+    return partial as DecoderObject<T>;
+  }
+
+  /**
+  * Convenience, map docoders to optional field decoders
+  * @param dobject an object with decoders
+  */
+  static mapOptionalFields<T>(decoders: DecoderObject<T>): DecoderObjectWithOptionals<T> {
+    const keys = Object.keys(decoders) as Array<keyof typeof decoders>
+    const partial: Partial<DecoderObjectWithOptionals<T>> = keys.reduce((acc, key) => {
+      const propertyDecoder = getProperty(decoders, key);
+      acc[key] = Decode.optionalField(key as string, propertyDecoder);
+      return acc;
+    }, {} as Partial<DecoderObjectWithOptionals<T>>)
+    return partial as DecoderObjectWithOptionals<T>;
+  }
+
+  /**
    * Decoder for big objects, where map8() is not enough.
    * @param darray an array with decoders
    */
@@ -551,4 +579,5 @@ function getProperty<T, K extends keyof T>(o: T, key: K): T[K] {
 }
 
 type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>
+type DecoderObjectWithOptionals<T> = Required<{ [P in keyof T]: Decoder<T[P] | undefined> }>
 type DecoderArray<A extends any[]> = Required<{ [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }>

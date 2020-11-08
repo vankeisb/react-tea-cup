@@ -221,6 +221,28 @@ describe('mapObject', () => {
     //   foo: Decode.field('foo', Decode.str),
     // }).decodeValue(value)).toEqual(ok(expected));
   })
+
+  test('simpler optional field', () => {
+    type MyType2 = {
+      foo: string,
+      bar?: number
+    };
+    const expected: MyType2 = {
+      foo: 'a foo',
+    }
+
+    const decoder = {
+      ...Decode.mapRequiredFields({
+        foo: Decode.str,
+      }),
+      ...Decode.mapOptionalFields({
+        bar: Decode.num
+      })
+    }
+
+    const value = { foo: 'a foo', toto: true }
+    expect(Decode.mapObject<MyType2>(decoder).decodeValue(value)).toEqual(ok(expected));
+  })
 })
 
 describe('mapArray', () => {
