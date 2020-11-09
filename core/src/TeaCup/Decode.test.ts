@@ -24,7 +24,7 @@
  */
 
 import { Decode, Decoder } from './Decode';
-import { err, ok } from './Result';
+import { err, ok, Result } from './Result';
 import { just, nothing } from './Maybe';
 const num = Decode.num;
 const field = Decode.field;
@@ -292,3 +292,35 @@ describe('optional field', () => {
     ).toEqual(ok(expected));
   })
 });
+
+describe('null types', () => {
+  test("non null value", () => {
+    const value = { foo: 'bar' };
+    const result: Result<string, string | null> = Decode.orNull(Decode.field('foo', Decode.str)).decodeValue(value)
+    expect(result).toEqual(ok('bar'));
+  })
+
+  test("null value", () => {
+    const value = { foo: null };
+    const result: Result<string, string | null> = (Decode.field('foo', Decode.orNull(Decode.str))).decodeValue(value)
+    expect(result).toEqual(ok(null));
+  })
+
+  test("typical use case", () => {
+    type MyType = {
+      gnu: number | null;
+      foo: string | null
+    }
+    const value = { foo: null, gnu: null };
+    const expected: MyType = {
+      foo: null,
+      gnu: null
+    };
+    expect(Decode.map2(
+      (foo, gnu) => { return { foo, gnu } },
+      Decode.field('foo', Decode.orNull(Decode.str)),
+      Decode.field('gnu', Decode.orNull(Decode.num)))
+      .decodeValue(value)
+    ).toEqual(ok(expected));
+  })
+})
