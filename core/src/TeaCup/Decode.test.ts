@@ -24,8 +24,6 @@
  */
 
 import { Decode, Decoder, DecoderObject } from './Decode';
-import { err, ok } from './Result';
-import { Decode, Decoder } from './Decode';
 import { err, ok, Result } from './Result';
 import { just, nothing } from './Maybe';
 const num = Decode.num;
@@ -495,3 +493,4 @@ describe('null types', () => {
       .decodeValue(value)
     ).toEqual(ok(expected));
   })
+})
