@@ -134,6 +134,14 @@ export class Decode {
   }
 
   /**
+   * Decoder for nullable types
+   * @param d the decoder to be used if the value is not null
+   */
+  static orNull<T>(d: Decoder<T>): Decoder<T | null> {
+    return this.map(v => v.map<T | null>(v => v).withDefault(null), this.nullable(d));
+  }
+
+  /**
    * Decoder for lists
    * @param d the decoder for elements in the list
    */
