@@ -258,7 +258,7 @@ describe('mapArray', () => {
   test('simple', () => {
     type ValueType = [string, number]
     const value: ValueType = ['a foo', 13]
-    expect(Decode.mapArray<ValueType>([
+    expect(Decode.mapTuple<ValueType>([
       Decode.str,
       Decode.num
     ]).decodeValue(value)).toEqual(ok(expected));
@@ -274,8 +274,8 @@ describe('mapArray', () => {
     //   Decode.str
     // ]).decodeValue(value)).toEqual(err('ran into decoder error at [1] : value is not a string : 13'));
 
-    // the type system will let though to runtime: 
-    expect(Decode.mapArray([
+    // the type system will let though to runtime:
+    expect(Decode.mapTuple([
       Decode.str,
       Decode.str
     ]).decodeValue(value)).toEqual(err('ran into decoder error at [1] : value is not a string : 13'));
@@ -286,9 +286,9 @@ describe('mapArray', () => {
     // the type system will compile fail this test:
     // const value: ValueType  = ['a foo']
 
-    // the type system will let though to runtime: 
+    // the type system will let though to runtime:
     const value = ['a foo']
-    expect(Decode.mapArray([
+    expect(Decode.mapTuple([
       Decode.str,
       Decode.num
     ]).decodeValue(value)).toEqual(err('path not found [1] on [\"a foo\"]'));
@@ -299,9 +299,9 @@ describe('mapArray', () => {
     // the type system will compile fail this test:
     // const value: ValueType = ['a foo', 13, true]
 
-    // the type system will let though to runtime: 
+    // the type system will let though to runtime:
     const value = ['a foo', 13, true]
-    expect(Decode.mapArray([
+    expect(Decode.mapTuple([
       Decode.str,
       Decode.num
     ]).decodeValue(value)).toEqual(ok(expected));

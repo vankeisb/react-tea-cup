@@ -462,7 +462,7 @@ export class Decode {
 
   /**
    * Convenience, map decoder object to another decoder object
-   * @param dobject an object with decoders 
+   * @param dobject an object with decoders
    * @param fun the mapper function
    */
   static mapFields<T, T2>(decoders: DecoderObject<T>, fun: DecoderObjectMapper<T, T2>): DecoderObject<T2> {
@@ -485,7 +485,7 @@ export class Decode {
   }
 
   /**
-  * Convenience, map docoders to optional field decoders
+  * Convenience, map decoders to optional field decoders
   * @param dobject an object with decoders
   */
   static mapOptionalFields<T>(decoders: DecoderObject<T>): DecoderObject<OptionalFields<T>> {
@@ -495,11 +495,11 @@ export class Decode {
   }
 
   /**
-   * Decoder for big objects, where map8() is not enough.
+   * Decoder for fixed-length tuples.
    * @param darray an array with decoders
    */
-  static mapArray<T extends any[]>(darray: DecoderArray<T>): Decoder<T> {
-    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(this.mapRequiredFields<T>(darray)));
+  static mapTuple<T extends any[]>(decoders: DecoderArray<T>): Decoder<T> {
+    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(this.mapRequiredFields<T>(decoders)));
   }
 
   // Fancy Decoding
