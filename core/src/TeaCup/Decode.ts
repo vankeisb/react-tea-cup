@@ -462,7 +462,7 @@ export class Decode {
 
   /**
    * Convenience, map decoder object to another decoder object
-   * @param dobject an object with decoders
+   * @param decoders an object with decoders
    * @param fun the mapper function
    */
   static mapFields<T, T2>(decoders: DecoderObject<T>, fun: DecoderObjectMapper<T, T2>): DecoderObject<T2> {
@@ -478,7 +478,7 @@ export class Decode {
 
   /**
    * Convenience, map docoders to required field decoders
-   * @param dobject an object with decoders
+   * @param decoders an object with decoders
    */
   static mapRequiredFields<T>(decoders: DecoderObject<T>): DecoderObject<T> {
     return this.mapFields(decoders, (k: keyof T, d: Decoder<T[keyof T]>) => [k, Decode.field(k as string, d)]);
@@ -486,7 +486,7 @@ export class Decode {
 
   /**
   * Convenience, map decoders to optional field decoders
-  * @param dobject an object with decoders
+  * @param decoders an object with decoders
   */
   static mapOptionalFields<T>(decoders: DecoderObject<T>): DecoderObject<OptionalFields<T>> {
     const mapper: DecoderObjectMapper<T, OptionalFields<T>> =
@@ -496,7 +496,7 @@ export class Decode {
 
   /**
    * Decoder for fixed-length tuples.
-   * @param darray an array with decoders
+   * @param decoders an array with decoders
    */
   static mapTuple<T extends any[]>(decoders: DecoderArray<T>): Decoder<T> {
     return Decode.map(v => Object.values(v) as T, this.mapObject<T>(this.mapRequiredFields<T>(decoders)));
@@ -521,7 +521,7 @@ export class Decode {
 
   /**
    * Decoder for null
-   * @param the result to yield in case the decoded value is null
+   * @param t the result to yield in case the decoded value is null
    */
   static null<T>(t: T): Decoder<T> {
     return new Decoder<T>((o: any) => {
