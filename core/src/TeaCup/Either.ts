@@ -23,6 +23,8 @@
  *
  */
 
+import {just, Maybe, nothing} from "./Maybe";
+
 /**
  * Either left, or right.
  */
@@ -55,6 +57,14 @@ export class Left<A, B> {
   match<R>(onLeft: (a: A) => R, onRight: (b: B) => R): R {
     return onLeft(this.value);
   }
+
+  get left(): Maybe<A> {
+    return just(this.value);
+  }
+
+  get right(): Maybe<B> {
+    return nothing;
+  }
 }
 
 export class Right<A, B> {
@@ -83,6 +93,14 @@ export class Right<A, B> {
 
   match<R>(onLeft: (a: A) => R, onRight: (b: B) => R): R {
     return onRight(this.value);
+  }
+
+  get left(): Maybe<A> {
+    return nothing;
+  }
+
+  get right(): Maybe<B> {
+    return just(this.value);
   }
 }
 
