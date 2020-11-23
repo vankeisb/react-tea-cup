@@ -60,6 +60,7 @@ export class DevTools<Model, Msg> {
   private pausedOnEvent: number = -1;
   private listeners: DevToolsListener<Model, Msg>[] = [];
   private objectSerializer: ObjectSerializer;
+  private maxEvents: number = -1;
 
   constructor(objectSerializer: ObjectSerializer) {
     this.objectSerializer = objectSerializer;
@@ -82,6 +83,7 @@ export class DevTools<Model, Msg> {
 
   onEvent(e: DevToolsEvent<Model, Msg>): void {
     this.events.push(e);
+    this.removeEventsIfNeeded();
     this.listeners.forEach((l) => l(e));
   }
 
@@ -191,5 +193,30 @@ export class DevTools<Model, Msg> {
         '*** Application state cleared, the application will now start normally.\n' +
         '***********************************************************************',
     );
+  }
+
+  clear() {
+    if (this.isPaused()) {
+      this.resume();
+    }
+    this.events = [];
+    console.log("All events cleared")
+  }
+
+  setMaxEvents(maxEvents: number): DevTools<Model, Msg> {
+    this.maxEvents = maxEvents;
+    this.removeEventsIfNeeded();
+    return this;
+  }
+
+  private removeEventsIfNeeded(): DevTools<Model, Msg> {
+    if (this.maxEvents > 0) {
+      const delta = this.events.length - this.maxEvents;
+      if (delta > 0) {
+        const newEvents = this.events.slice(delta, this.events.length);
+        this.events = newEvents;
+      }
+    }
+    return this;
   }
 }
