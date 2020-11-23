@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.0 (03/11/2020)
+
+#### closed
+
+- [**closed**] Run .ts tests only [#36](https://github.com/vankeisb/react-tea-cup/pull/36)
+- [**closed**] parallel tasks [#34](https://github.com/vankeisb/react-tea-cup/pull/34)
+
+---
+
 ## v1.1.2 (19/10/2020)
 
 #### closed
