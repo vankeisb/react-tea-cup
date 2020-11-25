@@ -55,7 +55,7 @@ const snapshotKey = 'teaCupSnapshot';
 export type DevToolsListener<Model, Msg> = (e: DevToolsEvent<Model, Msg>) => void;
 
 export class DevTools<Model, Msg> {
-  private program?: Program<Model, Msg>;
+  // private program?: Program<Model, Msg>;
   private events: DevToolsEvent<Model, Msg>[] = [];
   private pausedOnEvent: number = -1;
   private listeners: DevToolsListener<Model, Msg>[] = [];
@@ -77,9 +77,9 @@ export class DevTools<Model, Msg> {
     return this.pausedOnEvent !== -1;
   }
 
-  connected(program: Program<Model, Msg>) {
-    this.program = program;
-  }
+  // connected(program: Program<Model, Msg>) {
+  //   this.program = program;
+  // }
 
   onEvent(e: DevToolsEvent<Model, Msg>): void {
     this.events.push(e);
@@ -87,16 +87,16 @@ export class DevTools<Model, Msg> {
     this.listeners.forEach((l) => l(e));
   }
 
-  travelTo(evtNum: number) {
-    if (this.program) {
-      const evt: DevToolsEvent<Model, Msg> = this.events[evtNum];
-      if (evt) {
-        const model = this.getEventModel(evt);
-        this.pausedOnEvent = evtNum;
-        this.program.setModel(model, false);
-      }
-    }
-  }
+  // travelTo(evtNum: number) {
+  //   if (this.program) {
+  //     const evt: DevToolsEvent<Model, Msg> = this.events[evtNum];
+  //     if (evt) {
+  //       const model = this.getEventModel(evt);
+  //       this.pausedOnEvent = evtNum;
+  //       this.program.setModel(model, false);
+  //     }
+  //   }
+  // }
 
   private getEventModel(e: DevToolsEvent<Model, Msg>): Model {
     switch (e.tag) {
@@ -107,30 +107,30 @@ export class DevTools<Model, Msg> {
     }
   }
 
-  resume() {
-    if (this.program) {
-      if (this.events.length > 0) {
-        const lastEvent = this.events[this.events.length - 1];
-        if (lastEvent) {
-          const model = this.getEventModel(lastEvent);
-          this.pausedOnEvent = -1;
-          this.program.setModel(model, true);
-        }
-      }
-    }
-  }
+  // resume() {
+  //   if (this.program) {
+  //     if (this.events.length > 0) {
+  //       const lastEvent = this.events[this.events.length - 1];
+  //       if (lastEvent) {
+  //         const model = this.getEventModel(lastEvent);
+  //         this.pausedOnEvent = -1;
+  //         this.program.setModel(model, true);
+  //       }
+  //     }
+  //   }
+  // }
 
-  forward() {
-    if (this.pausedOnEvent >= 0 && this.pausedOnEvent < this.events.length - 1) {
-      this.travelTo(this.pausedOnEvent + 1);
-    }
-  }
+  // forward() {
+  //   if (this.pausedOnEvent >= 0 && this.pausedOnEvent < this.events.length - 1) {
+  //     this.travelTo(this.pausedOnEvent + 1);
+  //   }
+  // }
 
-  backward() {
-    if (this.pausedOnEvent >= 1) {
-      this.travelTo(this.pausedOnEvent - 1);
-    }
-  }
+  // backward() {
+  //   if (this.pausedOnEvent >= 1) {
+  //     this.travelTo(this.pausedOnEvent - 1);
+  //   }
+  // }
 
   addListener(l: DevToolsListener<Model, Msg>): void {
     this.listeners.push(l);
@@ -197,7 +197,7 @@ export class DevTools<Model, Msg> {
 
   clear() {
     if (this.isPaused()) {
-      this.resume();
+      // this.resume();
     }
     this.events = [];
     console.log("All events cleared")

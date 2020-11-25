@@ -125,7 +125,7 @@ export function withReduxDevTools<Model, Msg>(
         // console.log('DISPATCH', message.payload);
         if (message.payload?.type === 'JUMP_TO_ACTION' || message.payload?.type === 'JUMP_TO_STATE') {
           // console.log('travelling to ', message.payload.actionId);
-          dt.travelTo(message.payload.actionId);
+          //dt.travelTo(message.payload.actionId);
         }
       }
     });
