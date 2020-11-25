@@ -68,15 +68,20 @@ export function Program<Model,Msg>(props: ProgramProps<Model, Msg>) {
 
   const cmd = useRef<Cmd<Msg>>(Cmd.none());
   const modelRef = useRef(model);
+  const sub = useRef<Sub<Msg>>(Sub.none());
 
   const dispatch = (msg: Msg) => {
     console.log("*** dispatch ***", msg);
     if (modelRef.current.type === 'Just') {
       const m = modelRef.current.value;
-      const mac = props.update(msg, m);
-      modelRef.current = just(mac[0]);
-      cmd.current = mac[1];
-      setModel(just(mac[0]));
+      const [uModel, uCmd] = props.update(msg, m);
+      modelRef.current = just(uModel);
+      cmd.current = uCmd;
+      setModel(just(uModel));
+      const newSub = props.subscriptions(uModel);
+      newSub.init(dispatch);
+      sub.current.release();
+      sub.current = newSub;
     }
   };
 
@@ -84,10 +89,13 @@ export function Program<Model,Msg>(props: ProgramProps<Model, Msg>) {
   useEffect(() => {
     if (modelRef.current.isNothing()) {
       console.log("*** init ***");
-      const mac = props.init();
-      setModel(just(mac[0]));
-      modelRef.current = just(mac[0]);
-      cmd.current = mac[1];
+      const [uModel, uCmd] = props.init();
+      setModel(just(uModel));
+      modelRef.current = just(uModel);
+      cmd.current = uCmd;
+      const newSub = props.subscriptions(uModel);
+      sub.current = newSub;
+      newSub.init(dispatch);
     }
   });
 
