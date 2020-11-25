@@ -74,16 +74,15 @@ export function Program<Model,Msg>(props: ProgramProps<Model, Msg>) {
     if (modelRef.current.type === 'Just') {
       const m = modelRef.current.value;
       const mac = props.update(msg, m);
-      setModel(just(mac[0]));
       modelRef.current = just(mac[0]);
       cmd.current = mac[1];
+      setModel(just(mac[0]));
     }
   };
 
   // init : run once (componentDidMount)
   useEffect(() => {
     if (modelRef.current.isNothing()) {
-      debugger;
       console.log("*** init ***");
       const mac = props.init();
       setModel(just(mac[0]));
@@ -94,9 +93,8 @@ export function Program<Model,Msg>(props: ProgramProps<Model, Msg>) {
 
   // executed at every render
   useEffect(() => {
-    debugger;
-    props.dispatchBridge?.subscribe(dispatch);
     console.log("*** render ***", cmd.current);
+    props.dispatchBridge?.subscribe(dispatch);
     cmd.current.execute(dispatch)
   });
 
