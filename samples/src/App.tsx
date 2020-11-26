@@ -55,6 +55,7 @@ import * as ClassMsgs from './Samples/ClassMsgs';
 import * as Sful from './Samples/StatefulInView';
 import * as Rest from './Samples/Rest';
 import * as TimeSample from './Samples/TimeSample';
+import * as EventsSample from './Samples/EventsSample';
 
 enum Tab {
   All,
@@ -160,6 +161,7 @@ interface Samples {
   readonly sful: Sful.Model;
   readonly rest: Rest.Model;
   readonly time: TimeSample.Model;
+  readonly events: EventsSample.Model;
 }
 
 type Msg =
@@ -172,6 +174,7 @@ type Msg =
   | { type: 'sful'; child: Sful.Msg }
   | { type: 'rest'; child: Rest.Msg }
   | { type: 'timeSample'; child: TimeSample.Msg }
+  | { type: 'eventsSample'; child: EventsSample.Msg }
   | { type: 'urlChange'; location: Location }
   | { type: 'newUrl'; url: string }
   | { type: 'noop' }
@@ -189,6 +192,7 @@ function initSamples(): [Model, Cmd<Msg>] {
   const sful = Sful.init();
   const rest = Rest.init();
   const time = TimeSample.init();
+  const events = EventsSample.init();
   return [
     {
       tag: 'samples',
@@ -202,6 +206,7 @@ function initSamples(): [Model, Cmd<Msg>] {
         sful: sful[0],
         rest: rest[0],
         time: time[0],
+        events: events[0],
       },
     },
     Cmd.batch([
@@ -214,6 +219,7 @@ function initSamples(): [Model, Cmd<Msg>] {
       sful[1].map(mapSful),
       rest[1].map(mapRest),
       time[1].map(mapTimeSample),
+      events[1].map(mapEventsSample),
     ]),
   ];
 }
@@ -328,6 +334,13 @@ function mapTimeSample(m: TimeSample.Msg): Msg {
   };
 }
 
+function mapEventsSample(m: EventsSample.Msg): Msg {
+  return {
+    type: 'eventsSample',
+    child: m,
+  };
+}
+
 function view(dispatch: Dispatcher<Msg>, model: Model) {
   switch (model.tag) {
     case 'home':
@@ -421,16 +434,16 @@ function viewTodos(dispatch: Dispatcher<Msg>, todoMvc: TodoMvc) {
         {active ? (
           <span>{label}</span>
         ) : (
-          <a
-            href="#x"
-            onClick={(e) => {
-              e.preventDefault();
-              dispatch({ type: 'tabClicked', tab: t });
-            }}
-          >
-            {label}
-          </a>
-        )}
+            <a
+              href="#x"
+              onClick={(e) => {
+                e.preventDefault();
+                dispatch({ type: 'tabClicked', tab: t });
+              }}
+            >
+              {label}
+            </a>
+          )}
       </li>
     );
   }
@@ -442,46 +455,46 @@ function viewTodos(dispatch: Dispatcher<Msg>, todoMvc: TodoMvc) {
       {todos.length === 0 ? (
         <p>You have nothing to do ! Neat !!</p>
       ) : (
-        <div>
-          <ul>
-            {viewTab(Tab.All)}
-            {viewTab(Tab.Open)}
-            {viewTab(Tab.Closed)}
-          </ul>
-          <ul>
-            {todos
-              .filter((todo) => {
-                switch (tab) {
-                  case Tab.All:
-                    return true;
-                  case Tab.Open:
-                    return !todo.done;
-                  case Tab.Closed:
-                    return todo.done;
-                }
-                return false;
-              })
-              .map((todo) => {
-                const style = {
-                  textDecoration: todo.done ? 'line-through' : 'none',
-                };
-                return (
-                  <li key={todo.id} style={style}>
-                    <a
-                      href="#x"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        dispatch(navigateTo(todoRoute(todo.id)));
-                      }}
-                    >
-                      {todo.text}
-                    </a>
-                  </li>
-                );
-              })}
-          </ul>
-        </div>
-      )}
+          <div>
+            <ul>
+              {viewTab(Tab.All)}
+              {viewTab(Tab.Open)}
+              {viewTab(Tab.Closed)}
+            </ul>
+            <ul>
+              {todos
+                .filter((todo) => {
+                  switch (tab) {
+                    case Tab.All:
+                      return true;
+                    case Tab.Open:
+                      return !todo.done;
+                    case Tab.Closed:
+                      return todo.done;
+                  }
+                  return false;
+                })
+                .map((todo) => {
+                  const style = {
+                    textDecoration: todo.done ? 'line-through' : 'none',
+                  };
+                  return (
+                    <li key={todo.id} style={style}>
+                      <a
+                        href="#x"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          dispatch(navigateTo(todoRoute(todo.id)));
+                        }}
+                      >
+                        {todo.text}
+                      </a>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
+        )}
     </div>
   );
 }
@@ -545,6 +558,8 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
       {Rest.view(map(dispatch, mapRest), samples.rest)}
       <h2>Time</h2>
       {TimeSample.view(map(dispatch, mapTimeSample), samples.time)}
+      <h2>Events</h2>
+      {EventsSample.view(map(dispatch, mapEventsSample), samples.events)}
     </div>
   );
 }
@@ -610,6 +625,12 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         return [{ ...s, time: macTime[0] }, macTime[1].map(mapTimeSample)];
       });
 
+    case 'eventsSample':
+      return mapSample((s: Samples) => {
+        const macEvents = EventsSample.update(msg.child, s.events);
+        return [{ ...s, event: macEvents[0] }, macEvents[1].map(mapEventsSample)];
+      });
+
     case 'urlChange':
       return init(msg.location);
 
@@ -625,12 +646,13 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 function subscriptions(model: Model): Sub<Msg> {
   switch (model.tag) {
     case 'samples':
-      const { counter, parentChild, raf, time } = model.samples;
+      const { counter, parentChild, raf, time, events } = model.samples;
       return Sub.batch([
         Counter.subscriptions(counter).map(mapCounter),
         ParentChild.subscriptions(parentChild).map(mapParentChild),
         Raf.subscriptions(raf).map(mapRaf),
         TimeSample.subscriptions(time).map(mapTimeSample),
+        EventsSample.subscriptions(events).map(mapEventsSample),
       ]);
     default:
       return Sub.none();
@@ -645,16 +667,16 @@ function onUrlChange(l: Location): Msg {
 }
 
 const App = () => (
-    <React.StrictMode>
-      <ProgramWithNav
-          init={init}
-          view={view}
-          update={update}
-          subscriptions={subscriptions}
-          onUrlChange={onUrlChange}
-          devTools={withReduxDevTools(DevTools.init<Model, Msg>(window))}
-      />
-    </React.StrictMode>
+  <React.StrictMode>
+    <ProgramWithNav
+      init={init}
+      view={view}
+      update={update}
+      subscriptions={subscriptions}
+      onUrlChange={onUrlChange}
+      devTools={withReduxDevTools(DevTools.init<Model, Msg>(window))}
+    />
+  </React.StrictMode>
 );
 
 export default App;
