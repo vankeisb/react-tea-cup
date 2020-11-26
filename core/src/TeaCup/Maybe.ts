@@ -78,6 +78,13 @@ export class Just<T> {
   isNothing(): boolean {
     return false;
   }
+
+  filter(f:(t:T) => boolean): Maybe<T> {
+    if (f(this.value)) {
+      return this;
+    }
+    return nothing;
+  }
 }
 
 /**
@@ -134,6 +141,11 @@ export class Nothing<T> {
   isNothing(): boolean {
     return true;
   }
+
+  filter(): Maybe<T> {
+    return nothing;
+  }
+
 }
 
 /**
