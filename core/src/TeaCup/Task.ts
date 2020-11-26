@@ -61,6 +61,14 @@ export abstract class Task<E, R> {
    * @param r the value
    */
   static succeed<R>(r: R): Task<never, R> {
+    return new TSuccess(() => r);
+  }
+
+  /**
+   * Create a task that succeeds with a lazily-supplied value
+   * @param r the value supplier
+   */
+  static succeedLazy<R>(r: () => R): Task<never, R> {
     return new TSuccess(r);
   }
 
@@ -69,6 +77,14 @@ export abstract class Task<E, R> {
    * @param e the error
    */
   static fail<E>(e: E): Task<E, never> {
+    return new TError(() => e);
+  }
+
+  /**
+   * Create a task that fails with a lazily-supplied error
+   * @param e the error supplier
+   */
+  static failLazy<E>(e: () => E): Task<E, never> {
     return new TError(e);
   }
 
@@ -104,6 +120,14 @@ export abstract class Task<E, R> {
   }
 
   /**
+   * Recover from error (turns error into a success !)
+   * @param f the error-to-success converter
+   */
+  recover(f: (e: E) => R): Task<never, R> {
+    return new TRecover(this, f);
+  }
+
+  /**
    * Chain this task with another task
    * @param f a function that accepts the result of this task, and yields a new task
    */
@@ -118,6 +142,19 @@ export abstract class Task<E, R> {
    */
   parallel<T2, R2>(t: Task<E, T2>, f: (a: R, b: T2) => R2): Task<E, R2> {
     return new TParallel<E, R2, R, T2>(f, this, t);
+  }
+}
+
+class TRecover<E, R> extends Task<never, R> {
+  constructor(private readonly t: Task<E, R>, private readonly f: (e: E) => R) {
+    super();
+  }
+
+  execute(callback: (r: Result<never, R>) => void): void {
+    this.t.execute((tRes) => tRes.match(
+        tOk => callback(ok(tOk)),
+        tErr => callback(ok(this.f(tErr)))
+    ));
   }
 }
 
@@ -259,28 +296,28 @@ class TMappedErr<E, R, E2> extends Task<E2, R> {
 }
 
 class TSuccess<R> extends Task<never, R> {
-  private readonly result: R;
+  private readonly result: () => R;
 
-  constructor(result: R) {
+  constructor(result: () => R) {
     super();
     this.result = result;
   }
 
   execute(callback: (r: Result<never, R>) => void): void {
-    callback(new Ok(this.result));
+    callback(ok(this.result()));
   }
 }
 
 class TError<E> extends Task<E, never> {
-  private readonly err: E;
+  private readonly err: () => E;
 
-  constructor(err: E) {
+  constructor(err: () => E) {
     super();
     this.err = err;
   }
 
   execute(callback: (r: Result<E, never>) => void): void {
-    callback(new Err(this.err));
+    callback(err(this.err()));
   }
 }
 
