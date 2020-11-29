@@ -23,7 +23,7 @@
  *
  */
 
-import { Program } from './Program';
+import { DispatchBridge, Program } from './Program';
 import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-core';
 import * as React from 'react';
 import { Component, createRef, ReactNode, RefObject } from 'react';
@@ -46,7 +46,7 @@ export interface NavProps<Model, Msg> {
  */
 export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, never> {
   private listener: Maybe<EventListener>;
-  private readonly ref: RefObject<Program<Model, Msg>> = createRef();
+  private dispatchBridge: DispatchBridge<Msg> = new DispatchBridge();
 
   constructor(props: Readonly<NavProps<Model, Msg>>) {
     super(props);
@@ -61,15 +61,15 @@ export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, 
         update={this.props.update}
         subscriptions={this.props.subscriptions}
         devTools={this.props.devTools}
-        ref={this.ref}
+        dispatchBridge={this.dispatchBridge}
       />
     );
   }
 
   componentDidMount(): void {
     const l = () => {
-      if (this.ref.current) {
-        this.ref.current.dispatch(this.props.onUrlChange(window.location));
+      if (this.dispatchBridge) {
+        this.dispatchBridge.dispatch(this.props.onUrlChange(window.location));
       }
     };
     this.listener = just(l);
