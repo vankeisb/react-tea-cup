@@ -23,47 +23,103 @@
  *
  */
 
+import { mkdirSync } from 'fs';
 import * as React from 'react';
-import { Dispatcher, Cmd, Sub, noCmd, onClick } from 'react-tea-cup';
+import { Dispatcher, Cmd, Sub, noCmd, onClick, nothing, just, Maybe, onDocument } from 'react-tea-cup';
 
-// model can be anything of course. Here, it
-// is just a number...
-export type Model = number;
+export type Model = {
+  clicked: Maybe<MousePosition>
+  moved: Maybe<MousePosition>
+};
 
-// discriminated unions can be used for Msgs
-export type Msg = { type: 'inc' } | { type: 'dec' };
-
-// init func : creates initial Model (no Cmds at init yet...)
-export function init(): [Model, Cmd<Msg>] {
-  return noCmd(0);
+type MousePosition = {
+  pos: Position;
+  page: Position;
+  offset: Position;
 }
 
-// view : renders the Model. Same as Elm's, but you
-// need this "dispatch" arg, so that you can emit Msgs
+type Position = [number, number]
+
+export type Msg = {
+  type: 'clicked',
+  position: MousePosition
+} | {
+  type: 'moved',
+  position: MousePosition
+};
+
+export function init(): [Model, Cmd<Msg>] {
+  return noCmd({
+    clicked: nothing,
+    moved: nothing
+  });
+}
+
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
   return (
     <div className="events">
-      <button onClick={(_) => dispatch({ type: 'dec' })}>-</button>
-      <span>{model}</span>
-      <button onClick={(_) => dispatch({ type: 'inc' })}>+</button>
+      {model.clicked
+        .map(viewPosition('Clicked'))
+        .withDefault(<div>Waiting for click ...</div>)
+      }
+      {model.moved
+        .map(viewPosition('Moved'))
+        .withDefault(<div>Waiting for move ...</div>)
+      }
     </div>
   );
 }
 
-// update : same as Elm's
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
   switch (msg.type) {
-    case 'inc':
-      return [model + 1, Cmd.none()];
-    case 'dec':
-      return [model - 1, Cmd.none()];
+    case 'clicked': {
+      const model1: Model = {
+        ...model,
+        clicked: just(msg.position)
+      };
+      return [model1, Cmd.none()];
+    }
+    case 'moved': {
+      const model1: Model = {
+        ...model,
+        moved: just(msg.position)
+      };
+      return [model1, Cmd.none()];
+    }
   }
 }
 
 export function subscriptions(model: Model): Sub<Msg> {
-  return onClick<Msg>((e: MouseEvent) => {
-    console.log('click', e)
-    return { type: 'inc' };
-  })
-  // return Sub.none<Msg>();
+  return Sub.batch([
+    onDocument('click', (e: MouseEvent) => (
+      {
+        type: 'clicked',
+        position: {
+          pos: [e.x, e.y],
+          page: [e.pageX, e.pageY],
+          offset: [e.offsetX, e.offsetY]
+        }
+      } as Msg
+    )),
+    onDocument('mousemove', (e: MouseEvent) => ({
+      type: 'moved',
+      position: {
+        pos: [e.x, e.y],
+        page: [e.pageX, e.pageY],
+        offset: [e.offsetX, e.offsetY]
+      }
+    } as Msg))
+  ]);
+}
+
+function viewPosition(title: string) {
+  return (position: MousePosition) => {
+    return (<div>
+      <b>{title}: </b>
+      Position {position.pos[0]},{position.pos[0]}&nbsp;
+      Page {position.page[0]},{position.page[0]}&nbsp;
+      Offset {position.offset[0]},{position.offset[0]}
+    </div>
+    );
+  }
 }

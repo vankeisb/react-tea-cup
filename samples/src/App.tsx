@@ -628,7 +628,7 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     case 'eventsSample':
       return mapSample((s: Samples) => {
         const macEvents = EventsSample.update(msg.child, s.events);
-        return [{ ...s, event: macEvents[0] }, macEvents[1].map(mapEventsSample)];
+        return [{ ...s, events: macEvents[0] }, macEvents[1].map(mapEventsSample)];
       });
 
     case 'urlChange':
