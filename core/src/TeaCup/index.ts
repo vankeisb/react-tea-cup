@@ -42,4 +42,3 @@ export * from './ListWithSelection';
 export * from './ObjectSerializer';
 export * from './Try';
 export * from './UUID';
-export * from './DocumentEvents';

@@ -23,7 +23,7 @@
  *
  */
 
-import { Sub } from './Sub';
+import { Sub } from 'tea-cup-core';
 
 type KeyType = keyof DocumentEventMap
 
@@ -126,22 +126,20 @@ class DocSub<K extends keyof DocumentEventMap, M> extends Sub<M> {
   }
 }
 
-function on<K extends keyof DocumentEventMap, M>(key: K, mapper: (e: DocumentEventMap[K]) => M): Sub<M> {
+/**
+ * Subscribe to a document event.
+ * @param key the event type to subscribe to.
+ * @param mapper map the event to a message.
+ */
+
+export function onDocument<K extends keyof DocumentEventMap, M>(key: K, mapper: (e: DocumentEventMap[K]) => M): Sub<M> {
   return new DocSub(key, mapper);
 }
 
 ///
 
 export function onClick<M>(mapper: (e: MouseEvent) => M): Sub<M> {
-  return on("click", mapper);
-}
-
-export function onMouseDown<M>(mapper: (e: MouseEvent) => M): Sub<M> {
-  return on("mousedown", mapper);
-}
-
-export function onMouseUp<M>(mapper: (e: MouseEvent) => M): Sub<M> {
-  return on("mouseup", mapper);
+  return onDocument("click", mapper);
 }
 
 // etc.
