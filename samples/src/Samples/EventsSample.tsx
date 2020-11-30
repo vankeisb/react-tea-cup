@@ -23,9 +23,8 @@
  *
  */
 
-import { mkdirSync } from 'fs';
 import * as React from 'react';
-import { Dispatcher, Cmd, Sub, noCmd, onClick, nothing, just, Maybe, onDocument } from 'react-tea-cup';
+import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe, onDocument } from 'react-tea-cup';
 
 export type Model = {
   clicked: Maybe<MousePosition>
