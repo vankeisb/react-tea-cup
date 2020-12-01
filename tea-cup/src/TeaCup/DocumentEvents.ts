@@ -39,41 +39,37 @@ function getListener<T, K extends keyof T>(o: ListenerMap<T>, k: K): Listener<T[
   return o[k];
 }
 
-type SubsMap<M> = {
-  [K in keyof DocumentEventMap]?: ReadonlyArray<DocSub<K, M>>
+type SubsMap<Map, Msg> = {
+  [K in keyof Map]?: ReadonlyArray<DocSub<K, Map, Msg>>
 }
 
-function addOneSub<K extends keyof DocumentEventMap, M>(sub: DocSub<K, M>, subs: SubsMap<M>[K]): SubsMap<M>[K] {
+function addOneSub<K extends keyof Map, Map, Msg>(sub: DocSub<K, Map, Msg>, subs: SubsMap<Map, Msg>[K]): SubsMap<Map, Msg>[K] {
   const result = new Array().concat(subs);
   result.push(sub);
   return result;
 }
 
-function removeOneSub<K extends keyof DocumentEventMap, M>(sub: DocSub<K, M>, subs: SubsMap<M>[K]): SubsMap<M>[K] | undefined {
+function removeOneSub<K extends keyof Map, Map, Msg>(sub: DocSub<K, Map, Msg>, subs: SubsMap<Map, Msg>[K]): SubsMap<Map, Msg>[K] | undefined {
   const result = new Array().concat(subs).filter(s => s !== sub);
   return result.length !== 0 ? result : undefined;
 }
 
-function getSubs<K extends keyof DocumentEventMap, M>(o: SubsMap<M>, k: K): SubsMap<M>[K] | undefined {
+function getSubs<K extends keyof Map, Map, Msg>(o: SubsMap<Map, Msg>, k: K): SubsMap<Map, Msg>[K] | undefined {
   return o[k];
 }
 
-function setSubs<K extends keyof DocumentEventMap, M>(o: SubsMap<M>, k: K, v: SubsMap<M>[K] | undefined) {
+function setSubs<K extends keyof Map, Map, Msg>(o: SubsMap<Map, Msg>, k: K, v: SubsMap<Map, Msg>[K] | undefined) {
   o[k] = v;
 }
 
-class DocSub<K extends keyof DocumentEventMap, M> extends Sub<M> {
+class DocSub<K extends keyof Map, Map, Msg> extends Sub<Msg> {
 
   constructor(
-    private readonly documentEvents: DocumentEvents<M>,
+    private readonly documentEvents: EventMapEvents<Map, Msg>,
     private readonly key: K,
-    private readonly mapper: (t: DocumentEventMap[K]) => M
+    private readonly mapper: (t: Map[K]) => Msg
   ) {
     super();
-  }
-
-  get type(): K {
-    return this.key;
   }
 
   protected onInit() {
@@ -86,14 +82,14 @@ class DocSub<K extends keyof DocumentEventMap, M> extends Sub<M> {
     this.documentEvents.removeSub(this.key, this);
   }
 
-  event(e: DocumentEventMap[K]) {
+  event(e: Map[K]) {
     this.dispatch(this.mapper(e));
   }
 }
 
-export class DocumentEvents<M> {
-  private readonly listeners: ListenerMap<DocumentEventMap> = {}
-  private readonly subs: SubsMap<M> = {}
+abstract class EventMapEvents<Map, Msg> {
+  private readonly listeners: ListenerMap<Map> = {}
+  private readonly subs: SubsMap<Map, Msg> = {}
 
   constructor() {
   }
@@ -104,14 +100,18 @@ export class DocumentEvents<M> {
     keys.forEach(key => this.releaseListener(key));
   }
 
-  addSub<K extends keyof DocumentEventMap>({ key, sub }: { key: K; sub: DocSub<K, M>; }) {
+  abstract doAddListener<K extends keyof Map>(key: K, listener: (ev: Map[K]) => any): void
+
+  abstract doRemoveListener<K extends keyof Map>(key: K, listener: (ev: Map[K]) => any): void
+
+  addSub<K extends keyof Map>({ key, sub }: { key: K; sub: DocSub<K, Map, Msg>; }) {
     this.initListener(key);
-    const subs: SubsMap<M>[K] = getSubs(this.subs, key) ?? [];
+    const subs: SubsMap<Map, Msg>[K] = getSubs(this.subs, key) ?? [];
     setSubs(this.subs, key, addOneSub(sub, subs))
   }
 
-  removeSub<K extends keyof DocumentEventMap, M>(key: K, sub: DocSub<K, M>) {
-    const list: SubsMap<M>[K] = getSubs(this.subs, key) ?? [];
+  removeSub<K extends keyof Map, M>(key: K, sub: DocSub<K, Map, Msg>) {
+    const list: SubsMap<Map, Msg>[K] = getSubs(this.subs, key) ?? [];
     const list1 = removeOneSub(sub, list)
     setSubs(this.subs, key, list1)
     if (!list1) {
@@ -119,32 +119,60 @@ export class DocumentEvents<M> {
     }
   }
 
-  private initListener<K extends keyof DocumentEventMap>(key: K) {
+  private initListener<K extends keyof Map>(key: K) {
     if (!this.listeners[key]) {
-      const listener = (ev: DocumentEventMap[K]) => {
-        const subs: SubsMap<any>[K] = getSubs(this.subs, key) ?? [];
-        new Array().concat(subs).forEach((s: DocSub<K, any>) => s.event(ev))
+      const listener = (ev: Map[K]) => {
+        const subs: SubsMap<Map, Msg>[K] = getSubs(this.subs, key) ?? [];
+        new Array().concat(subs).forEach((s: DocSub<K, Map, Msg>) => s.event(ev))
         return {};
       };
       setListener(this.listeners, key, listener);
-      document.addEventListener(key, listener);
+      this.doAddListener(key, listener);
     }
   }
 
-  private releaseListener<K extends keyof DocumentEventMap>(key: K) {
-    const listener: Listener<DocumentEventMap[K]> | undefined = getListener(this.listeners, key);
+  private releaseListener<K extends keyof Map>(key: K) {
+    const listener: Listener<Map[K]> | undefined = getListener(this.listeners, key);
     if (listener) {
       setListener(this.listeners, key, undefined);
-      document.removeEventListener(key, listener);
+      this.doRemoveListener(key, listener)
     }
   }
 
   /**
-   * Subscribe to a document event.
+   * Subscribe to an event.
    * @param key the event type to subscribe to.
    * @param mapper map the event to a message.
    */
-  public on<K extends keyof DocumentEventMap, M>(key: K, mapper: (e: DocumentEventMap[K]) => M): Sub<M> {
-    return new DocSub<K, M>(this, key, mapper);
+  public on<K extends keyof Map, Msg>(key: K, mapper: (e: Map[K]) => Msg): Sub<Msg> {
+    return new DocSub<K, Map, Msg>(this, key, mapper);
+  }
+}
+
+/**
+ * Subscribe to document events.
+ */
+export class DocumentEvents<Msg> extends EventMapEvents<DocumentEventMap, Msg> {
+
+  doAddListener<K extends keyof DocumentEventMap>(key: K, listener: (ev: DocumentEventMap[K]) => any): void {
+    document.addEventListener(key, listener)
+  }
+
+  doRemoveListener<K extends keyof DocumentEventMap>(key: K, listener: (ev: DocumentEventMap[K]) => any): void {
+    document.removeEventListener(key, listener)
+  }
+}
+
+/**
+ * Bonus, WindowEvents
+ */
+export class WindowEvents<Msg> extends EventMapEvents<WindowEventMap, Msg> {
+
+  doAddListener<K extends keyof WindowEventMap>(key: K, listener: (ev: WindowEventMap[K]) => any): void {
+    window.addEventListener(key, listener)
+  }
+
+  doRemoveListener<K extends keyof WindowEventMap>(key: K, listener: (ev: WindowEventMap[K]) => any): void {
+    window.removeEventListener(key, listener)
   }
 }
