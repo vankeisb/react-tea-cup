@@ -24,7 +24,7 @@
  */
 
 import * as React from 'react';
-import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe, onDocument } from 'react-tea-cup';
+import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe, DocumentEvents } from 'react-tea-cup';
 
 export type Model = {
   clicked: Maybe<MousePosition>
@@ -88,9 +88,11 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
   }
 }
 
+const documentEvents = new DocumentEvents<Msg>();
+
 export function subscriptions(model: Model): Sub<Msg> {
   return Sub.batch([
-    onDocument('click', (e: MouseEvent) => (
+    documentEvents.on('click', (e: MouseEvent) => (
       {
         type: 'clicked',
         position: {
@@ -100,7 +102,7 @@ export function subscriptions(model: Model): Sub<Msg> {
         }
       } as Msg
     )),
-    onDocument('mousemove', (e: MouseEvent) => ({
+    documentEvents.on('mousemove', (e: MouseEvent) => ({
       type: 'moved',
       position: {
         pos: [e.x, e.y],
