@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.4.0 (01/12/2020)
+
+#### closed
+
+- [**closed**] move init to componentDidMount to keep ctor pure [#40](https://github.com/vankeisb/react-tea-cup/pull/40)
+- [**closed**] Port utility, with sample (interop) [#48](https://github.com/vankeisb/react-tea-cup/pull/48)
+- [**closed**] Task improvements, UUID module, Maybe.filter [#46](https://github.com/vankeisb/react-tea-cup/pull/46)
+
+---
+
 ## v1.3.0 (23/11/2020)
 
 #### closed

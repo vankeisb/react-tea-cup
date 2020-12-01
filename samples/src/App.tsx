@@ -56,6 +56,8 @@ import * as Sful from './Samples/StatefulInView';
 import * as Rest from './Samples/Rest';
 import * as TimeSample from './Samples/TimeSample';
 import * as EventsSample from './Samples/EventsSample';
+import * as PortsSample from './Samples/PortsSample';
+import {appSamplePorts} from "./Samples/PortsSample";
 
 enum Tab {
   All,
@@ -162,6 +164,7 @@ interface Samples {
   readonly rest: Rest.Model;
   readonly time: TimeSample.Model;
   readonly events: EventsSample.Model;
+  readonly ports: PortsSample.Model;
 }
 
 type Msg =
@@ -175,6 +178,7 @@ type Msg =
   | { type: 'rest'; child: Rest.Msg }
   | { type: 'timeSample'; child: TimeSample.Msg }
   | { type: 'eventsSample'; child: EventsSample.Msg }
+  | { type: 'portsSample'; child: PortsSample.Msg }
   | { type: 'urlChange'; location: Location }
   | { type: 'newUrl'; url: string }
   | { type: 'noop' }
@@ -193,6 +197,7 @@ function initSamples(): [Model, Cmd<Msg>] {
   const rest = Rest.init();
   const time = TimeSample.init();
   const events = EventsSample.init();
+  const ports = PortsSample.init();
   return [
     {
       tag: 'samples',
@@ -207,6 +212,7 @@ function initSamples(): [Model, Cmd<Msg>] {
         rest: rest[0],
         time: time[0],
         events: events[0],
+        ports: ports[0],
       },
     },
     Cmd.batch([
@@ -220,6 +226,7 @@ function initSamples(): [Model, Cmd<Msg>] {
       rest[1].map(mapRest),
       time[1].map(mapTimeSample),
       events[1].map(mapEventsSample),
+      ports[1].map(mapPortsSample),
     ]),
   ];
 }
@@ -339,6 +346,11 @@ function mapEventsSample(m: EventsSample.Msg): Msg {
     type: 'eventsSample',
     child: m,
   };
+function mapPortsSample(m: PortsSample.Msg): Msg {
+  return {
+    type: 'portsSample',
+    child: m,
+  }
 }
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
@@ -560,6 +572,12 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
       {TimeSample.view(map(dispatch, mapTimeSample), samples.time)}
       <h2>Events</h2>
       {EventsSample.view(map(dispatch, mapEventsSample), samples.events)}
+      <h2>Ports</h2>
+      {PortsSample.view(map(dispatch, mapPortsSample), samples.ports)}
+      <button onClick={() => {
+        // call ports without going through any update loop
+        appSamplePorts.setCounter.send(0)
+      }}>Reset using port</button>
     </div>
   );
 }
@@ -618,11 +636,15 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         const macRest = Rest.update(msg.child, s.rest);
         return [{ ...s, rest: macRest[0] }, macRest[1].map(mapRest)];
       });
-
     case 'timeSample':
       return mapSample((s: Samples) => {
         const macTime = TimeSample.update(msg.child, s.time);
         return [{ ...s, time: macTime[0] }, macTime[1].map(mapTimeSample)];
+      });
+    case "portsSample":
+      return mapSample((s: Samples) => {
+        const mac = PortsSample.update(msg.child, s.ports);
+        return [{ ...s, ports: mac[0]}, mac[1].map(mapPortsSample)];
       });
 
     case 'eventsSample':
@@ -653,6 +675,7 @@ function subscriptions(model: Model): Sub<Msg> {
         Raf.subscriptions(raf).map(mapRaf),
         TimeSample.subscriptions(time).map(mapTimeSample),
         EventsSample.subscriptions(events).map(mapEventsSample),
+        PortsSample.subscriptions().map(mapPortsSample),
       ]);
     default:
       return Sub.none();
