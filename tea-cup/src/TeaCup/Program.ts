@@ -45,44 +45,24 @@ export interface ProgramProps<Model, Msg> {
 export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, never> {
   readonly uuid = nextUuid();
   private readonly bd: Dispatcher<Msg>;
-  private readonly devTools?: DevTools<Model, Msg>;
   private count: number = 0;
-  private readonly initialCmd: Cmd<any>;
-  private currentModel: Model;
-  private currentSub: Sub<Msg>;
+  private initialCmd?: Cmd<any>;
+  private currentModel?: Model;
+  private currentSub?: Sub<Msg>;
 
   constructor(props: Readonly<ProgramProps<Model, Msg>>) {
     super(props);
-    this.devTools = this.props.devTools;
-    if (this.devTools) {
-      this.devTools.connected(this);
-    }
-    const mac = (this.devTools && this.devTools.initFromSnapshot()) || props.init();
-    if (this.devTools) {
-      this.fireEvent({
-        tag: 'init',
-        time: new Date().getTime(),
-        model: mac[0],
-      });
-    }
-    const sub = props.subscriptions(mac[0]);
-    this.currentModel = mac[0];
-    this.currentSub = sub;
-    // connect to sub
-    const d = this.dispatch.bind(this);
-    this.bd = d;
-    sub.init(d);
-    this.initialCmd = mac[1];
+    this.bd = this.dispatch.bind(this);
   }
 
   private fireEvent(e: DevToolsEvent<Model, Msg>) {
-    if (this.devTools) {
-      this.devTools.onEvent(e);
+    if (this.props.devTools) {
+      this.props.devTools.onEvent(e);
     }
   }
 
   dispatch(msg: Msg) {
-    if (this.devTools && this.devTools.isPaused()) {
+    if (this.props.devTools && this.props.devTools.isPaused()) {
       // do not process messages if we are paused
       return;
     }
@@ -90,62 +70,93 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
     this.count++;
     const count = this.count;
     const currentModel = this.currentModel;
-    const updated = this.props.update(msg, currentModel);
-    if (this.devTools) {
-      this.fireEvent({
-        tag: 'updated',
-        msgNum: count,
-        time: new Date().getTime(),
-        msg: msg,
-        modelBefore: currentModel,
-        modelAfter: updated[0],
-        cmd: updated[1],
-      });
+    if (currentModel) {
+      const updated = this.props.update(msg, currentModel);
+      if (this.props.devTools) {
+        this.fireEvent({
+          tag: 'updated',
+          msgNum: count,
+          time: new Date().getTime(),
+          msg: msg,
+          modelBefore: currentModel,
+          modelAfter: updated[0],
+          cmd: updated[1],
+        });
+      }
+      const newSub = this.props.subscriptions(updated[0]);
+      const prevSub = this.currentSub;
+
+      const d = this.dispatch.bind(this);
+
+      newSub.init(d);
+      prevSub && prevSub.release();
+
+      // perform commands in a separate timout, to
+      // make sure that this dispatch is done
+      setTimeout(() => {
+        // console.log("dispatch: processing commands");
+        // debug("performing command", updated[1]);
+        updated[1].execute(d);
+        // debug("<<<  done");
+      }, 0);
+
+      this.currentModel = updated[0];
+      this.currentSub = newSub;
+
+      // trigger rendering
+      this.forceUpdate();
     }
-    const newSub = this.props.subscriptions(updated[0]);
-    const prevSub = this.currentSub;
-
-    const d = this.dispatch.bind(this);
-
-    newSub.init(d);
-    prevSub.release();
-
-    // perform commands in a separate timout, to
-    // make sure that this dispatch is done
-    setTimeout(() => {
-      // console.log("dispatch: processing commands");
-      // debug("performing command", updated[1]);
-      updated[1].execute(d);
-      // debug("<<<  done");
-    }, 0);
-
-    this.currentModel = updated[0];
-    this.currentSub = newSub;
-    this.forceUpdate();
   }
 
   componentDidMount() {
+    const { devTools } = this.props;
+    if (devTools) {
+      devTools.connected(this);
+    }
+    const mac = (devTools && devTools.initFromSnapshot()) || this.props.init();
+    if (devTools) {
+      this.fireEvent({
+        tag: 'init',
+        time: new Date().getTime(),
+        model: mac[0],
+      });
+    }
+    const sub = this.props.subscriptions(mac[0]);
+    this.currentModel = mac[0];
+    this.currentSub = sub;
+    // connect to sub
+    sub.init(this.bd);
+    this.initialCmd = mac[1];
+
     // trigger initial command
     setTimeout(() => {
-      this.initialCmd.execute(this.bd);
+      this.initialCmd && this.initialCmd.execute(this.bd);
     }, 0);
+
+    // trigger rendering after mount
+    this.forceUpdate();
   }
 
   render(): ReactNode {
-    return this.props.view(this.bd, this.currentModel);
+    if (this.currentModel && this.bd) {
+      return this.props.view(this.bd, this.currentModel);
+    }
+    return null;
   }
 
   setModel(model: Model, withSubs: boolean) {
-    let newSub: Sub<Msg>;
-    if (withSubs) {
-      newSub = this.props.subscriptions(model);
-    } else {
-      newSub = Sub.none();
+    if (this.bd) {
+      let newSub: Sub<Msg>;
+      if (withSubs) {
+        newSub = this.props.subscriptions(model);
+      } else {
+        newSub = Sub.none();
+      }
+      newSub.init(this.bd);
+      this.currentSub && this.currentSub.release();
+      this.currentModel = model;
+      this.currentSub = newSub;
+      this.forceUpdate();
     }
-    newSub.init(this.bd);
-    this.currentSub.release();
-    this.currentModel = model;
-    this.currentSub = newSub;
-    this.forceUpdate();
   }
 }
