@@ -45,7 +45,6 @@ export interface ProgramProps<Model, Msg> {
 export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, never> {
   readonly uuid = nextUuid();
   private readonly bd: Dispatcher<Msg>;
-  private readonly devTools?: DevTools<Model, Msg>;
   private count: number = 0;
   private initialCmd?: Cmd<any>;
   private currentModel?: Model;
@@ -53,7 +52,7 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
 
   constructor(props: Readonly<ProgramProps<Model, Msg>>) {
     super(props);
-    this.state = this.count;
+    this.bd = this.dispatch.bind(this);
   }
 
   private fireEvent(e: DevToolsEvent<Model, Msg>) {
@@ -104,8 +103,8 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
       this.currentModel = updated[0];
       this.currentSub = newSub;
 
-      // trigger rendering via (useless) state update
-      this.setState(s => s + 1);
+      // trigger rendering
+      this.forceUpdate();
     }
   }
 
@@ -126,14 +125,12 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
     this.currentModel = mac[0];
     this.currentSub = sub;
     // connect to sub
-    const d = this.dispatch.bind(this);
-    this.bd = d;
-    sub.init(d);
+    sub.init(this.bd);
     this.initialCmd = mac[1];
 
     // trigger initial command
     setTimeout(() => {
-      this.initialCmd && this.initialCmd.execute(d);
+      this.initialCmd && this.initialCmd.execute(this.bd);
     }, 0);
 
     // trigger rendering after mount
