@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.0 (23/11/2020)
+
+#### closed
+
+- [**closed**] introduce mapObject [#38](https://github.com/vankeisb/react-tea-cup/pull/38)
+- [**closed**] Either left/right accessors [#44](https://github.com/vankeisb/react-tea-cup/pull/44)
+- [**closed**] max/clear events in devtools [#42](https://github.com/vankeisb/react-tea-cup/pull/42)
+- [**closed**] add orNull decoder [#37](https://github.com/vankeisb/react-tea-cup/pull/37)
+
+---
+
 ## v1.2.0 (03/11/2020)
 
 #### closed

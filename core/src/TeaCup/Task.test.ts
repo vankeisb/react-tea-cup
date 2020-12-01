@@ -91,9 +91,7 @@ test('parallel', (done) => {
   const t1 = Time.in(1000).map(() => 1);
   const t2 = Time.in(2000).map(() => 2);
   const t3 = Time.in(1000).map(() => 4);
-  const p = t1
-      .parallel(t2, (a, b) => a + b)
-      .parallel(t3, (a, b) => a + b);
+  const p = t1.parallel(t2, (a, b) => a + b).parallel(t3, (a, b) => a + b);
   const t = new Date().getTime();
   perform(p, (x: number) => {
     const elapsed = new Date().getTime() - t;
@@ -101,6 +99,32 @@ test('parallel', (done) => {
     expect(elapsed < 2100).toBeTruthy();
     done();
   });
+});
+
+test('lazy', (done) => {
+  expectOk(
+    done,
+    Task.succeedLazy(() => 123),
+    123,
+  );
+  expectErr(
+    done,
+    Task.failLazy(() => 'kaboom'),
+    'kaboom',
+  );
+});
+
+test('recover', (done) => {
+  const t: Task<string, number> = Task.fromLambda(() => {
+    throw new Error('kaboom');
+  }).mapError((e) => e.message);
+  expectErr(done, t, 'kaboom');
+  const t2: Task<never, number> = t.recover((e) => e.length);
+  expectOk(done, t2, 6);
+  const t3: Task<string, number> = t2.andThen(() => Task.succeed(123));
+  expectOk(done, t3, 123);
+  const t4: Task<string, number> = t3.andThen(() => Task.fail('yalla'));
+  expectErr(done, t4, 'yalla');
 });
 
 export function attempt<E, R>(t: Task<E, R>, callback: (r: Result<E, R>) => void) {
