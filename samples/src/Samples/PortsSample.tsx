@@ -23,23 +23,51 @@
  *
  */
 
-export * from './Cmd';
-export * from './Dispatcher';
-export * from './Random';
-export * from './Result';
-export * from './Task';
-export * from './Sub';
-export * from './Animation';
-export * from './Maybe';
-export * from './List';
-export * from './Decode';
-export * from './Http';
-export * from './Tuple';
-export * from './Either';
-export * from './Time';
-export * from './Dict';
-export * from './ListWithSelection';
-export * from './ObjectSerializer';
-export * from './Try';
-export * from './UUID';
-export * from './Port';
+import * as React from 'react';
+import { Cmd, Dispatcher, noCmd, Port, Sub } from 'tea-cup-core';
+
+export type Model = number;
+
+export type Msg = { tag: 'inc' } | { tag: 'set-value'; value: number };
+
+function onSetValue(value: number): Msg {
+  return {
+    tag: 'set-value',
+    value,
+  };
+}
+
+// the ports allow to send Msgs to the update loop from the outside
+export const appSamplePorts = {
+  setCounter: new Port<number>(),
+};
+
+export function init(): [Model, Cmd<Msg>] {
+  return noCmd(0);
+}
+
+export function view(dispatch: Dispatcher<Msg>, model: Model) {
+  return (
+    <div>
+      <h2>Counter with ports</h2>
+      <span>Value = {model}</span>
+      <button onClick={() => dispatch({ tag: 'inc' })}>+</button>
+    </div>
+  );
+}
+
+export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
+  switch (msg.tag) {
+    case 'inc': {
+      return noCmd(model + 1);
+    }
+    case 'set-value': {
+      return noCmd(msg.value);
+    }
+  }
+}
+
+export function subscriptions(): Sub<Msg> {
+  // wire ports to get Msgs into our update func
+  return appSamplePorts.setCounter.subscribe(onSetValue);
+}

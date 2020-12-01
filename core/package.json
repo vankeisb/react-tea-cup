@@ -15,6 +15,7 @@
     "test": "jest",
     "test-watch": "jest --watch",
     "prettify": "prettier --write .",
+    "tsc": "tsc",
     "compile": "rimraf dist && tsc"
   }
 }
