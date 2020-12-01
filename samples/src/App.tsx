@@ -57,7 +57,7 @@ import * as Rest from './Samples/Rest';
 import * as TimeSample from './Samples/TimeSample';
 import * as EventsSample from './Samples/EventsSample';
 import * as PortsSample from './Samples/PortsSample';
-import {appSamplePorts} from "./Samples/PortsSample";
+import { appSamplePorts } from "./Samples/PortsSample";
 
 enum Tab {
   All,
@@ -346,6 +346,8 @@ function mapEventsSample(m: EventsSample.Msg): Msg {
     type: 'eventsSample',
     child: m,
   };
+}
+
 function mapPortsSample(m: PortsSample.Msg): Msg {
   return {
     type: 'portsSample',
@@ -644,7 +646,7 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     case "portsSample":
       return mapSample((s: Samples) => {
         const mac = PortsSample.update(msg.child, s.ports);
-        return [{ ...s, ports: mac[0]}, mac[1].map(mapPortsSample)];
+        return [{ ...s, ports: mac[0] }, mac[1].map(mapPortsSample)];
       });
 
     case 'eventsSample':
