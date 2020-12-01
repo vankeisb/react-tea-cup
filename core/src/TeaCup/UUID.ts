@@ -23,22 +23,22 @@
  *
  */
 
-export * from './Cmd';
-export * from './Dispatcher';
-export * from './Random';
-export * from './Result';
-export * from './Task';
-export * from './Sub';
-export * from './Animation';
-export * from './Maybe';
-export * from './List';
-export * from './Decode';
-export * from './Http';
-export * from './Tuple';
-export * from './Either';
-export * from './Time';
-export * from './Dict';
-export * from './ListWithSelection';
-export * from './ObjectSerializer';
-export * from './Try';
-export * from './UUID';
+import {Task} from "./Task";
+
+/**
+ * Generate a UUID. Side effect, use uuid() that returns a Task instead
+ */
+export function nextUuid(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+/**
+ * Return a Task that generates a UUID
+ */
+export function uuid(): Task<never, string> {
+  return Task.succeedLazy(() => nextUuid());
+}

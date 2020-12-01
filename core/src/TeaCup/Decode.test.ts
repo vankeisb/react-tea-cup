@@ -23,7 +23,7 @@
  *
  */
 
-import { Decode, Decoder } from './Decode';
+import { Decode, Decoder, DecoderObject } from './Decode';
 import { err, ok, Result } from './Result';
 import { just, nothing } from './Maybe';
 const num = Decode.num;
@@ -154,7 +154,159 @@ test('map8', () => {
       field('h', num),
     ).decodeValue(o),
   ).toEqual(ok(o));
+
 });
+
+describe('mapObject', () => {
+  type MyType = {
+    foo: string,
+    bar: number
+  };
+  const expected: MyType = {
+    foo: 'a foo',
+    bar: 13
+  }
+
+  test('simple', () => {
+    const value = { foo: 'a foo', bar: 13 }
+    expect(Decode.mapObject<MyType>({
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.field('bar', Decode.num)
+    }).decodeValue(value)).toEqual(ok(expected));
+  })
+
+
+  test('simpler', () => {
+    const value = { foo: 'a foo', bar: 13 }
+    expect(Decode.mapObject<MyType>(Decode.mapRequiredFields({
+      foo: Decode.str,
+      bar: Decode.num
+    })).decodeValue(value)).toEqual(ok(expected));
+  })
+
+
+  test('missing field', () => {
+    const value = { foo: 'a foo' }
+    expect(Decode.mapObject<MyType>({
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.field('bar', Decode.num)
+    }).decodeValue(value)).toEqual(err('path not found [bar] on {"foo":"a foo"}'));
+  })
+
+  test('superfluous field', () => {
+    const value = { foo: 'a foo', bar: 13, toto: true }
+    expect(Decode.mapObject<MyType>({
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.field('bar', Decode.num)
+    }).decodeValue(value)).toEqual(ok(expected));
+  })
+
+  test('optional field', () => {
+    type MyType2 = {
+      foo: string,
+      bar?: number
+    };
+    const expected: MyType2 = {
+      foo: 'a foo',
+    }
+
+    const value = { foo: 'a foo', toto: true }
+    expect(Decode.mapObject<MyType2>({
+      foo: Decode.field('foo', Decode.str),
+      bar: Decode.optionalField('bar', Decode.num)
+    }).decodeValue(value)).toEqual(ok(expected));
+
+    // the type system will compile fail this test:
+    // expect(Decode.mapObject<MyType2>({
+    //   foo: Decode.field('foo', Decode.str),
+    // }).decodeValue(value)).toEqual(ok(expected));
+  })
+
+  test('simpler optional field', () => {
+    type MyType2 = {
+      foo: string,
+      bar?: number
+    };
+    const expected: MyType2 = {
+      foo: 'a foo',
+    }
+
+    const decoder: DecoderObject<MyType2> = {
+      ...Decode.mapRequiredFields({
+        foo: Decode.str,
+      }),
+      ...Decode.mapOptionalFields({
+        bar: Decode.num,
+      })
+    }
+
+    const value = { foo: 'a foo', toto: true }
+    expect(Decode.mapObject<MyType2>(decoder).decodeValue(value)).toEqual(ok(expected));
+  })
+})
+
+describe('mapArray', () => {
+  type MyType = [
+    string,
+    number
+  ]
+  const expected: MyType = [
+    'a foo',
+    13
+  ]
+
+  test('simple', () => {
+    type ValueType = [string, number]
+    const value: ValueType = ['a foo', 13]
+    expect(Decode.mapTuple<ValueType>([
+      Decode.str,
+      Decode.num
+    ]).decodeValue(value)).toEqual(ok(expected));
+  })
+
+  test('type mismatch', () => {
+    type ValueType = [string, number]
+    const value: ValueType = ['a foo', 13]
+
+    // the type system will compile fail this test:
+    // expect(Decode.mapArray<ValueType>([
+    //   Decode.str,
+    //   Decode.str
+    // ]).decodeValue(value)).toEqual(err('ran into decoder error at [1] : value is not a string : 13'));
+
+    // the type system will let though to runtime:
+    expect(Decode.mapTuple([
+      Decode.str,
+      Decode.str
+    ]).decodeValue(value)).toEqual(err('ran into decoder error at [1] : value is not a string : 13'));
+  })
+
+  test('missing item', () => {
+    type ValueType = [string, number]
+    // the type system will compile fail this test:
+    // const value: ValueType  = ['a foo']
+
+    // the type system will let though to runtime:
+    const value = ['a foo']
+    expect(Decode.mapTuple([
+      Decode.str,
+      Decode.num
+    ]).decodeValue(value)).toEqual(err('path not found [1] on [\"a foo\"]'));
+  })
+
+  test('too many items', () => {
+    type ValueType = [string, number]
+    // the type system will compile fail this test:
+    // const value: ValueType = ['a foo', 13, true]
+
+    // the type system will let though to runtime:
+    const value = ['a foo', 13, true]
+    expect(Decode.mapTuple([
+      Decode.str,
+      Decode.num
+    ]).decodeValue(value)).toEqual(ok(expected));
+  })
+})
 
 test('andThen', () => {
   type Stuff = { readonly tag: 'stuff1'; readonly foo: string } | { readonly tag: 'stuff2'; readonly bar: string };
@@ -290,6 +442,24 @@ describe('optional field', () => {
       Decode.field('foo', Decode.str),
       Decode.optionalField('gnu', Decode.num)).decodeValue(value)
     ).toEqual(ok(expected));
+  })
+
+  test('simpler optional field', () => {
+    type MyType2 = {
+      foo: string,
+      bar?: number
+    };
+    const expected: MyType2 = {
+      foo: 'a foo',
+    }
+
+    const value = { foo: 'a foo', toto: true }
+    expect(Decode.mapObject<MyType2>({
+      ...Decode.mapRequiredFields({
+        foo: Decode.str,
+      }),
+      bar: Decode.optionalField('bar', Decode.num)
+    }).decodeValue(value)).toEqual(ok(expected));
   })
 });
 

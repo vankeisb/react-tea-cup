@@ -24,7 +24,7 @@
  */
 
 import { Component, ReactNode } from 'react';
-import { Dispatcher, Cmd, Sub } from 'tea-cup-core';
+import { Dispatcher, Cmd, Sub, nextUuid } from 'tea-cup-core';
 import { DevToolsEvent, DevTools } from './DevTools';
 
 /**
@@ -39,22 +39,13 @@ export interface ProgramProps<Model, Msg> {
   devTools?: DevTools<Model, Msg>;
 }
 
-class Guid {
-  static newGuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      const r = (Math.random() * 16) | 0,
-        v = c == 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
-}
-
 /**
  * A React component that holds a TEA "program", provides the Dispatcher, and implements the MVU loop.
  */
-export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, number> {
-  readonly uuid = Guid.newGuid();
-  private bd?: Dispatcher<Msg>;
+export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, never> {
+  readonly uuid = nextUuid();
+  private readonly bd: Dispatcher<Msg>;
+  private readonly devTools?: DevTools<Model, Msg>;
   private count: number = 0;
   private initialCmd?: Cmd<any>;
   private currentModel?: Model;
