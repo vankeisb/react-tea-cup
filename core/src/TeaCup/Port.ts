@@ -23,23 +23,44 @@
  *
  */
 
-export * from './Cmd';
-export * from './Dispatcher';
-export * from './Random';
-export * from './Result';
-export * from './Task';
-export * from './Sub';
-export * from './Animation';
-export * from './Maybe';
-export * from './List';
-export * from './Decode';
-export * from './Http';
-export * from './Tuple';
-export * from './Either';
-export * from './Time';
-export * from './Dict';
-export * from './ListWithSelection';
-export * from './ObjectSerializer';
-export * from './Try';
-export * from './UUID';
-export * from './Port';
+import {Sub} from "./Sub";
+
+export class Port<T> {
+  private subs: PortSub<T, any>[] = [];
+
+  send(t: T): void {
+    this.subs.forEach((s) => s.notify(t));
+  }
+
+  subscribe<M>(f: (t: T) => M): Sub<M> {
+    return new PortSub(
+        f,
+        (p) => this.subs.push(p),
+        (p) => {
+          this.subs = this.subs.filter((x) => x !== p);
+        },
+    );
+  }
+}
+
+class PortSub<T, M> extends Sub<M> {
+  constructor(
+      private readonly f: (t: T) => M,
+      private readonly _onInit: (p: PortSub<T, M>) => void,
+      private readonly _onRelease: (p: PortSub<T, M>) => void,
+  ) {
+    super();
+  }
+
+  protected onInit() {
+    this._onInit(this);
+  }
+
+  protected onRelease() {
+    this._onRelease(this);
+  }
+
+  notify(t: T): void {
+    this.dispatch(this.f(t));
+  }
+}
