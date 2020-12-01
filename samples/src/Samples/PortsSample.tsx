@@ -42,6 +42,10 @@ export const appSamplePorts = {
   setCounter: new Port<number>(),
 };
 
+// export as a global to play in dev tools
+// @ts-ignore
+window['appSamplePorts'] = appSamplePorts;
+
 export function init(): [Model, Cmd<Msg>] {
   return noCmd(0);
 }
