@@ -24,11 +24,12 @@
  */
 
 import * as React from 'react';
-import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe, DocumentEvents } from 'react-tea-cup';
+import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe, DocumentEvents, WindowEvents } from 'react-tea-cup';
 
 export type Model = {
   clicked: Maybe<MousePosition>
   moved: Maybe<MousePosition>
+  scrolled: Maybe<Position>
 };
 
 type MousePosition = {
@@ -45,12 +46,16 @@ export type Msg = {
 } | {
   type: 'moved',
   position: MousePosition
+} | {
+  type: 'scrolled',
+  scroll: Position
 };
 
 export function init(): [Model, Cmd<Msg>] {
   return noCmd({
     clicked: nothing,
-    moved: nothing
+    moved: nothing,
+    scrolled: nothing
   });
 }
 
@@ -58,11 +63,15 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
   return (
     <div className="events">
       {model.clicked
-        .map(viewPosition('Clicked'))
+        .map(viewMousePosition('Clicked'))
         .withDefault(<div>Waiting for click ...</div>)
       }
       {model.moved
-        .map(viewPosition('Moved'))
+        .map(viewMousePosition('Moved'))
+        .withDefault(<div>Waiting for move ...</div>)
+      }
+      {model.scrolled
+        .map(viewPosition('Scrolled'))
         .withDefault(<div>Waiting for move ...</div>)
       }
     </div>
@@ -85,10 +94,18 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
       };
       return [model1, Cmd.none()];
     }
+    case 'scrolled': {
+      const model1: Model = {
+        ...model,
+        scrolled: just(msg.scroll)
+      };
+      return [model1, Cmd.none()];
+    }
   }
 }
 
 const documentEvents = new DocumentEvents<Msg>();
+const windowEvents = new WindowEvents<Msg>();
 
 export function subscriptions(model: Model): Sub<Msg> {
   return Sub.batch([
@@ -109,18 +126,35 @@ export function subscriptions(model: Model): Sub<Msg> {
         page: [e.pageX, e.pageY],
         offset: [e.offsetX, e.offsetY]
       }
-    } as Msg))
+    } as Msg)),
+    windowEvents.on('scroll', (e: Event) => {
+      console.log('FW', e);
+      return {
+        type: 'scrolled',
+        scroll: [window.scrollX, window.scrollY]
+      } as Msg;
+    })
   ]);
 }
 
-function viewPosition(title: string) {
+function viewMousePosition(title: string) {
   return (position: MousePosition) => {
     return (<div>
       <b>{title}: </b>
-      Position {position.pos[0]},{position.pos[0]}&nbsp;
-      Page {position.page[0]},{position.page[0]}&nbsp;
-      Offset {position.offset[0]},{position.offset[0]}
+      {viewPosition('Position')(position.pos)}&nbsp;
+      {viewPosition('Page')(position.page)}&nbsp;
+      {viewPosition('Offset')(position.offset)}
     </div>
+    );
+  }
+}
+
+function viewPosition(title: string) {
+  return (position: Position) => {
+    return (
+      <>
+        {title} {position[0]},{position[1]}&nbsp;
+      </>
     );
   }
 }
