@@ -128,7 +128,6 @@ export function subscriptions(model: Model): Sub<Msg> {
       }
     } as Msg)),
     windowEvents.on('scroll', (e: Event) => {
-      console.log('FW', e);
       return {
         type: 'scrolled',
         scroll: [window.scrollX, window.scrollY]
