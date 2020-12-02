@@ -28,13 +28,4 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: ['node_modules'],
   roots: ['<rootDir>/src/'],
-  globals: {
-    'ts-jest': {
-      //TS2322:
-      diagnostics: {
-        // warnOnly: true,
-        ignoreCodes: ['TS2322', 'TS2345']
-      }
-    }
-  }
 };
