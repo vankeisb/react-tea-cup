@@ -51,12 +51,10 @@ function addOneSub<K extends keyof Map, Map, Msg>(sub: DocSub<K, Map, Msg>, subs
 
 function removeOneSub<K extends keyof Map, Map, Msg>(sub: DocSub<K, Map, Msg>, subs: SubsMap<Map, Msg>[K]): SubsMap<Map, Msg>[K] | undefined {
   const result = new Array().concat(subs).filter(s => s !== sub);
-  // @ts-ignore
   return result.length !== 0 ? result : undefined;
 }
 
 function getSubs<K extends keyof Map, Map, Msg>(o: SubsMap<Map, Msg>, k: K): SubsMap<Map, Msg>[K] | undefined {
-  // @ts-ignore
   return o[k];
 }
 
@@ -108,9 +106,7 @@ abstract class EventMapEvents<Map, Msg> {
 
   addSub<K extends keyof Map>({ key, sub }: { key: K; sub: DocSub<K, Map, Msg>; }) {
     this.initListener(key);
-    // @ts-ignore
     const subs: SubsMap<Map, Msg>[K] = getSubs(this.subs, key) ?? [];
-    // @ts-ignore
     setSubs(this.subs, key, addOneSub(sub, subs))
   }
 
