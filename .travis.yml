@@ -8,6 +8,7 @@ install:
 
 script:
   - ./build.sh
+  - cd samples && yarn build
 
 deploy:
   provider: script
