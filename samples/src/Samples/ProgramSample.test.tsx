@@ -1,10 +1,7 @@
 import { mount, ReactWrapper } from 'enzyme';
-import { extendJest, Cmd, Sub, Task, Program, ProgramProps } from "react-tea-cup";
+import { extendJest, Cmd, Sub, Task, Program, ProgramProps, updateUntilIdle } from "react-tea-cup";
 import React, { ReactNode } from 'react';
 import { Dispatcher } from 'tea-cup-core';
-import { view } from './Counter';
-import { ReactElement } from 'react';
-// import 'jest-enzyme';
 
 extendJest(expect);
 
@@ -39,7 +36,7 @@ describe('Test Program', () => {
         })
     })
 
-    it('alternative', () => {
+    it('updateUntilIdle', () => {
         const props: ProgramProps<number, string> = {
             init: init1,
             view: view1,
@@ -60,88 +57,6 @@ function mountWhenIdle<Model, Msg>(props: ProgramProps<Model, Msg>) {
     return testable.mountWhenIdle()
 }
 
-type Trigger<Model, Msg, T> = (node: ReactElement<ProgramProps<Model, Msg>>) => T
-// type WrapperType<Model, Msg> = ReactWrapper<Program<Model, Msg>, ProgramProps<Model, Msg>, never>
-type ResolveType<Model, T> = (idle: [Model, T]) => void;
-
-function updateUntilIdle<Model, Msg, T>(props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>): Promise<[Model, T]> {
-    return new Promise(resolve => {
-        fun(<Program {...testableProps(resolve, props, fun)} />)
-    })
-}
-
-function testableProps<Model, Msg, T>(resolve: ResolveType<Model, T>, props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>) {
-    const tprops: ProgramProps<TestableModel<Model, Msg, T>, Msg> = {
-        init: initTestable(resolve, props.init),
-        view: viewTestable(props.view),
-        update: updateTestable((props.update)),
-        subscriptions: suscriptionsTestable(props, fun)
-    }
-    return tprops
-}
-
-type TestableModel<Model, Msg, T> = {
-    readonly resolve: ResolveType<Model, T>;
-    readonly cmds: Cmd<Msg>[];
-    readonly model: Model;
-}
-
-function initTestable<Model, Msg, T>(resolve: ResolveType<Model, T>, init: ProgramProps<Model, Msg>['init']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['init'] {
-    const mac = init();
-    return () => [{
-        resolve,
-        cmds: [mac[1]],
-        model: mac[0]
-    }, Cmd.none()];
-}
-
-function viewTestable<Model, Msg, T>(view: ProgramProps<Model, Msg>['view']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['view'] {
-    return (dispatch: Dispatcher<Msg>, model: TestableModel<Model, Msg, T>) => view(dispatch, model.model);
-}
-
-function updateTestable<Model, Msg, T>(update: ProgramProps<Model, Msg>['update']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['update'] {
-    return (msg: Msg, model: TestableModel<Model, Msg, T>) => {
-        const [model1, cmd1] = update(msg, model.model);
-        const cmds = [cmd1].filter(cmd => cmd.constructor.name !== 'CmdNone')
-        return [{
-            ...model,
-            cmds,
-            model: model1,
-        }, Cmd.none()];
-    }
-}
-
-function suscriptionsTestable<Model, Msg, T>(props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>): ProgramProps<TestableModel<Model, Msg, T>, Msg>['subscriptions'] {
-    return (model: TestableModel<Model, Msg, T>) => {
-        const subs = props.subscriptions(model.model);
-        if (model.cmds.length === 0) {
-            const result = fun(<Program
-                init={() => [model.model, Cmd.none()]}
-                update={(msg, model) => [model, Cmd.none()]}
-                view={(d, m) => props.view(d, m)}
-                subscriptions={(d) => Sub.none()}
-            />)
-            model.resolve([model.model, result]);
-            return subs;
-        }
-        return Sub.batch([new TestableSub(model.cmds), subs]);
-    }
-}
-
-class TestableSub<Msg> extends Sub<Msg> {
-    constructor(private readonly cmds: readonly Cmd<Msg>[]) {
-        super();
-    }
-
-    protected onInit(): void {
-        setTimeout(() => {
-            if (this.dispatcher !== undefined) {
-                const d = this.dispatcher.bind(this);
-                this.cmds.map(cmd => cmd.execute(d));
-            }
-        }, 0)
-    }
-}
 
 class Testable<Model, Msg>{
     private resolve?: (idle: [Model, ReactWrapper<Program<Model, Msg>, ProgramProps<Model, Msg>, never>]) => void;
