@@ -69,13 +69,13 @@ function updateUntilIdle<Model, Msg>(props: ProgramProps<Model, Msg>): Promise<[
 }
 
 function testableProps<Model, Msg>(resolve: ResolveType<Model, Msg>, props: ProgramProps<Model, Msg>) {
-    const props2: ProgramProps<TestableModel<Model, Msg>, Msg> = {
+    const tprops: ProgramProps<TestableModel<Model, Msg>, Msg> = {
         init: initTestable(resolve, props.init),
         view: viewTestable(props.view),
         update: updateTestable((props.update)),
         subscriptions: suscriptionsTestable(props)
     }
-    return props2
+    return tprops
 }
 
 type TestableModel<Model, Msg> = {
