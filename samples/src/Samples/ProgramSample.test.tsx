@@ -3,6 +3,7 @@ import { extendJest, Cmd, Sub, Task, Program, ProgramProps } from "react-tea-cup
 import React, { ReactNode } from 'react';
 import { Dispatcher } from 'tea-cup-core';
 import { view } from './Counter';
+import { ReactElement } from 'react';
 // import 'jest-enzyme';
 
 extendJest(expect);
@@ -45,7 +46,7 @@ describe('Test Program', () => {
             update: update1,
             subscriptions: () => Sub.none<string>()
         }
-        return updateUntilIdle(props).then(([model, wrapper]) => {
+        return updateUntilIdle(props, mount).then(([model, wrapper]) => {
             expect(model).toEqual(6)
             // expect(wrapper).toHaveHTML('')
             expect(wrapper.find('.count')).toHaveText('6')
@@ -59,32 +60,33 @@ function mountWhenIdle<Model, Msg>(props: ProgramProps<Model, Msg>) {
     return testable.mountWhenIdle()
 }
 
-type WrapperType<Model, Msg> = ReactWrapper<Program<Model, Msg>, ProgramProps<Model, Msg>, never>
-type ResolveType<Model, Msg> = (idle: [Model, WrapperType<Model, Msg>]) => void;
+type Trigger<Model, Msg, T> = (node: ReactElement<ProgramProps<Model, Msg>>) => T
+// type WrapperType<Model, Msg> = ReactWrapper<Program<Model, Msg>, ProgramProps<Model, Msg>, never>
+type ResolveType<Model, T> = (idle: [Model, T]) => void;
 
-function updateUntilIdle<Model, Msg>(props: ProgramProps<Model, Msg>): Promise<[Model, WrapperType<Model, Msg>]> {
+function updateUntilIdle<Model, Msg, T>(props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>): Promise<[Model, T]> {
     return new Promise(resolve => {
-        mount(<Program {...testableProps(resolve, props)} />)
+        fun(<Program {...testableProps(resolve, props, fun)} />)
     })
 }
 
-function testableProps<Model, Msg>(resolve: ResolveType<Model, Msg>, props: ProgramProps<Model, Msg>) {
-    const tprops: ProgramProps<TestableModel<Model, Msg>, Msg> = {
+function testableProps<Model, Msg, T>(resolve: ResolveType<Model, T>, props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>) {
+    const tprops: ProgramProps<TestableModel<Model, Msg, T>, Msg> = {
         init: initTestable(resolve, props.init),
         view: viewTestable(props.view),
         update: updateTestable((props.update)),
-        subscriptions: suscriptionsTestable(props)
+        subscriptions: suscriptionsTestable(props, fun)
     }
     return tprops
 }
 
-type TestableModel<Model, Msg> = {
-    readonly resolve: ResolveType<Model, Msg>;
+type TestableModel<Model, Msg, T> = {
+    readonly resolve: ResolveType<Model, T>;
     readonly cmds: Cmd<Msg>[];
     readonly model: Model;
 }
 
-function initTestable<Model, Msg>(resolve: ResolveType<Model, Msg>, init: ProgramProps<Model, Msg>['init']): ProgramProps<TestableModel<Model, Msg>, Msg>['init'] {
+function initTestable<Model, Msg, T>(resolve: ResolveType<Model, T>, init: ProgramProps<Model, Msg>['init']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['init'] {
     const mac = init();
     return () => [{
         resolve,
@@ -93,12 +95,12 @@ function initTestable<Model, Msg>(resolve: ResolveType<Model, Msg>, init: Progra
     }, Cmd.none()];
 }
 
-function viewTestable<Model, Msg>(view: ProgramProps<Model, Msg>['view']): ProgramProps<TestableModel<Model, Msg>, Msg>['view'] {
-    return (dispatch: Dispatcher<Msg>, model: TestableModel<Model, Msg>) => view(dispatch, model.model);
+function viewTestable<Model, Msg, T>(view: ProgramProps<Model, Msg>['view']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['view'] {
+    return (dispatch: Dispatcher<Msg>, model: TestableModel<Model, Msg, T>) => view(dispatch, model.model);
 }
 
-function updateTestable<Model, Msg>(update: ProgramProps<Model, Msg>['update']): ProgramProps<TestableModel<Model, Msg>, Msg>['update'] {
-    return (msg: Msg, model: TestableModel<Model, Msg>) => {
+function updateTestable<Model, Msg, T>(update: ProgramProps<Model, Msg>['update']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['update'] {
+    return (msg: Msg, model: TestableModel<Model, Msg, T>) => {
         const [model1, cmd1] = update(msg, model.model);
         const cmds = [cmd1].filter(cmd => cmd.constructor.name !== 'CmdNone')
         return [{
@@ -109,17 +111,17 @@ function updateTestable<Model, Msg>(update: ProgramProps<Model, Msg>['update']):
     }
 }
 
-function suscriptionsTestable<Model, Msg>(props: ProgramProps<Model, Msg>): ProgramProps<TestableModel<Model, Msg>, Msg>['subscriptions'] {
-    return (model: TestableModel<Model, Msg>) => {
+function suscriptionsTestable<Model, Msg, T>(props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>): ProgramProps<TestableModel<Model, Msg, T>, Msg>['subscriptions'] {
+    return (model: TestableModel<Model, Msg, T>) => {
         const subs = props.subscriptions(model.model);
         if (model.cmds.length === 0) {
-            const wrapper: WrapperType<Model, Msg> = mount(<Program
+            const result = fun(<Program
                 init={() => [model.model, Cmd.none()]}
                 update={(msg, model) => [model, Cmd.none()]}
                 view={(d, m) => props.view(d, m)}
                 subscriptions={(d) => Sub.none()}
             />)
-            model.resolve([model.model, wrapper]);
+            model.resolve([model.model, result]);
             return subs;
         }
         return Sub.batch([new TestableSub(model.cmds), subs]);
