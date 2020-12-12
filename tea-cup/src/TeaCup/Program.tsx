@@ -23,13 +23,12 @@
  *
  */
 
-import {Component, ReactNode, useEffect, useRef, useState} from 'react';
-import {Dispatcher, Cmd, Sub, nothing, Maybe, just} from 'tea-cup-core';
-import { DevToolsEvent, DevTools } from './DevTools';
-import * as React from "react";
+import * as React from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import { Cmd, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-core';
+import {DevTools, DevToolsEvent} from './DevTools';
 
 export class DispatchBridge<Msg> {
-
   private d?: Dispatcher<Msg>;
 
   subscribe(d: Dispatcher<Msg>): void {
@@ -54,27 +53,41 @@ export interface ProgramProps<Model, Msg> {
   devTools?: DevTools<Model, Msg>;
 }
 
-
-interface ProgState<Model,Msg> {
-  readonly initialCmd?: Cmd<any>;
-  readonly currentModel: Model;
-  readonly currentSub: Sub<Msg>;
-}
-
-
-export function Program<Model,Msg>(props: ProgramProps<Model, Msg>) {
-
+export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const [model, setModel] = useState<Maybe<Model>>(nothing);
+  const [count, setCount] = useState(0);
 
   const cmd = useRef<Cmd<Msg>>(Cmd.none());
   const modelRef = useRef(model);
   const sub = useRef<Sub<Msg>>(Sub.none());
 
+  const { devTools } = props;
+
   const dispatch = (msg: Msg) => {
-    console.log("*** dispatch ***", msg);
+    if (devTools && devTools.isPaused()) {
+      // do not process messages if we are paused
+      return;
+    }
+
+    const c = count + 1;
+    setCount(c);
+
+    console.log('*** dispatch ***', msg);
     if (modelRef.current.type === 'Just') {
       const m = modelRef.current.value;
       const [uModel, uCmd] = props.update(msg, m);
+      if (devTools) {
+        fireEvent({
+          tag: 'updated',
+          msgNum: count,
+          time: new Date().getTime(),
+          msg: msg,
+          modelBefore: m,
+          modelAfter: uModel,
+          cmd: uCmd,
+        });
+      }
+
       modelRef.current = just(uModel);
       cmd.current = uCmd;
       setModel(just(uModel));
@@ -85,11 +98,27 @@ export function Program<Model,Msg>(props: ProgramProps<Model, Msg>) {
     }
   };
 
+  const fireEvent = (e: DevToolsEvent<Model, Msg>) => {
+    props.devTools?.onEvent(e);
+  }
+
   // init : run once (componentDidMount)
   useEffect(() => {
     if (modelRef.current.isNothing()) {
-      console.log("*** init ***");
-      const [uModel, uCmd] = props.init();
+      console.log('*** init ***');
+
+      // init from dev tools snap if any
+      const mac = (props.devTools && props.devTools.initFromSnapshot()) || props.init();
+      if (props.devTools) {
+        fireEvent({
+          tag: 'init',
+          time: new Date().getTime(),
+          model: mac[0],
+        });
+      }
+
+      // and start the MVU
+      const [uModel, uCmd] = mac;
       setModel(just(uModel));
       modelRef.current = just(uModel);
       cmd.current = uCmd;
@@ -101,12 +130,12 @@ export function Program<Model,Msg>(props: ProgramProps<Model, Msg>) {
 
   // executed at every render
   useEffect(() => {
-    console.log("*** render ***", cmd.current);
+    console.log('*** render ***', cmd.current);
     props.dispatchBridge?.subscribe(dispatch);
-    cmd.current.execute(dispatch)
+    cmd.current.execute(dispatch);
   });
 
-  return <>{model.map(m => props.view(dispatch, m)).toNative()}</>;
+  return <>{model.map((m) => props.view(dispatch, m)).toNative()}</>;
 }
 
 class Guid {
