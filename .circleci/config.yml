@@ -21,6 +21,8 @@ jobs:
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+      - run: echo "dir=$PWD"
+      - run: echo $(ls -la)
       - run: ./deploy.sh
 
 workflows:
