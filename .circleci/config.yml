@@ -3,28 +3,18 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:erbium
+
 jobs:
   build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:erbium
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
-#    working_directory: ~/repo
+    <<: *defaults
 
     steps:
       - checkout
-
-      # Download and cache dependencies
-#      - restore_cache:
-#          keys:
-#            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-#            - v1-dependencies
-
       - run: ./build.sh
 
 #      - save_cache:
