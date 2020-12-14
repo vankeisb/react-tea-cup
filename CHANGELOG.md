@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.5.0 (11/12/2020)
+
+#### closed
+
+- [**closed**] document events [#47](https://github.com/vankeisb/react-tea-cup/pull/47)
+
+---
+
 ## v1.4.0 (01/12/2020)
 
 #### closed
