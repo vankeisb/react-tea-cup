@@ -17,20 +17,19 @@ jobs:
       - checkout
       - run: ./build.sh
 
-#      - save_cache:
-#          paths:
-#            - node_modules
-#          key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+  deploy:
+    <<: *defaults
+    steps:
+      - run: ./deploy.sh
 
-#      - run:
-#          name: test
-#          command: |
-#            yarn test
-#            yarn test-mutate
-#          # later?!
-#          #yarn itest
-#
-#      - run:
-#          name: package
-#          command: |
-#            yarn vsce-package
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - deploy:
+        requires:
+          - build
+        filters:
+          tags:
+            only: /\d+\.\d+\.\d+/
+
