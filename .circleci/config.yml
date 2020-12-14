@@ -25,7 +25,7 @@ jobs:
 #            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
 #            - v1-dependencies
 
-      - run: yarn install --verbose
+      - run: ./build.sh
 
 #      - save_cache:
 #          paths:
