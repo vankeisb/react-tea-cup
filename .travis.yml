@@ -10,9 +10,9 @@ script:
   - ./build.sh
   - cd samples && yarn build
 
-deploy:
-  provider: script
-  script: ./deploy.sh
-  skip_cleanup: true
-  on:
-    tags: true
+#deploy:
+#  provider: script
+#  script: ./deploy.sh
+#  skip_cleanup: true
+#  on:
+#    tags: true
