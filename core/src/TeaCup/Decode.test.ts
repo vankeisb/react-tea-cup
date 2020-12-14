@@ -243,6 +243,31 @@ describe('mapObject', () => {
     const value = { foo: 'a foo', toto: true }
     expect(Decode.mapObject<MyType2>(decoder).decodeValue(value)).toEqual(ok(expected));
   })
+
+  it('decode array of mapObject', () => {
+    type MyItem = { gnu: number; foo: string };
+
+    const MyItemDecoder: Decoder<MyItem> = Decode.mapObject(
+      Decode.mapRequiredFields({
+        gnu: Decode.num,
+        foo: Decode.str,
+      }),
+    );
+
+    const payload: MyItem[] = [
+      {
+        gnu: 1,
+        foo: 'a',
+      },
+      {
+        gnu: 2,
+        foo: 'b',
+      },
+    ];
+
+    const r = Decode.array(MyItemDecoder).decodeValue(payload);
+    expect(r).toEqual(ok(payload));
+  });
 })
 
 describe('mapArray', () => {
