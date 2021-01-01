@@ -450,14 +450,16 @@ export class Decode {
    */
   static mapObject<T>(dobject: DecoderObject<T>): Decoder<T> {
     const keys = Object.keys(dobject) as Array<keyof typeof dobject>
-    const partialDecoder: Decoder<Partial<T>> = keys.reduce((dacc, key) => Decode.andThen(object => {
-      const propertyDecoder = getProperty(dobject, key);
-      return Decode.map(property => {
-        object[key] = property;
-        return object;
-      }, propertyDecoder);
-    }, dacc), Decode.succeed({} as Partial<T>))
-    return Decode.map(v => v as T, partialDecoder);
+    return new Decoder((value: any) =>
+      keys.reduce((acc, key) => {
+        const propertyDecoder = getProperty(dobject, key);
+        const v = propertyDecoder.decodeValue(value);
+        return v.andThen(v => acc.map(acc => {
+          acc[key] = v;
+          return acc;
+        }))
+      }, ok<string, T>({} as T))
+    );
   }
 
   /**
