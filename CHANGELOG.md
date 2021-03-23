@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.5.2 (14/12/2020)
+*No changelog for this release.*
+
+---
+
+## v1.5.1 (14/12/2020)
+
+#### closed
+
+- [**closed**] fix mapObject, create new object for every call [#51](https://github.com/vankeisb/react-tea-cup/pull/51)
+
+#### dependencies
+
+- [**dependencies**] Bump ini from 1.3.5 to 1.3.8 [#52](https://github.com/vankeisb/react-tea-cup/pull/52)
+
+---
+
 ## v1.5.0 (11/12/2020)
 
 #### closed
