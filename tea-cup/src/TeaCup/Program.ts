@@ -70,7 +70,7 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
     this.count++;
     const count = this.count;
     const currentModel = this.currentModel;
-    if (currentModel) {
+    if (currentModel !== undefined) {
       const updated = this.props.update(msg, currentModel);
       if (this.props.devTools) {
         this.fireEvent({
