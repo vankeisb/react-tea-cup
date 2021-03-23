@@ -20,7 +20,9 @@
     "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
   },
   "dependencies": {
-    "tea-cup-core": "1.5.2",
+    "tea-cup-core": "1.5.2"
+  },
+  "peerDependencies": {
     "react": "^16.7.0"
   },
   "devDependencies": {
