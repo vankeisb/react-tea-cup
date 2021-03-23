@@ -23,16 +23,18 @@
  *
  */
 
-import { genericUpdatePiped } from "./UpdatePiped";
+import { Cmd } from './Cmd';
+import { genericUpdatePiped, updatePiped } from './UpdatePiped';
 
 describe('UpdatePiped', () => {
   type MyModel = number;
-  type MyCmd = string[];
+  type MyCmd = readonly string[];
 
   test('generic', () => {
-    const model0 : MyModel = 6;
+    const model0: MyModel = 6;
     const [model, cmd] = genericUpdatePiped(
-      (cmds: readonly MyCmd[]) => new Array().concat(...cmds),
+      (cmd1: MyCmd, cmd2: MyCmd) => new Array().concat(...cmd1, ...cmd2),
+      [],
       model0,
       (model) => [model + 1, ['add 1']],
       (model) => [model * 6, ['multiply by 6']],
@@ -40,5 +42,16 @@ describe('UpdatePiped', () => {
     expect(model).toBe(42);
     expect(cmd).toEqual(['add 1', 'multiply by 6']);
   });
-});
 
+  test('example with none handling', () => {
+    type MyMsg = string;
+    const model0: MyModel = 6;
+    const [model, cmd] = updatePiped(
+      model0,
+      (model) => [model + 1, Cmd.none()],
+      (model) => [model * 6, Cmd.none()],
+    );
+    expect(model).toBe(42);
+    expect(cmd).toEqual(Cmd.none());
+  });
+});

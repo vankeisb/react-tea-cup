@@ -35,7 +35,17 @@ export function updatePiped<Model, Msg>(
   model: Model,
   ...updates: readonly UpdateFunction<Model, Msg>[]
 ): [Model, Cmd<Msg>] {
-  return genericUpdatePiped(Cmd.batch, model, ...updates);
+  const none: Cmd<Msg> = Cmd.none();
+  const combine = (cmd1: Cmd<Msg>, cmd2: Cmd<Msg>) => {
+    const none1 = isNone(cmd1);
+    const none2 = isNone(cmd2);
+    return none1 && none2 ? cmd1 : none1 ? cmd2 : none2 ? cmd1 : Cmd.batch([cmd1, cmd2]);
+  };
+  return genericUpdatePiped(combine, none, model, ...updates);
+}
+
+function isNone<Msg>(cmd: Cmd<Msg>): boolean {
+  return cmd.constructor.name === 'CmdNone';
 }
 
 export type GenericUpdateFunction<Model, Cmd> = (model: Model) => [Model, Cmd];
@@ -45,17 +55,17 @@ export type GenericUpdateFunction<Model, Cmd> = (model: Model) => [Model, Cmd];
  * See updatePiped().
  */
 export function genericUpdatePiped<Model, Cmd>(
-  batch: (cmds: readonly Cmd[]) => Cmd,
+  combine: (cmd1: Cmd, cmd2: Cmd) => Cmd,
+  none: Cmd,
   model: Model,
   ...updates: readonly GenericUpdateFunction<Model, Cmd>[]
 ): [Model, Cmd] {
-  const cmd0: Cmd = batch([]);
   return updates.reduce<[Model, Cmd]>(
     (acc: [Model, Cmd], update: GenericUpdateFunction<Model, Cmd>) => {
       const [model0, cmd0] = acc;
       const [model1, cmd1] = update(model0);
-      return [model1, batch([cmd0, cmd1])];
+      return [model1, combine(cmd0, cmd1)];
     },
-    [model, cmd0],
+    [model, none],
   );
 }
