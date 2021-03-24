@@ -26,15 +26,19 @@
 import React from 'react';
 import {
   Cmd,
-  DevTools,
   Dispatcher,
   just,
   map,
   Maybe,
   maybeOf,
-  newUrl,
   noCmd,
   nothing,
+  Sub,
+  Task,
+} from 'tea-cup-core';
+import {
+  DevTools,
+  newUrl,
   ProgramWithNav,
   QueryParams,
   route0,
@@ -42,8 +46,6 @@ import {
   route2,
   Router,
   str,
-  Sub,
-  Task,
   withReduxDevTools,
 } from 'react-tea-cup';
 import * as Counter from './Samples/Counter';

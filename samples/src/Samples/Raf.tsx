@@ -23,7 +23,7 @@
  *
  */
 
-import { Dispatcher, Cmd, noCmd, Sub, onAnimationFrame } from 'react-tea-cup';
+import { Dispatcher, Cmd, noCmd, Sub, onAnimationFrame } from 'tea-cup-core';
 import * as React from 'react';
 
 export interface Model {

@@ -25,7 +25,8 @@
 
 import { view, Msg, update, init } from "./Rand";
 import { shallow } from 'enzyme';
-import { Cmd, extendJest, Testing, nothing, just } from "react-tea-cup";
+import { extendJest, Testing } from "react-tea-cup";
+import { Cmd, nothing, just } from "tea-cup-core";
 
 extendJest(expect);
 const testing = new Testing<Msg>();

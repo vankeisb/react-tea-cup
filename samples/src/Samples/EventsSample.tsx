@@ -24,7 +24,8 @@
  */
 
 import * as React from 'react';
-import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe, DocumentEvents, WindowEvents } from 'react-tea-cup';
+import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe } from 'tea-cup-core';
+import {DocumentEvents, WindowEvents} from "react-tea-cup";
 
 export type Model = {
   clicked: Maybe<MousePosition>
