@@ -29,6 +29,10 @@ import { just, nothing } from './Maybe';
 const num = Decode.num;
 const field = Decode.field;
 
+test('syntax error', () => {
+  expect(num.decodeString(' { broken ')).toEqual(err('Unexpected token b in JSON at position 3'));
+});
+
 test('primitives', () => {
   expect(num.decodeValue(1)).toEqual(ok(1));
   expect(num.decodeValue('yeah')).toEqual(err('value is not a number : "yeah"'));
@@ -154,82 +158,91 @@ test('map8', () => {
       field('h', num),
     ).decodeValue(o),
   ).toEqual(ok(o));
-
 });
 
 describe('mapObject', () => {
   type MyType = {
-    foo: string,
-    bar: number
+    foo: string;
+    bar: number;
   };
   const expected: MyType = {
     foo: 'a foo',
-    bar: 13
-  }
+    bar: 13,
+  };
 
   test('simple', () => {
-    const value = { foo: 'a foo', bar: 13 }
-    expect(Decode.mapObject<MyType>({
-      foo: Decode.field('foo', Decode.str),
-      bar: Decode.field('bar', Decode.num)
-    }).decodeValue(value)).toEqual(ok(expected));
-  })
-
+    const value = { foo: 'a foo', bar: 13 };
+    expect(
+      Decode.mapObject<MyType>({
+        foo: Decode.field('foo', Decode.str),
+        bar: Decode.field('bar', Decode.num),
+      }).decodeValue(value),
+    ).toEqual(ok(expected));
+  });
 
   test('simpler', () => {
-    const value = { foo: 'a foo', bar: 13 }
-    expect(Decode.mapObject<MyType>(Decode.mapRequiredFields({
-      foo: Decode.str,
-      bar: Decode.num
-    })).decodeValue(value)).toEqual(ok(expected));
-  })
-
+    const value = { foo: 'a foo', bar: 13 };
+    expect(
+      Decode.mapObject<MyType>(
+        Decode.mapRequiredFields({
+          foo: Decode.str,
+          bar: Decode.num,
+        }),
+      ).decodeValue(value),
+    ).toEqual(ok(expected));
+  });
 
   test('missing field', () => {
-    const value = { foo: 'a foo' }
-    expect(Decode.mapObject<MyType>({
-      foo: Decode.field('foo', Decode.str),
-      bar: Decode.field('bar', Decode.num)
-    }).decodeValue(value)).toEqual(err('path not found [bar] on {"foo":"a foo"}'));
-  })
+    const value = { foo: 'a foo' };
+    expect(
+      Decode.mapObject<MyType>({
+        foo: Decode.field('foo', Decode.str),
+        bar: Decode.field('bar', Decode.num),
+      }).decodeValue(value),
+    ).toEqual(err('path not found [bar] on {"foo":"a foo"}'));
+  });
 
   test('superfluous field', () => {
-    const value = { foo: 'a foo', bar: 13, toto: true }
-    expect(Decode.mapObject<MyType>({
-      foo: Decode.field('foo', Decode.str),
-      bar: Decode.field('bar', Decode.num)
-    }).decodeValue(value)).toEqual(ok(expected));
-  })
+    const value = { foo: 'a foo', bar: 13, toto: true };
+    expect(
+      Decode.mapObject<MyType>({
+        foo: Decode.field('foo', Decode.str),
+        bar: Decode.field('bar', Decode.num),
+      }).decodeValue(value),
+    ).toEqual(ok(expected));
+  });
 
   test('optional field', () => {
     type MyType2 = {
-      foo: string,
-      bar?: number
+      foo: string;
+      bar?: number;
     };
     const expected: MyType2 = {
       foo: 'a foo',
-    }
+    };
 
-    const value = { foo: 'a foo', toto: true }
-    expect(Decode.mapObject<MyType2>({
-      foo: Decode.field('foo', Decode.str),
-      bar: Decode.optionalField('bar', Decode.num)
-    }).decodeValue(value)).toEqual(ok(expected));
+    const value = { foo: 'a foo', toto: true };
+    expect(
+      Decode.mapObject<MyType2>({
+        foo: Decode.field('foo', Decode.str),
+        bar: Decode.optionalField('bar', Decode.num),
+      }).decodeValue(value),
+    ).toEqual(ok(expected));
 
     // the type system will compile fail this test:
     // expect(Decode.mapObject<MyType2>({
     //   foo: Decode.field('foo', Decode.str),
     // }).decodeValue(value)).toEqual(ok(expected));
-  })
+  });
 
   test('simpler optional field', () => {
     type MyType2 = {
-      foo: string,
-      bar?: number
+      foo: string;
+      bar?: number;
     };
     const expected: MyType2 = {
       foo: 'a foo',
-    }
+    };
 
     const decoder: DecoderObject<MyType2> = {
       ...Decode.mapRequiredFields({
@@ -237,12 +250,12 @@ describe('mapObject', () => {
       }),
       ...Decode.mapOptionalFields({
         bar: Decode.num,
-      })
-    }
+      }),
+    };
 
-    const value = { foo: 'a foo', toto: true }
+    const value = { foo: 'a foo', toto: true };
     expect(Decode.mapObject<MyType2>(decoder).decodeValue(value)).toEqual(ok(expected));
-  })
+  });
 
   it('decode array of mapObject', () => {
     type MyItem = { gnu: number; foo: string };
@@ -268,30 +281,23 @@ describe('mapObject', () => {
     const r = Decode.array(MyItemDecoder).decodeValue(payload);
     expect(r).toEqual(ok(payload));
   });
-})
+});
 
 describe('mapArray', () => {
-  type MyType = [
-    string,
-    number
-  ]
-  const expected: MyType = [
-    'a foo',
-    13
-  ]
+  type MyType = [string, number];
+  const expected: MyType = ['a foo', 13];
 
   test('simple', () => {
-    type ValueType = [string, number]
-    const value: ValueType = ['a foo', 13]
-    expect(Decode.mapTuple<ValueType>([
-      Decode.str,
-      Decode.num
-    ]).decodeValue(value)).toEqual(ok(expected));
-  })
+    type ValueType = [string, number];
+    const value: ValueType = ['a foo', 13];
+    expect(
+      Decode.mapTuple<ValueType>([Decode.str, Decode.num]).decodeValue(value),
+    ).toEqual(ok(expected));
+  });
 
   test('type mismatch', () => {
-    type ValueType = [string, number]
-    const value: ValueType = ['a foo', 13]
+    type ValueType = [string, number];
+    const value: ValueType = ['a foo', 13];
 
     // the type system will compile fail this test:
     // expect(Decode.mapArray<ValueType>([
@@ -300,38 +306,33 @@ describe('mapArray', () => {
     // ]).decodeValue(value)).toEqual(err('ran into decoder error at [1] : value is not a string : 13'));
 
     // the type system will let though to runtime:
-    expect(Decode.mapTuple([
-      Decode.str,
-      Decode.str
-    ]).decodeValue(value)).toEqual(err('ran into decoder error at [1] : value is not a string : 13'));
-  })
+    expect(Decode.mapTuple([Decode.str, Decode.str]).decodeValue(value)).toEqual(
+      err('ran into decoder error at [1] : value is not a string : 13'),
+    );
+  });
 
   test('missing item', () => {
-    type ValueType = [string, number]
+    type ValueType = [string, number];
     // the type system will compile fail this test:
     // const value: ValueType  = ['a foo']
 
     // the type system will let though to runtime:
-    const value = ['a foo']
-    expect(Decode.mapTuple([
-      Decode.str,
-      Decode.num
-    ]).decodeValue(value)).toEqual(err('path not found [1] on [\"a foo\"]'));
-  })
+    const value = ['a foo'];
+    expect(Decode.mapTuple([Decode.str, Decode.num]).decodeValue(value)).toEqual(
+      err('path not found [1] on ["a foo"]'),
+    );
+  });
 
   test('too many items', () => {
-    type ValueType = [string, number]
+    type ValueType = [string, number];
     // the type system will compile fail this test:
     // const value: ValueType = ['a foo', 13, true]
 
     // the type system will let though to runtime:
-    const value = ['a foo', 13, true]
-    expect(Decode.mapTuple([
-      Decode.str,
-      Decode.num
-    ]).decodeValue(value)).toEqual(ok(expected));
-  })
-})
+    const value = ['a foo', 13, true];
+    expect(Decode.mapTuple([Decode.str, Decode.num]).decodeValue(value)).toEqual(ok(expected));
+  });
+});
 
 test('andThen', () => {
   type Stuff = { readonly tag: 'stuff1'; readonly foo: string } | { readonly tag: 'stuff2'; readonly bar: string };
@@ -444,78 +445,87 @@ test('any value', () => {
 });
 
 describe('optional field', () => {
-  test("is present", () => {
+  test('is present', () => {
     const value = { foo: 'bar', gnu: 13 };
     expect(Decode.optionalField('gnu', Decode.num).decodeValue(value)).toEqual(ok(13));
-  })
-  test("is missing", () => {
+  });
+  test('is missing', () => {
     const value = { foo: 'bar' };
     expect(Decode.optionalField('gnu', Decode.num).decodeValue(value)).toEqual(ok(undefined));
-  })
+  });
 
-  test("typical use case", () => {
+  test('typical use case', () => {
     type MyType = {
       foo: string;
       gnu?: number;
-    }
+    };
     const value = { foo: 'bar' };
     const expected: MyType = {
-      foo: 'bar'
+      foo: 'bar',
     };
-    expect(Decode.map2(
-      (foo, gnu) => { return { foo, gnu } },
-      Decode.field('foo', Decode.str),
-      Decode.optionalField('gnu', Decode.num)).decodeValue(value)
+    expect(
+      Decode.map2(
+        (foo, gnu) => {
+          return { foo, gnu };
+        },
+        Decode.field('foo', Decode.str),
+        Decode.optionalField('gnu', Decode.num),
+      ).decodeValue(value),
     ).toEqual(ok(expected));
-  })
+  });
 
   test('simpler optional field', () => {
     type MyType2 = {
-      foo: string,
-      bar?: number
+      foo: string;
+      bar?: number;
     };
     const expected: MyType2 = {
       foo: 'a foo',
-    }
+    };
 
-    const value = { foo: 'a foo', toto: true }
-    expect(Decode.mapObject<MyType2>({
-      ...Decode.mapRequiredFields({
-        foo: Decode.str,
-      }),
-      bar: Decode.optionalField('bar', Decode.num)
-    }).decodeValue(value)).toEqual(ok(expected));
-  })
+    const value = { foo: 'a foo', toto: true };
+    expect(
+      Decode.mapObject<MyType2>({
+        ...Decode.mapRequiredFields({
+          foo: Decode.str,
+        }),
+        bar: Decode.optionalField('bar', Decode.num),
+      }).decodeValue(value),
+    ).toEqual(ok(expected));
+  });
 });
 
 describe('null types', () => {
-  test("non null value", () => {
+  test('non null value', () => {
     const value = { foo: 'bar' };
-    const result: Result<string, string | null> = Decode.orNull(Decode.field('foo', Decode.str)).decodeValue(value)
+    const result: Result<string, string | null> = Decode.orNull(Decode.field('foo', Decode.str)).decodeValue(value);
     expect(result).toEqual(ok('bar'));
-  })
+  });
 
-  test("null value", () => {
+  test('null value', () => {
     const value = { foo: null };
-    const result: Result<string, string | null> = (Decode.field('foo', Decode.orNull(Decode.str))).decodeValue(value)
+    const result: Result<string, string | null> = Decode.field('foo', Decode.orNull(Decode.str)).decodeValue(value);
     expect(result).toEqual(ok(null));
-  })
+  });
 
-  test("typical use case", () => {
+  test('typical use case', () => {
     type MyType = {
       gnu: number | null;
-      foo: string | null
-    }
+      foo: string | null;
+    };
     const value = { foo: null, gnu: null };
     const expected: MyType = {
       foo: null,
-      gnu: null
+      gnu: null,
     };
-    expect(Decode.map2(
-      (foo, gnu) => { return { foo, gnu } },
-      Decode.field('foo', Decode.orNull(Decode.str)),
-      Decode.field('gnu', Decode.orNull(Decode.num)))
-      .decodeValue(value)
+    expect(
+      Decode.map2(
+        (foo, gnu) => {
+          return { foo, gnu };
+        },
+        Decode.field('foo', Decode.orNull(Decode.str)),
+        Decode.field('gnu', Decode.orNull(Decode.num)),
+      ).decodeValue(value),
     ).toEqual(ok(expected));
-  })
-})
+  });
+});

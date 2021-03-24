@@ -46,7 +46,7 @@ export class Decoder<T> {
       const o = JSON.parse(s);
       return this.decodeValue(o);
     } catch (e) {
-      return err(e);
+      return err(e.message ?? 'unknown JSON error');
     }
   }
 
@@ -138,7 +138,7 @@ export class Decode {
    * @param d the decoder to be used if the value is not null
    */
   static orNull<T>(d: Decoder<T>): Decoder<T | null> {
-    return this.map(v => v.map<T | null>(v => v).withDefault(null), this.nullable(d));
+    return this.map((v) => v.map<T | null>((v) => v).withDefault(null), this.nullable(d));
   }
 
   /**
@@ -193,8 +193,13 @@ export class Decode {
    */
   static optionalField<T>(key: string, d: Decoder<T>): Decoder<T | undefined> {
     return Decode.andThen(
-      (value) => value.map<Decoder<T | undefined>>(v => new Decoder<T>(() => d.decodeValue(v))).withDefault(Decode.succeed(undefined)),
-      Decode.maybe(Decode.field(key, Decode.value))
+      (value) =>
+        value
+          .map<Decoder<T | undefined>>(
+            (v) => new Decoder<T>(() => d.decodeValue(v)),
+          )
+          .withDefault(Decode.succeed(undefined)),
+      Decode.maybe(Decode.field(key, Decode.value)),
     );
   }
 
@@ -449,16 +454,18 @@ export class Decode {
    * @param dobject an object with decoders
    */
   static mapObject<T>(dobject: DecoderObject<T>): Decoder<T> {
-    const keys = Object.keys(dobject) as Array<keyof typeof dobject>
+    const keys = Object.keys(dobject) as Array<keyof typeof dobject>;
     return new Decoder((value: any) =>
       keys.reduce((acc, key) => {
         const propertyDecoder = getProperty(dobject, key);
         const v = propertyDecoder.decodeValue(value);
-        return v.andThen(v => acc.map(acc => {
-          acc[key] = v;
-          return acc;
-        }))
-      }, ok<string, T>({} as T))
+        return v.andThen((v) =>
+          acc.map((acc) => {
+            acc[key] = v;
+            return acc;
+          }),
+        );
+      }, ok<string, T>({} as T)),
     );
   }
 
@@ -468,13 +475,13 @@ export class Decode {
    * @param fun the mapper function
    */
   static mapFields<T, T2>(decoders: DecoderObject<T>, fun: DecoderObjectMapper<T, T2>): DecoderObject<T2> {
-    const keys = Object.keys(decoders) as Array<keyof typeof decoders>
+    const keys = Object.keys(decoders) as Array<keyof typeof decoders>;
     const partial: Partial<DecoderObject<T2>> = keys.reduce((acc, key) => {
       const propertyDecoder = getProperty(decoders, key);
       const [key2, propertyDecoder2] = fun(key, propertyDecoder);
       acc[key2] = propertyDecoder2;
       return acc;
-    }, {} as Partial<DecoderObject<T2>>)
+    }, {} as Partial<DecoderObject<T2>>);
     return partial as DecoderObject<T2>;
   }
 
@@ -487,12 +494,14 @@ export class Decode {
   }
 
   /**
-  * Convenience, map decoders to optional field decoders
-  * @param decoders an object with decoders
-  */
+   * Convenience, map decoders to optional field decoders
+   * @param decoders an object with decoders
+   */
   static mapOptionalFields<T>(decoders: DecoderObject<T>): DecoderObject<OptionalFields<T>> {
-    const mapper: DecoderObjectMapper<T, OptionalFields<T>> =
-      (k: keyof T, d: Decoder<T[keyof T]>) => [k, Decode.optionalField(k as string, d)]
+    const mapper: DecoderObjectMapper<T, OptionalFields<T>> = (k: keyof T, d: Decoder<T[keyof T]>) => [
+      k,
+      Decode.optionalField(k as string, d),
+    ];
     return this.mapFields(decoders, mapper);
   }
 
@@ -501,7 +510,7 @@ export class Decode {
    * @param decoders an array with decoders
    */
   static mapTuple<T extends any[]>(decoders: DecoderArray<T>): Decoder<T> {
-    return Decode.map(v => Object.values(v) as T, this.mapObject<T>(this.mapRequiredFields<T>(decoders)));
+    return Decode.map((v) => Object.values(v) as T, this.mapObject<T>(this.mapRequiredFields<T>(decoders)));
   }
 
   // Fancy Decoding
@@ -575,18 +584,17 @@ export class Decode {
   }
 }
 
-
 function getProperty<T, K extends keyof T>(o: T, key: K): T[K] {
   return o[key];
 }
 
-export type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>
-export type DecoderArray<A extends any[]> = Required<{ [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }>
+export type DecoderObject<T> = Required<{ [P in keyof T]: Decoder<T[P]> }>;
+export type DecoderArray<A extends any[]> = Required<
+  { [P in keyof A]: A[P] extends A[number] ? Decoder<A[P]> : never }
+>;
 
 export type OptionalFields<T> = {
-  [P in keyof T]: (T[P] | undefined);
+  [P in keyof T]: T[P] | undefined;
 };
 
-export type DecoderObjectMapper<T, T2> =
-  (k: keyof T, d: Decoder<T[keyof T]>) => [keyof T2, Decoder<T2[keyof T2]>]
-
+export type DecoderObjectMapper<T, T2> = (k: keyof T, d: Decoder<T[keyof T]>) => [keyof T2, Decoder<T2[keyof T2]>];
