@@ -24,7 +24,7 @@
  */
 
 import * as React from 'react';
-import { Dispatcher, Cmd, Sub, noCmd } from 'react-tea-cup';
+import { Dispatcher, Cmd, Sub, noCmd } from 'tea-cup-core';
 
 // model can be anything of course. Here, it
 // is just a number...

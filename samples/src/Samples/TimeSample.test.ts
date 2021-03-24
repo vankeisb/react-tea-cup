@@ -23,180 +23,164 @@
  *
  */
 
-import { view, Msg, update, init } from "./TimeSample";
+import { view, Msg, update, init } from './TimeSample';
 import { mount } from 'enzyme';
-import { Cmd, extendJest, Testing } from "react-tea-cup";
+import { extendJest, Testing } from 'react-tea-cup';
+import { Cmd } from 'tea-cup-core';
 
 extendJest(expect);
 const testing = new Testing<Msg>();
 
-describe("Test TimeSample", () => {
+describe('Test TimeSample', () => {
+  describe('init state', () => {
+    test('triggers no message', () => {
+      const [state, cmd] = init();
+      expect(cmd).toEqual(Cmd.none());
+    });
+  });
 
-    describe("init state", () => {
+  describe('view state', () => {
+    const [initialState, _cmd] = init();
 
-        test("triggers no message", () => {
-            const [state, cmd] = init();
-            expect(cmd).toEqual(Cmd.none());
-        });
+    describe('render initial state', () => {
+      test('current time', () => {
+        const wrapper = mount(view(testing.noop, initialState));
 
+        expect(wrapper.find('div').at(0)).toIncludeText('Current time :');
+        expect(wrapper.find('div > button').at(0)).toHaveText('Get current time');
+      });
+
+      test('trigger in', () => {
+        const wrapper = mount(view(testing.noop, initialState));
+
+        expect(wrapper.find('div').at(1)).toIncludeText('In :');
+        expect(wrapper.find('div > button').at(1)).toHaveText('Trigger in');
+      });
+
+      test('ticks', () => {
+        const wrapper = mount(view(testing.noop, initialState));
+
+        expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 :');
+        expect(wrapper.find('div').at(2)).toIncludeText(', ticks2 :');
+        expect(wrapper.find('div > button').at(2)).toHaveText('start ticking');
+      });
+
+      test('snapshot initial', () => {
+        const wrapper = mount(view(testing.noop, initialState));
+        expect(wrapper).toMatchSnapshot();
+      });
     });
 
-    describe("view state", () => {
+    describe('render some state', () => {
+      const state1 = {
+        ...initialState,
+        currentTime: 1313,
+        inTime: true,
+        inProgress: false,
+        ticking: true,
+        ticks1: 13,
+        ticks2: 131313,
+      };
 
-        const [initialState, _cmd] = init();
+      const state2 = {
+        ...state1,
+        inProgress: true,
+      };
 
-        describe("render initial state", () => {
+      test('current time', () => {
+        const wrapper = mount(view(testing.noop, state1));
+        expect(wrapper.find('div').at(0)).toIncludeText('Current time : 1313');
+      });
 
-            test("current time", () => {
-                const wrapper = mount(view(testing.noop, initialState))
+      test('trigger in', () => {
+        const wrapper = mount(view(testing.noop, state1));
+        expect(wrapper.find('div').at(1)).toIncludeText('In :true');
+      });
 
-                expect(wrapper.find('div').at(0)).toIncludeText('Current time :');
-                expect(wrapper.find('div > button').at(0)).toHaveText('Get current time');
-            });
+      test('trigger in progress', () => {
+        const wrapper = mount(view(testing.noop, state2));
+        expect(wrapper.find('div').at(1)).toIncludeText('In :...');
+      });
 
-            test("trigger in", () => {
-                const wrapper = mount(view(testing.noop, initialState))
+      test('ticks', () => {
+        const wrapper = mount(view(testing.noop, state1));
+        expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 : 13');
+        expect(wrapper.find('div').at(2)).toIncludeText('ticks2 : 131313');
+        expect(wrapper.find('div > button').at(2)).toIncludeText('stop ticking');
+      });
 
-                expect(wrapper.find('div').at(1)).toIncludeText('In :');
-                expect(wrapper.find('div > button').at(1)).toHaveText('Trigger in');
-            });
+      test('snapshot state1', () => {
+        const wrapper = mount(view(testing.noop, state1));
+        expect(wrapper).toMatchSnapshot();
+      });
 
-            test("ticks", () => {
-                const wrapper = mount(view(testing.noop, initialState))
+      test('snapshot state2', () => {
+        const wrapper = mount(view(testing.noop, state2));
+        expect(wrapper).toMatchSnapshot();
+      });
+    });
+  });
 
-                expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 :');
-                expect(wrapper.find('div').at(2)).toIncludeText(', ticks2 :');
-                expect(wrapper.find('div > button').at(2)).toHaveText('start ticking');
-            });
+  describe('clicking generates messages', () => {
+    const [initialState, _cmd] = init();
 
-            test("snapshot initial", () => {
-                const wrapper = mount(view(testing.noop, initialState))
-                expect(wrapper).toMatchSnapshot();
-            });
-
-        });
-
-        describe("render some state", () => {
-
-            const state1 = {
-                ...initialState,
-                currentTime: 1313,
-                inTime: true,
-                inProgress: false,
-                ticking: true,
-                ticks1: 13,
-                ticks2: 131313
-            }
-
-            const state2 = {
-                ...state1,
-                inProgress: true
-            }
-
-            test("current time", () => {
-                const wrapper = mount(view(testing.noop, state1))
-                expect(wrapper.find('div').at(0)).toIncludeText('Current time : 1313');
-            });
-
-            test("trigger in", () => {
-                const wrapper = mount(view(testing.noop, state1))
-                expect(wrapper.find('div').at(1)).toIncludeText('In :true');
-            });
-
-            test("trigger in progress", () => {
-                const wrapper = mount(view(testing.noop, state2))
-                expect(wrapper.find('div').at(1)).toIncludeText('In :...');
-            });
-
-            test("ticks", () => {
-                const wrapper = mount(view(testing.noop, state1))
-                expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 : 13');
-                expect(wrapper.find('div').at(2)).toIncludeText('ticks2 : 131313');
-                expect(wrapper.find('div > button').at(2)).toIncludeText('stop ticking');
-            });
-
-            test("snapshot state1", () => {
-                const wrapper = mount(view(testing.noop, state1))
-                expect(wrapper).toMatchSnapshot();
-            });
-
-            test("snapshot state2", () => {
-                const wrapper = mount(view(testing.noop, state2))
-                expect(wrapper).toMatchSnapshot();
-            });
-
-        });
-
+    test('get current time', () => {
+      const wrapper = mount(view(testing.dispatcher, initialState));
+      wrapper.find('div > button').at(0).simulate('click');
+      expect(testing).toHaveDispatchedMsg({ tag: 'get-cur-time' });
     });
 
-    describe("clicking generates messages", () => {
-
-        const [initialState, _cmd] = init();
-
-        test("get current time", () => {
-            const wrapper = mount(view(testing.dispatcher, initialState));
-            wrapper.find('div > button').at(0).simulate('click');
-            expect(testing).toHaveDispatchedMsg({ tag: "get-cur-time" });
-        });
-
-        test("get in", () => {
-            const wrapper = mount(view(testing.dispatcher, initialState));
-            wrapper.find('div > button').at(1).simulate('click');
-            expect(testing).toHaveDispatchedMsg({ tag: "get-in" });
-        });
-
-        test("toggle tick", () => {
-            const wrapper = mount(view(testing.dispatcher, initialState));
-            wrapper.find('div > button').at(2).simulate('click');
-            expect(testing).toHaveDispatchedMsg({ tag: "toggle-tick" });
-        });
-
+    test('get in', () => {
+      const wrapper = mount(view(testing.dispatcher, initialState));
+      wrapper.find('div > button').at(1).simulate('click');
+      expect(testing).toHaveDispatchedMsg({ tag: 'get-in' });
     });
 
-    describe("message updates state", () => {
+    test('toggle tick', () => {
+      const wrapper = mount(view(testing.dispatcher, initialState));
+      wrapper.find('div > button').at(2).simulate('click');
+      expect(testing).toHaveDispatchedMsg({ tag: 'toggle-tick' });
+    });
+  });
 
-        const [initialState, _cmd] = init();
+  describe('message updates state', () => {
+    const [initialState, _cmd] = init();
 
-        test("get-cur-time", () => {
-            const [newState, cmd] = update({ tag: "get-cur-time" }, initialState);
-            expect(newState.currentTime).toBe(-1);
-            testing.dispatchFrom(cmd)
-                .then(msg => {
-                    expect(msg).toHaveProperty('tag', 'got-cur-time')
-                });
-        });
-
-        test("get-in", () => {
-            const [newState, cmd] = update({ tag: "get-in" }, initialState);
-            expect(newState.inTime).toBe(false);
-            expect(newState.inProgress).toBe(true);
-            testing.dispatchFrom(cmd)
-                .then(msg => {
-                    expect(msg).toHaveProperty('tag', 'got-in')
-                });
-        });
-
-        test("toggle-tick", () => {
-            const [newState, cmd] = update({ tag: "toggle-tick" }, initialState);
-            expect(newState.ticking).toBe(!initialState.ticking);
-            expect(cmd).toEqual(Cmd.none())
-        });
-
-        test("got-tick 1", () => {
-            const [newState, cmd] = update({ tag: "got-tick", isFirst: true }, initialState);
-            expect(newState.ticks1).toBe(initialState.ticks1 + 1);
-            expect(newState.ticks2).toBe(initialState.ticks2);
-            expect(cmd).toEqual(Cmd.none())
-        });
-
-        test("got-tick 2", () => {
-            const [newState, cmd] = update({ tag: "got-tick", isFirst: false }, initialState);
-            expect(newState.ticks1).toBe(initialState.ticks1);
-            expect(newState.ticks2).toBe(initialState.ticks2 + 1);
-            expect(cmd).toEqual(Cmd.none())
-        });
-
+    test('get-cur-time', () => {
+      const [newState, cmd] = update({ tag: 'get-cur-time' }, initialState);
+      expect(newState.currentTime).toBe(-1);
+      testing.dispatchFrom(cmd).then((msg) => {
+        expect(msg).toHaveProperty('tag', 'got-cur-time');
+      });
     });
 
+    test('get-in', () => {
+      const [newState, cmd] = update({ tag: 'get-in' }, initialState);
+      expect(newState.inTime).toBe(false);
+      expect(newState.inProgress).toBe(true);
+      testing.dispatchFrom(cmd).then((msg) => {
+        expect(msg).toHaveProperty('tag', 'got-in');
+      });
+    });
+
+    test('toggle-tick', () => {
+      const [newState, cmd] = update({ tag: 'toggle-tick' }, initialState);
+      expect(newState.ticking).toBe(!initialState.ticking);
+      expect(cmd).toEqual(Cmd.none());
+    });
+
+    test('got-tick 1', () => {
+      const [newState, cmd] = update({ tag: 'got-tick', isFirst: true }, initialState);
+      expect(newState.ticks1).toBe(initialState.ticks1 + 1);
+      expect(newState.ticks2).toBe(initialState.ticks2);
+      expect(cmd).toEqual(Cmd.none());
+    });
+
+    test('got-tick 2', () => {
+      const [newState, cmd] = update({ tag: 'got-tick', isFirst: false }, initialState);
+      expect(newState.ticks1).toBe(initialState.ticks1);
+      expect(newState.ticks2).toBe(initialState.ticks2 + 1);
+      expect(cmd).toEqual(Cmd.none());
+    });
+  });
 });
-

@@ -20,10 +20,10 @@
     "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
   },
   "dependencies": {
-    "tea-cup-core": "^1.5.3"
   },
   "peerDependencies": {
-    "react": "^16.7.0"
+    "react": "^16.7.0",
+    "tea-cup-core": "^1.5.3"
   },
   "devDependencies": {
     "@types/jsdom": "^16.2.5",
