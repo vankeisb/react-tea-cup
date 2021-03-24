@@ -23,7 +23,6 @@
  *
  */
 
-export * from 'tea-cup-core';
 export * from './Memo';
 export * from './Program';
 export * from './Navigation';

@@ -23,8 +23,9 @@
  *
  */
 
-import { Cmd, Dispatcher, memo, noCmd } from 'react-tea-cup';
+import { Cmd, Dispatcher, noCmd } from 'tea-cup-core';
 import * as React from 'react';
+import { memo } from 'react-tea-cup';
 
 export type Model = Readonly<{
   value: number;

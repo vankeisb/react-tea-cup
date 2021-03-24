@@ -23,7 +23,7 @@
  *
  */
 
-import { Http, Cmd, Task, Result, noCmd, Dispatcher, Decode, Decoder } from "react-tea-cup";
+import { Http, Cmd, Task, Result, noCmd, Dispatcher, Decode, Decoder } from "tea-cup-core";
 import * as React from 'react'
 
 export interface Commit {

@@ -23,7 +23,7 @@
  *
  */
 
-import { Cmd, Dispatcher, just, Maybe, nothing, Random, Task } from 'react-tea-cup';
+import { Cmd, Dispatcher, just, Maybe, nothing, Random, Task } from 'tea-cup-core';
 import * as React from 'react';
 
 export type Model = Maybe<number>;
