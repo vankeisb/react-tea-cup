@@ -29,7 +29,7 @@ test('left', () => {
   const e: Either<string, number> = left('yeah');
   expect(e.isLeft()).toBe(true);
   expect(e.isRight()).toBe(false);
-  expect(e.left.map(s => s + '!').withDefault('')).toBe('yeah!');
+  expect(e.left.map((s) => s + '!').withDefault('')).toBe('yeah!');
   expect(e.right.withDefault(123)).toBe(123);
 });
 
@@ -38,7 +38,7 @@ test('right', () => {
   expect(e.isLeft()).toBe(false);
   expect(e.isRight()).toBe(true);
   expect(e.left.withDefault('!!!')).toBe('!!!');
-  expect(e.right.map(x => x + 1).withDefault(456)).toBe(124);
+  expect(e.right.map((x) => x + 1).withDefault(456)).toBe(124);
 });
 
 test('mapLeft', () => {

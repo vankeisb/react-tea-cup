@@ -200,7 +200,7 @@ export class DevTools<Model, Msg> {
       this.resume();
     }
     this.events = [];
-    console.log("All events cleared")
+    console.log('All events cleared');
   }
 
   setMaxEvents(maxEvents: number): DevTools<Model, Msg> {
