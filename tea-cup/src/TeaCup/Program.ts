@@ -24,7 +24,7 @@
  */
 
 import { Component, ReactNode } from 'react';
-import { Dispatcher, Cmd, Sub, nextUuid } from 'tea-cup-core';
+import { Dispatcher, Cmd, Sub, nextUuid, CmdNone } from 'tea-cup-core';
 import { DevToolsEvent, DevTools } from './DevTools';
 
 /**
@@ -93,18 +93,25 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
 
       // perform commands in a separate timout, to
       // make sure that this dispatch is done
-      setTimeout(() => {
-        // console.log("dispatch: processing commands");
-        // debug("performing command", updated[1]);
-        updated[1].execute(d);
-        // debug("<<<  done");
-      }, 0);
+      const cmd = updated[1];
+      if (!(cmd instanceof CmdNone)) {
+        setTimeout(() => {
+          // console.log("dispatch: processing commands");
+          // debug("performing command", updated[1]);
+          updated[1].execute(d);
+          // debug("<<<  done");
+        }, 0);
+      }
+
+      const needsUpdate = this.currentModel === updated[0];
 
       this.currentModel = updated[0];
       this.currentSub = newSub;
 
       // trigger rendering
-      this.forceUpdate();
+      if (needsUpdate) {
+        this.forceUpdate();
+      }
     }
   }
 

@@ -63,7 +63,8 @@ export abstract class Cmd<Msg> {
 /**
  * A command that does nothing.
  */
-class CmdNone<Msg> extends Cmd<Msg> {
+// exported for perf optimisation reasons
+export class CmdNone<Msg> extends Cmd<Msg> {
   execute(dispatch: Dispatcher<Msg>): void {
     // it's a noop !
   }
