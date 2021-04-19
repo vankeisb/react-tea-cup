@@ -23,7 +23,7 @@
  *
  */
 
-import {Sub} from "./Sub";
+import { Sub } from './Sub';
 
 export class Port<T> {
   private subs: PortSub<T, any>[] = [];
@@ -34,20 +34,20 @@ export class Port<T> {
 
   subscribe<M>(f: (t: T) => M): Sub<M> {
     return new PortSub(
-        f,
-        (p) => this.subs.push(p),
-        (p) => {
-          this.subs = this.subs.filter((x) => x !== p);
-        },
+      f,
+      (p) => this.subs.push(p),
+      (p) => {
+        this.subs = this.subs.filter((x) => x !== p);
+      },
     );
   }
 }
 
 class PortSub<T, M> extends Sub<M> {
   constructor(
-      private readonly f: (t: T) => M,
-      private readonly _onInit: (p: PortSub<T, M>) => void,
-      private readonly _onRelease: (p: PortSub<T, M>) => void,
+    private readonly f: (t: T) => M,
+    private readonly _onInit: (p: PortSub<T, M>) => void,
+    private readonly _onRelease: (p: PortSub<T, M>) => void,
   ) {
     super();
   }

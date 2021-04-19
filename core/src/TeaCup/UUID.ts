@@ -23,7 +23,7 @@
  *
  */
 
-import {Task} from "./Task";
+import { Task } from './Task';
 
 /**
  * Generate a UUID. Side effect, use uuid() that returns a Task instead

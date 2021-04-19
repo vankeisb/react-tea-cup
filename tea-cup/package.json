@@ -19,8 +19,7 @@
     "compile": "rimraf dist && tsc",
     "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": "^16.7.0",
     "tea-cup-core": "^2.0.0"

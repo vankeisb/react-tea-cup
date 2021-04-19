@@ -55,9 +55,9 @@ declare global {
 export class Testing<M> {
   private _dispatched: M | undefined;
 
-  public Testing() { }
+  public Testing() {}
 
-  public readonly noop: Dispatcher<M> = () => { };
+  public readonly noop: Dispatcher<M> = () => {};
 
   public get dispatcher(): Dispatcher<M> {
     this._dispatched = undefined;
@@ -80,74 +80,96 @@ export class Testing<M> {
   }
 }
 
-type Trigger<Model, Msg, T> = (node: ReactElement<ProgramProps<Model, Msg>>) => T
+type Trigger<Model, Msg, T> = (node: ReactElement<ProgramProps<Model, Msg>>) => T;
 type ResolveType<Model, T> = (idle: [Model, T]) => void;
 
-export function updateUntilIdle<Model, Msg, T>(props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>): Promise<[Model, T]> {
-  return new Promise(resolve => {
-    fun(<Program {...testableProps(resolve, props, fun)} />)
-  })
+export function updateUntilIdle<Model, Msg, T>(
+  props: ProgramProps<Model, Msg>,
+  fun: Trigger<Model, Msg, T>,
+): Promise<[Model, T]> {
+  return new Promise((resolve) => {
+    fun(<Program {...testableProps(resolve, props, fun)} />);
+  });
 }
 
-function testableProps<Model, Msg, T>(resolve: ResolveType<Model, T>, props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>) {
+function testableProps<Model, Msg, T>(
+  resolve: ResolveType<Model, T>,
+  props: ProgramProps<Model, Msg>,
+  fun: Trigger<Model, Msg, T>,
+) {
   const tprops: ProgramProps<TestableModel<Model, Msg, T>, Msg> = {
     init: initTestable(resolve, props.init),
     view: viewTestable(props.view),
-    update: updateTestable((props.update)),
-    subscriptions: suscriptionsTestable(props, fun)
-  }
-  return tprops
+    update: updateTestable(props.update),
+    subscriptions: suscriptionsTestable(props, fun),
+  };
+  return tprops;
 }
 
 type TestableModel<Model, Msg, T> = {
   readonly resolve: ResolveType<Model, T>;
   readonly cmds: Cmd<Msg>[];
   readonly model: Model;
-}
+};
 
-function initTestable<Model, Msg, T>(resolve: ResolveType<Model, T>, init: ProgramProps<Model, Msg>['init']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['init'] {
+function initTestable<Model, Msg, T>(
+  resolve: ResolveType<Model, T>,
+  init: ProgramProps<Model, Msg>['init'],
+): ProgramProps<TestableModel<Model, Msg, T>, Msg>['init'] {
   const mac = init();
-  return () => [{
-    resolve,
-    cmds: [mac[1]],
-    model: mac[0]
-  }, Cmd.none()];
+  return () => [
+    {
+      resolve,
+      cmds: [mac[1]],
+      model: mac[0],
+    },
+    Cmd.none(),
+  ];
 }
 
-function viewTestable<Model, Msg, T>(view: ProgramProps<Model, Msg>['view']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['view'] {
+function viewTestable<Model, Msg, T>(
+  view: ProgramProps<Model, Msg>['view'],
+): ProgramProps<TestableModel<Model, Msg, T>, Msg>['view'] {
   return (dispatch: Dispatcher<Msg>, model: TestableModel<Model, Msg, T>) => view(dispatch, model.model);
 }
 
-function updateTestable<Model, Msg, T>(update: ProgramProps<Model, Msg>['update']): ProgramProps<TestableModel<Model, Msg, T>, Msg>['update'] {
+function updateTestable<Model, Msg, T>(
+  update: ProgramProps<Model, Msg>['update'],
+): ProgramProps<TestableModel<Model, Msg, T>, Msg>['update'] {
   return (msg: Msg, model: TestableModel<Model, Msg, T>) => {
     const [model1, cmd1] = update(msg, model.model);
-    const cmds = [cmd1].filter(cmd => cmd.constructor.name !== 'CmdNone')
-    return [{
-      ...model,
-      cmds,
-      model: model1,
-    }, Cmd.none()];
-  }
+    const cmds = [cmd1].filter((cmd) => cmd.constructor.name !== 'CmdNone');
+    return [
+      {
+        ...model,
+        cmds,
+        model: model1,
+      },
+      Cmd.none(),
+    ];
+  };
 }
 
-function suscriptionsTestable<Model, Msg, T>(props: ProgramProps<Model, Msg>, fun: Trigger<Model, Msg, T>): ProgramProps<TestableModel<Model, Msg, T>, Msg>['subscriptions'] {
+function suscriptionsTestable<Model, Msg, T>(
+  props: ProgramProps<Model, Msg>,
+  fun: Trigger<Model, Msg, T>,
+): ProgramProps<TestableModel<Model, Msg, T>, Msg>['subscriptions'] {
   return (model: TestableModel<Model, Msg, T>) => {
     const subs = props.subscriptions(model.model);
     if (model.cmds.length === 0) {
-      const result = fun(<Program
-        init={() => [model.model, Cmd.none()]
-        }
-        update={(msg, model) => [model, Cmd.none()]
-        }
-        view={(d, m) => props.view(d, m)
-        }
-        subscriptions={(d) => Sub.none()}
-      />)
+      const result = fun(
+        <Program
+          init={() => [model.model, Cmd.none()]}
+          update={(msg, model) => [model, Cmd.none()]}
+          view={(d, m) => props.view(d, m)}
+          subscriptions={(d) => Sub.none()}
+        />,
+      );
       model.resolve([model.model, result]);
       return subs;
     }
     return Sub.batch([new TestableSub(model.cmds), subs]);
-  }
+  };
 }
 
 class TestableSub<Msg> extends Sub<Msg> {
@@ -159,8 +181,8 @@ class TestableSub<Msg> extends Sub<Msg> {
     setTimeout(() => {
       if (this.dispatcher !== undefined) {
         const d = this.dispatcher.bind(this);
-        this.cmds.map(cmd => cmd.execute(d));
+        this.cmds.map((cmd) => cmd.execute(d));
       }
-    }, 0)
+    }, 0);
   }
 }

@@ -151,10 +151,12 @@ class TRecover<E, R> extends Task<never, R> {
   }
 
   execute(callback: (r: Result<never, R>) => void): void {
-    this.t.execute((tRes) => tRes.match(
-        tOk => callback(ok(tOk)),
-        tErr => callback(ok(this.f(tErr)))
-    ));
+    this.t.execute((tRes) =>
+      tRes.match(
+        (tOk) => callback(ok(tOk)),
+        (tErr) => callback(ok(this.f(tErr))),
+      ),
+    );
   }
 }
 
