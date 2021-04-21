@@ -1,5 +1,41 @@
 # Changelog
 
+## v2.0.1 (21/04/2021)
+
+#### closed
+
+- [**closed**] performance improvements [#59](https://github.com/vankeisb/react-tea-cup/pull/59)
+- [**closed**] prettify all code [#60](https://github.com/vankeisb/react-tea-cup/pull/60)
+- [**closed**] fix raising errors from JSON parse to be strings [#56](https://github.com/vankeisb/react-tea-cup/pull/56)
+
+#### dependencies
+
+- [**dependencies**] Bump y18n from 3.2.1 to 3.2.2 [#58](https://github.com/vankeisb/react-tea-cup/pull/58)
+
+---
+
+## v2.0.0 (24/03/2021)
+
+#### closed
+
+- [**closed**] [breaking change] intra peer dependencies / no re-exports [#57](https://github.com/vankeisb/react-tea-cup/pull/57)
+
+---
+
+## v1.5.3 (23/03/2021)
+
+#### closed
+
+- [**closed**] Moved react to peer dependency [#55](https://github.com/vankeisb/react-tea-cup/pull/55)
+- [**closed**] program testing [#49](https://github.com/vankeisb/react-tea-cup/pull/49)
+- [**closed**] introduce updatePiped [#54](https://github.com/vankeisb/react-tea-cup/pull/54)
+
+#### dependencies
+
+- [**dependencies**] Bump elliptic from 6.5.3 to 6.5.4 [#53](https://github.com/vankeisb/react-tea-cup/pull/53)
+
+---
+
 ## v1.5.2 (14/12/2020)
 *No changelog for this release.*
 
