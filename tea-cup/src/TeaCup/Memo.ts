@@ -25,18 +25,24 @@
 
 import * as React from 'react';
 
+function compareRefEquals<T>(o1: T, o2: T): boolean {
+  return o1 === o2;
+}
+
 /**
- * Memoize the view for passed data, and wrap the function's result
- * into a <Memo/> component.
+ * Memoize the view for passed data.
  * @param t the data to memoize.
+ * @param compareFn optional comparison function. Defaults to ref equality
  */
-export function memo<T>(t: T) {
+export function memo<T>(t: T, compareFn?: (o1: T, o2: T) => boolean) {
+  const equals = compareFn ?? compareRefEquals;
   return (f: (t: T) => React.ReactNode) => {
     return React.createElement(Memo, {
       value: t,
       renderer: (x: any) => {
         return f(x);
       },
+      compareFn: equals,
     });
   };
 }
@@ -44,6 +50,7 @@ export function memo<T>(t: T) {
 interface MemoProps {
   value: any;
   renderer: (x: any) => React.ReactNode;
+  compareFn: (o1: any, o2: any) => boolean;
 }
 
 class Memo<T> extends React.Component<MemoProps> {
@@ -52,6 +59,6 @@ class Memo<T> extends React.Component<MemoProps> {
   }
 
   shouldComponentUpdate(nextProps: Readonly<MemoProps>, nextState: Readonly<{}>, nextContext: any): boolean {
-    return this.props.value !== nextProps.value;
+    return !this.props.compareFn(this.props.value, nextProps.value);
   }
 }
