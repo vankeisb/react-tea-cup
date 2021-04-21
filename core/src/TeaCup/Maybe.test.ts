@@ -142,6 +142,6 @@ test('isNothing', () => {
 
 test('filter', () => {
   const m: Maybe<number> = just(123);
-  expect(m.filter(x => x === 123).isJust()).toBe(true);
-  expect(m.filter(x => x === 456).isJust()).toBe(false);
-})
+  expect(m.filter((x) => x === 123).isJust()).toBe(true);
+  expect(m.filter((x) => x === 456).isJust()).toBe(false);
+});

@@ -23,7 +23,7 @@
  *
  */
 
-import {just, Maybe, nothing} from "./Maybe";
+import { just, Maybe, nothing } from './Maybe';
 
 /**
  * Either left, or right.
