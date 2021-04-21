@@ -109,7 +109,9 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
       this.currentSub = newSub;
 
       // trigger rendering
+      console.log('render')
       if (needsUpdate) {
+        console.log('render update')
         this.forceUpdate();
       }
     }
