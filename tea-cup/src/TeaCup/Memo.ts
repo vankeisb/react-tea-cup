@@ -59,6 +59,6 @@ class Memo<T> extends React.Component<MemoProps> {
   }
 
   shouldComponentUpdate(nextProps: Readonly<MemoProps>, nextState: Readonly<{}>, nextContext: any): boolean {
-    return this.props.compareFn(this.props.value, nextProps.value);
+    return !this.props.compareFn(this.props.value, nextProps.value);
   }
 }
