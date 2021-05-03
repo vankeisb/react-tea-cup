@@ -331,7 +331,7 @@ export class RouteDef<R> implements RouteBase<R> {
 
   static sanitizePath(path: string): string {
     const p1 = path.startsWith('/') ? path.substring(1) : path;
-    return p1.endsWith('/') ? p1.substring(0, p1.length - 2) : p1;
+    return p1.endsWith('/') ? p1.substring(0, p1.length - 1) : p1;
   }
 
   static splitPath(path: string): ReadonlyArray<string> {
