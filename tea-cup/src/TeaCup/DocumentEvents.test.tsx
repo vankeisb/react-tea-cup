@@ -51,30 +51,30 @@ describe('DocumentEvents Test', () => {
     expect(addSpy.mock.calls.length).toBe(1);
   });
 
-  it('second sub adds no listener', () => {
+  it('second sub adds another listener', () => {
     const sub = documentEvents.on('click', (e) => 'clicked');
     sub.init(() => ({}));
 
     expect(addSpy.mock.calls.length).toBe(1);
 
-    const sub2 = documentEvents.on('click', (e) => 'clicked2');
+    const sub2 = documentEvents.on('click', (e) => 'clicked2', true);
     sub2.init(() => ({}));
 
-    expect(addSpy.mock.calls.length).toBe(1);
+    expect(addSpy.mock.calls.length).toBe(2);
   });
 
-  it('last sub removes listener', () => {
+  it('all subs remove listeners', () => {
     const sub = documentEvents.on('click', (e) => 'clicked');
     sub.init(() => ({}));
 
-    const sub2 = documentEvents.on('click', (e) => 'clicked2');
+    const sub2 = documentEvents.on('click', (e) => 'clicked2', { capture: true });
     sub2.init(() => ({}));
 
     sub.release();
-    expect(removeSpy.mock.calls.length).toBe(0);
+    expect(removeSpy.mock.calls.length).toBe(1);
 
     sub2.release();
-    expect(removeSpy.mock.calls.length).toBe(1);
+    expect(removeSpy.mock.calls.length).toBe(2);
   });
 
   it('sub receives event from listener', () => {
@@ -93,23 +93,30 @@ describe('DocumentEvents Test', () => {
     expect(msgs).toEqual(['clicked1']);
   });
 
-  it('two subs receive events from listener', () => {
+  it('each sub receive events its listener', () => {
     const msgs: string[] = [];
     const collectMsgs = (msg: string): void => {
       msgs.push(msg);
     };
+    const msgs2: string[] = [];
+    const collectMsgs2 = (msg: string): void => {
+      msgs2.push(msg);
+    };
 
-    const sub = documentEvents.on('click', (e) => 'clicked1');
+    const sub = documentEvents.on('click', (e) => 'clicked');
     const sub2 = documentEvents.on('click', (e) => 'clicked2');
 
     sub.init(collectMsgs);
-    sub2.init(collectMsgs);
+    sub2.init(collectMsgs2);
 
-    expect(addSpy.mock.calls.length).toBe(1);
+    expect(addSpy.mock.calls.length).toBe(2);
     const listener = addSpy.mock.calls[0][1];
+    const listener2 = addSpy.mock.calls[1][1];
 
     listener({ event: 'event' });
-    expect(msgs).toEqual(['clicked1', 'clicked2']);
+    expect(msgs).toEqual(['clicked']);
+    listener2({ event: 'event' });
+    expect(msgs2).toEqual(['clicked2']);
   });
 
   it('sub stops receiving events from listener', () => {
@@ -132,16 +139,4 @@ describe('DocumentEvents Test', () => {
     expect(msgs).toEqual(['clicked1', 'clicked1']);
   });
 
-  it('release removes all listeners', () => {
-    const sub = documentEvents.on('click', (e) => 'clicked1');
-    sub.init(() => ({}));
-    const sub2 = documentEvents.on('click', (e) => 'clicked2');
-    sub2.init(() => ({}));
-    const sub3 = documentEvents.on('mousemove', (e) => 'moved3');
-    sub3.init(() => ({}));
-    expect(addSpy.mock.calls.length).toBe(2);
-
-    documentEvents.release();
-    expect(removeSpy.mock.calls.length).toBe(2);
-  });
 });
