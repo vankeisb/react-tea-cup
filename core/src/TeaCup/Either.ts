@@ -65,6 +65,10 @@ export class Left<A, B> {
   get right(): Maybe<B> {
     return nothing;
   }
+
+  toNative(): A {
+    return this.value;
+  }
 }
 
 export class Right<A, B> {
@@ -101,6 +105,10 @@ export class Right<A, B> {
 
   get right(): Maybe<B> {
     return just(this.value);
+  }
+
+  toNative(): B {
+    return this.value;
   }
 }
 
