@@ -23,7 +23,7 @@
  *
  */
 
-import { Either, left, right } from './Either';
+import { Either, Left, left, Right, right } from './Either';
 
 test('left', () => {
   const e: Either<string, number> = left('yeah');
@@ -66,3 +66,17 @@ test('mapRight', () => {
     ),
   ).toBe(124);
 });
+
+test('toNative', () => {
+  const lefty: Left<string, number> = new Left("hello");
+  const resLeft: string = lefty.toNative();
+  expect(resLeft).toEqual("hello")
+
+  const righty: Right<string, number> = new Right(13);
+  const resRight: number = righty.toNative();
+  expect(resRight).toEqual("hello")
+
+  const either: Either<string, number> = left("surprise");
+  const res: string | number = either.toNative();
+  expect(res).toEqual("surprise")
+})
