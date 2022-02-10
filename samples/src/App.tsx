@@ -415,6 +415,7 @@ function viewHome(dispatch: Dispatcher<Msg>) {
         </a>
         .
       </p>
+      <pre>React version: {React.version}</pre>
     </div>
   );
 }
