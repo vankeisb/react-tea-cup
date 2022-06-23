@@ -7,12 +7,20 @@ test everything. They are not meant to be "good practises".
 
     # make sure tea-cup is compiled
     cd react-tea-cup
-    npm install
-    npm run compile
+    yarn install
+    cd core
+    yarn run compile
+    cd ../tea-cup
+    yarn run compile
 
-    # build and run the samples
-    cd samples
-    npm install
-    npm start
+    # run the samples 
+        # With React 16 (default)
+        cd ../samples
+        yarn start
+    
+        # With React 17
+        cd ../samples
+        yarn upgrade react@^17.0.1 react-dom@^17.0.1 @types/react@^17.0.1 @types/react-dom@^17.0.1
+        yarn start
 
 The samples app is made with `create-react-app`. See the scripts in `package.json`.

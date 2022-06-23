@@ -97,6 +97,7 @@ const router: Router<MyRoute> = new Router(
 
 expectRoute('/', home());
 expectRoute('/songs', songs(nothing));
+expectRoute('/songs/', songs(nothing));
 expectRoute('/song/123', song(123));
 expectRoute('/song/123/edit', song(123, true));
 expectRoute('/songs?q=foobar', songs(just('foobar')));

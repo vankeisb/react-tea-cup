@@ -58,6 +58,7 @@ import * as Sful from './Samples/StatefulInView';
 import * as Rest from './Samples/Rest';
 import * as TimeSample from './Samples/TimeSample';
 import * as EventsSample from './Samples/EventsSample';
+import * as SelectSample from './Samples/SelectSample';
 import * as PortsSample from './Samples/PortsSample';
 import { appSamplePorts } from "./Samples/PortsSample";
 
@@ -166,6 +167,7 @@ interface Samples {
   readonly rest: Rest.Model;
   readonly time: TimeSample.Model;
   readonly events: EventsSample.Model;
+  readonly select: SelectSample.Model;
   readonly ports: PortsSample.Model;
 }
 
@@ -180,6 +182,7 @@ type Msg =
   | { type: 'rest'; child: Rest.Msg }
   | { type: 'timeSample'; child: TimeSample.Msg }
   | { type: 'eventsSample'; child: EventsSample.Msg }
+  | { type: 'selectSample'; child: SelectSample.Msg }
   | { type: 'portsSample'; child: PortsSample.Msg }
   | { type: 'urlChange'; location: Location }
   | { type: 'newUrl'; url: string }
@@ -199,6 +202,7 @@ function initSamples(): [Model, Cmd<Msg>] {
   const rest = Rest.init();
   const time = TimeSample.init();
   const events = EventsSample.init();
+  const select = SelectSample.init();
   const ports = PortsSample.init();
   return [
     {
@@ -214,6 +218,7 @@ function initSamples(): [Model, Cmd<Msg>] {
         rest: rest[0],
         time: time[0],
         events: events[0],
+        select: select[0],
         ports: ports[0],
       },
     },
@@ -228,6 +233,7 @@ function initSamples(): [Model, Cmd<Msg>] {
       rest[1].map(mapRest),
       time[1].map(mapTimeSample),
       events[1].map(mapEventsSample),
+      select[1].map(mapSelectSample),
       ports[1].map(mapPortsSample),
     ]),
   ];
@@ -350,6 +356,13 @@ function mapEventsSample(m: EventsSample.Msg): Msg {
   };
 }
 
+function mapSelectSample(m: SelectSample.Msg): Msg {
+  return {
+    type: 'selectSample',
+    child: m,
+  };
+}
+
 function mapPortsSample(m: PortsSample.Msg): Msg {
   return {
     type: 'portsSample',
@@ -402,6 +415,7 @@ function viewHome(dispatch: Dispatcher<Msg>) {
         </a>
         .
       </p>
+      <pre>React version: {React.version}</pre>
     </div>
   );
 }
@@ -576,6 +590,8 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
       {TimeSample.view(map(dispatch, mapTimeSample), samples.time)}
       <h2>Events</h2>
       {EventsSample.view(map(dispatch, mapEventsSample), samples.events)}
+      <h2>Select</h2>
+      {SelectSample.view(map(dispatch, mapSelectSample), samples.select)}
       <h2>Ports</h2>
       {PortsSample.view(map(dispatch, mapPortsSample), samples.ports)}
       <button onClick={() => {
@@ -657,6 +673,12 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         return [{ ...s, events: macEvents[0] }, macEvents[1].map(mapEventsSample)];
       });
 
+    case 'selectSample':
+      return mapSample((s: Samples) => {
+        const macSelect = SelectSample.update(msg.child, s.select);
+        return [{ ...s, select: macSelect[0] }, macSelect[1].map(mapSelectSample)];
+      });
+
     case 'urlChange':
       return init(msg.location);
 
@@ -672,13 +694,14 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 function subscriptions(model: Model): Sub<Msg> {
   switch (model.tag) {
     case 'samples':
-      const { counter, parentChild, raf, time, events } = model.samples;
+      const { counter, parentChild, raf, time, events, select } = model.samples;
       return Sub.batch([
         Counter.subscriptions(counter).map(mapCounter),
         ParentChild.subscriptions(parentChild).map(mapParentChild),
         Raf.subscriptions(raf).map(mapRaf),
         TimeSample.subscriptions(time).map(mapTimeSample),
         EventsSample.subscriptions(events).map(mapEventsSample),
+        SelectSample.subscriptions(select).map(mapSelectSample),
         PortsSample.subscriptions().map(mapPortsSample),
       ]);
     default:

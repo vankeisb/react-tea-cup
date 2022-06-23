@@ -43,3 +43,4 @@ export * from './ObjectSerializer';
 export * from './Try';
 export * from './UUID';
 export * from './Port';
+export * from './UpdatePiped';

@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.1.0 (03/05/2021)
+
+#### closed
+
+- [**closed**] Expose UpdatedPiped [#63](https://github.com/vankeisb/react-tea-cup/pull/63)
+- [**closed**] Router handles URLs that ends with / [#62](https://github.com/vankeisb/react-tea-cup/pull/62)
+
+#### dependencies
+
+- [**dependencies**] Bump ssri from 6.0.1 to 6.0.2 [#61](https://github.com/vankeisb/react-tea-cup/pull/61)
+
+---
+
 ## v2.0.1 (21/04/2021)
 
 #### closed
