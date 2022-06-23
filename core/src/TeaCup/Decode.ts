@@ -175,6 +175,40 @@ export class Decode {
     });
   }
 
+  /**
+   * Decoder for Map
+   * @param dK the decoder for keys in the Map
+   * @param dV the decoder for values in the Map
+   */
+  static jsMap<K, V>(dK: Decoder<K>, dV: Decoder<V>): Decoder<Map<K, V>> {
+    return new Decoder<Map<K, V>>((o: any) => {
+      if (o instanceof Map) {
+        const a: Map<K, V> = o as Map<K, V>;
+        const res: Map<K, V> = new Map<K, V>();
+        try {
+          a.forEach((value: V, key: K) => {
+            const rK: Result<string, K> = dK.decodeValue(key);
+            const rV: Result<string, V> = dV.decodeValue(value);
+            if (rK.tag === 'Ok' && rV.tag === 'Ok') {
+              res.set(key, value);
+            } else {
+              if (rK.tag === 'Err') {
+                throw(`could not convert key '${key}' : ${rK.err}`);
+              }
+              if (rV.tag === 'Err') {
+                throw(`could not convert element for key '${key}' : ${rV.err}`);
+              }
+            }
+          });
+        } catch (e) {
+          return err(e);
+        }
+        return ok(res);
+      }
+      return err(`value is not a Map : ${stringifyForMsg(o)}`);
+    });
+  }
+
   // Object Primitives
 
   /**

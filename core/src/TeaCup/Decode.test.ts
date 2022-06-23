@@ -283,6 +283,67 @@ describe('mapObject', () => {
   });
 });
 
+describe('mapJsMap', () => {
+  const expected = new Map<string, string>();
+  expected.set('1', 'first');
+  expected.set('2', 'second');
+  expected.set('3', 'third');
+
+  test('simple', () => {
+    const value = new Map<string, string>();
+    value.set('1', 'first');
+    value.set('2', 'second');
+    value.set('3', 'third');
+    expect(
+        Decode.jsMap<string, string>(Decode.str, Decode.str).decodeValue(value),
+    ).toEqual(ok(expected));
+  })
+
+  test('complex', () => {
+    type MyComplexType = {
+      name: string,
+    }
+    const expectedComplex = new Map<string, MyComplexType>();
+    expectedComplex.set('1', { name: 'foo' });
+    expectedComplex.set('2', { name: 'bar' });
+    expectedComplex.set('3', { name: 'baz' });
+
+    const value = new Map<string, MyComplexType>();
+    value.set('1', { name: 'foo' });
+    value.set('2', { name: 'bar' });
+    value.set('3', { name: 'baz' });
+
+    const myComplexDecoder: Decoder<MyComplexType> = Decode.map(
+        (name: string) => ({ name }),
+        Decode.field('name', Decode.str)
+    );
+
+    expect(
+        Decode.jsMap<string, MyComplexType>(Decode.str, myComplexDecoder).decodeValue(value),
+    ).toEqual(ok(expectedComplex));
+  })
+
+  test('key mismatch', () => {
+    const value = new Map<number, string>();
+    value.set(1, 'first');
+    value.set(2, 'second');
+    value.set(3, 'third');
+    expect(
+        Decode.jsMap<string, string>(Decode.str, Decode.str).decodeValue(value),
+    ).toEqual(err("could not convert key '1' : value is not a string : 1"));
+  })
+
+  test('value mismatch', () => {
+    const value = new Map<string, number>();
+    value.set('first', 1);
+    value.set('second', 2);
+    value.set('third', 3);
+    expect(
+        Decode.jsMap<string, string>(Decode.str, Decode.str).decodeValue(value),
+    ).toEqual(err("could not convert element for key 'first' : value is not a string : 1"));
+  })
+});
+
 describe('mapArray', () => {
   type MyType = [string, number];
   const expected: MyType = ['a foo', 13];
