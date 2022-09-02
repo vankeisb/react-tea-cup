@@ -62,6 +62,9 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
   }
 
   dispatch(msg: Msg) {
+    if (this.currentSub === undefined) {
+      return;
+    }
     if (this.props.devTools && this.props.devTools.isPaused()) {
       // do not process messages if we are paused
       return;
@@ -89,7 +92,7 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
       const d = this.dispatch.bind(this);
 
       newSub.init(d);
-      prevSub && prevSub.release();
+      prevSub?.release();
 
       // perform commands in a separate timout, to
       // make sure that this dispatch is done
@@ -113,6 +116,11 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
         this.forceUpdate();
       }
     }
+  }
+
+  componentWillUnmount() {
+    this.currentSub?.release();
+    this.currentSub = undefined;
   }
 
   componentDidMount() {
