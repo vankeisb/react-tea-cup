@@ -1,6 +1,6 @@
 import { mount } from 'enzyme';
-import { Cmd, Dispatcher, Sub, Task } from 'tea-cup-core';
-import { extendJest, ProgramProps, updateUntilIdle } from 'react-tea-cup';
+import { Cmd, Dispatcher, noCmd, Port, Sub, Task } from 'tea-cup-core';
+import { DevTools, extendJest, Program, ProgramProps, updateUntilIdle } from 'react-tea-cup';
 import React from 'react';
 
 extendJest(expect);
@@ -36,5 +36,64 @@ describe('Test Program using updateUntilIdle()', () => {
       // expect(wrapper).toHaveHTML('')
       expect(wrapper.find('.count')).toHaveText('6');
     });
+  });
+});
+
+describe('Test Program using DevTools', () => {
+  const init1: () => [ReadonlyArray<string>, Cmd<string>] = () => {
+    return noCmd([]);
+  };
+
+  const view1: (dispatch: Dispatcher<string>, model: ReadonlyArray<string>) => React.ReactNode = (
+    dispatch: Dispatcher<string>,
+    model: ReadonlyArray<string>,
+  ) => {
+    return <div className={'history'}>{model.join(' ')}</div>;
+  };
+
+  const update1: (msg: string, model: ReadonlyArray<string>) => [ReadonlyArray<string>, Cmd<string>] = (
+    msg: string,
+    model: ReadonlyArray<string>,
+  ) => {
+    return noCmd(model.concat([msg]));
+  };
+
+  const port1: Port<string> = new Port<string>();
+
+  it('stop dispatching when unmounted', () => {
+    const devTools = DevTools.init(window);
+    const props: ProgramProps<number, ReadonlyArray<string>> = {
+      init: init1,
+      view: view1,
+      update: update1,
+      subscriptions: () => port1.subscribe((msg) => msg),
+      devTools,
+    };
+
+    const wrapper = mount(<Program {...props} />);
+
+    expect(devTools.lastEvent().tag).toEqual('init');
+    expect(devTools.lastEvent().model).toEqual([]);
+    expect(devTools.lastModel()).toEqual([]);
+
+    port1.send('first');
+
+    expect(devTools.lastEvent().tag).toEqual('updated');
+    expect(devTools.lastEvent().msg).toEqual('first');
+    expect(devTools.lastModel()).toEqual(['first']);
+
+    port1.send('second');
+
+    expect(devTools.lastEvent().tag).toEqual('updated');
+    expect(devTools.lastEvent().msg).toEqual('second');
+    expect(devTools.lastModel()).toEqual(['first', 'second']);
+
+    wrapper.unmount();
+
+    port1.send('too-late');
+
+    expect(devTools.lastEvent().tag).toEqual('updated');
+    expect(devTools.lastEvent().msg).toEqual('second');
+    expect(devTools.lastModel()).toEqual(['first', 'second']);
   });
 });
