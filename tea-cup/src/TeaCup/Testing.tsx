@@ -88,20 +88,20 @@ export function updateUntilIdle<Model, Msg, T>(
   fun: Trigger<Model, Msg, T>,
 ): Promise<[Model, T]> {
   return new Promise((resolve) => {
-    fun(<Program {...testableProps(resolve, props, fun)} />);
+    let wrapper = fun(<Program {...testableProps(resolve, props, () => wrapper)} />);
   });
 }
 
 function testableProps<Model, Msg, T>(
   resolve: ResolveType<Model, T>,
   props: ProgramProps<Model, Msg>,
-  fun: Trigger<Model, Msg, T>,
+  getWrapper: () => T,
 ) {
   const tprops: ProgramProps<TestableModel<Model, Msg, T>, Msg> = {
     init: initTestable(resolve, props.init),
     view: viewTestable(props.view),
     update: updateTestable(props.update),
-    subscriptions: subscriptionsTestable(props, fun),
+    subscriptions: subscriptionsTestable(props, getWrapper),
   };
   return tprops;
 }
@@ -152,19 +152,12 @@ function updateTestable<Model, Msg, T>(
 
 function subscriptionsTestable<Model, Msg, T>(
   props: ProgramProps<Model, Msg>,
-  fun: Trigger<Model, Msg, T>,
+  getWrapper: () => T,
 ): ProgramProps<TestableModel<Model, Msg, T>, Msg>['subscriptions'] {
   return (model: TestableModel<Model, Msg, T>) => {
     const subs = props.subscriptions(model.model);
     if (model.cmds.length === 0) {
-      const result = fun(
-        <Program
-          init={() => [model.model, Cmd.none()]}
-          update={(msg, model) => [model, Cmd.none()]}
-          view={(d, m) => props.view(d, m)}
-          subscriptions={(d) => Sub.none()}
-        />,
-      );
+      const result = getWrapper();
       model.resolve([model.model, result]);
       return subs;
     }
