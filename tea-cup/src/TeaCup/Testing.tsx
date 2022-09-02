@@ -101,7 +101,7 @@ function testableProps<Model, Msg, T>(
     init: initTestable(resolve, props.init),
     view: viewTestable(props.view),
     update: updateTestable(props.update),
-    subscriptions: suscriptionsTestable(props, fun),
+    subscriptions: subscriptionsTestable(props, fun),
   };
   return tprops;
 }
@@ -150,7 +150,7 @@ function updateTestable<Model, Msg, T>(
   };
 }
 
-function suscriptionsTestable<Model, Msg, T>(
+function subscriptionsTestable<Model, Msg, T>(
   props: ProgramProps<Model, Msg>,
   fun: Trigger<Model, Msg, T>,
 ): ProgramProps<TestableModel<Model, Msg, T>, Msg>['subscriptions'] {
