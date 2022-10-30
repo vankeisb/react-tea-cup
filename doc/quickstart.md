@@ -12,19 +12,19 @@ You'll need to setup the project before you get to actual coding.
 You need a React project in order to start using tea-cup.
 In order to keep things simple, we'll use the infamous `create-react-app` :
 
-    npx create-react-app my-app --typescript
+    yarn create react-app my-app --template typescript
     cd my-app
     
 ### Add tea-cup to your dependencies
 
-    npm install react-tea-cup --save
+    yarn add -D react-tea-cup tea-cup-core
     
 ### Run the dev server
 
 We'll start the dev server, and let it recompile everything 
 when we save files :
 
-    npm start
+    yarn start
     
 This should also open your default browser to http://localhost:3000
 and show you the default generated app.
