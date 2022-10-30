@@ -153,7 +153,7 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
   }
 
   render(): ReactNode {
-    if (this.currentModel && this.bd) {
+    if (this.currentModel !== undefined && this.bd) {
       return this.props.view(this.bd, this.currentModel);
     }
     return null;
