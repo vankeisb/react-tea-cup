@@ -126,30 +126,30 @@ const windowEvents = new WindowEvents<Msg>();
 
 export function subscriptions(model: Model): Sub<Msg> {
   return Sub.batch([
-    // documentEvents.on('click', (e: MouseEvent) => (
-    //   {
-    //     type: 'clicked',
-    //     position: {
-    //       pos: [e.x, e.y],
-    //       page: [e.pageX, e.pageY],
-    //       offset: [e.offsetX, e.offsetY]
-    //     }
-    //   } as Msg
-    // )),
-    // documentEvents.on('mousemove', (e: MouseEvent) => ({
-    //   type: 'moved',
-    //   position: {
-    //     pos: [e.x, e.y],
-    //     page: [e.pageX, e.pageY],
-    //     offset: [e.offsetX, e.offsetY]
-    //   }
-    // } as Msg)),
-    // windowEvents.on('scroll', (e: Event) => {
-    //   return {
-    //     type: 'scrolled',
-    //     scroll: [window.scrollX, window.scrollY]
-    //   } as Msg;
-    // }),
+    documentEvents.on('click', (e: MouseEvent) => (
+      {
+        type: 'clicked',
+        position: {
+          pos: [e.x, e.y],
+          page: [e.pageX, e.pageY],
+          offset: [e.offsetX, e.offsetY]
+        }
+      } as Msg
+    )),
+    documentEvents.on('mousemove', (e: MouseEvent) => ({
+      type: 'moved',
+      position: {
+        pos: [e.x, e.y],
+        page: [e.pageX, e.pageY],
+        offset: [e.offsetX, e.offsetY]
+      }
+    } as Msg)),
+    windowEvents.on('scroll', (e: Event) => {
+      return {
+        type: 'scrolled',
+        scroll: [window.scrollX, window.scrollY]
+      } as Msg;
+    }),
     windowEvents.on('resize', () => {
       return {
         type: 'resized',
