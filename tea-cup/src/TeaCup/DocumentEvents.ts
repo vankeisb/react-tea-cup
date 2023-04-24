@@ -51,10 +51,6 @@ class DocSub<K extends keyof Map, Map, Msg> extends Sub<Msg> {
         super.onRelease();
         this.documentEvents.doRemoveListener(this.key, this.listener, this.options)
     }
-
-    event(e: Map[K]) {
-        this.dispatch(this.mapper(e));
-    }
 }
 
 abstract class EventMapEvents<Map, Msg> {

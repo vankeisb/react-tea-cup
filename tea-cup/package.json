@@ -16,6 +16,7 @@
     "test-watch": "jest --watch",
     "prettify": "prettier --write .",
     "tsc": "tsc",
+    "compile:ts": "tsc",
     "compile": "rimraf dist && tsc",
     "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
   },
