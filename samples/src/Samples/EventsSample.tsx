@@ -31,6 +31,8 @@ export type Model = {
   clicked: Maybe<MousePosition>
   moved: Maybe<MousePosition>
   scrolled: Maybe<Position>
+  nbResizeLeft: number
+  nbResizeRight: number
 };
 
 type MousePosition = {
@@ -48,6 +50,9 @@ export type Msg = {
   type: 'moved',
   position: MousePosition
 } | {
+  type: 'resized',
+  left: boolean
+} | {
   type: 'scrolled',
   scroll: Position
 };
@@ -56,7 +61,9 @@ export function init(): [Model, Cmd<Msg>] {
   return noCmd({
     clicked: nothing,
     moved: nothing,
-    scrolled: nothing
+    scrolled: nothing,
+    nbResizeLeft: 0,
+    nbResizeRight: 0,
   });
 }
 
@@ -75,6 +82,8 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
         .map(viewPosition('Scrolled'))
         .withDefault(<div>Waiting for move ...</div>)
       }
+      <div>resized left : {model.nbResizeLeft}</div>
+      <div>resized right : {model.nbResizeRight}</div>
     </div>
   );
 }
@@ -102,6 +111,13 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
       };
       return [model1, Cmd.none()];
     }
+    case 'resized': {
+      return noCmd({
+        ...model,
+        nbResizeRight: msg.left ? model.nbResizeRight : model.nbResizeRight + 1,
+        nbResizeLeft: msg.left ? model.nbResizeLeft + 1 : model.nbResizeLeft,
+      });
+    }
   }
 }
 
@@ -110,30 +126,42 @@ const windowEvents = new WindowEvents<Msg>();
 
 export function subscriptions(model: Model): Sub<Msg> {
   return Sub.batch([
-    // documentEvents.on('click', (e: MouseEvent) => (
-    //   {
-    //     type: 'clicked',
-    //     position: {
-    //       pos: [e.x, e.y],
-    //       page: [e.pageX, e.pageY],
-    //       offset: [e.offsetX, e.offsetY]
-    //     }
-    //   } as Msg
-    // )),
-    // documentEvents.on('mousemove', (e: MouseEvent) => ({
-    //   type: 'moved',
-    //   position: {
-    //     pos: [e.x, e.y],
-    //     page: [e.pageX, e.pageY],
-    //     offset: [e.offsetX, e.offsetY]
-    //   }
-    // } as Msg)),
-    // windowEvents.on('scroll', (e: Event) => {
-    //   return {
-    //     type: 'scrolled',
-    //     scroll: [window.scrollX, window.scrollY]
-    //   } as Msg;
-    // })
+    documentEvents.on('click', (e: MouseEvent) => (
+      {
+        type: 'clicked',
+        position: {
+          pos: [e.x, e.y],
+          page: [e.pageX, e.pageY],
+          offset: [e.offsetX, e.offsetY]
+        }
+      } as Msg
+    )),
+    documentEvents.on('mousemove', (e: MouseEvent) => ({
+      type: 'moved',
+      position: {
+        pos: [e.x, e.y],
+        page: [e.pageX, e.pageY],
+        offset: [e.offsetX, e.offsetY]
+      }
+    } as Msg)),
+    windowEvents.on('scroll', (e: Event) => {
+      return {
+        type: 'scrolled',
+        scroll: [window.scrollX, window.scrollY]
+      } as Msg;
+    }),
+    windowEvents.on('resize', () => {
+      return {
+        type: 'resized',
+        left: true
+      } as Msg;
+    }),
+    windowEvents.on('resize', () => {
+      return {
+        type: 'resized',
+        left: false
+      } as Msg;
+    }),
   ]);
 }
 

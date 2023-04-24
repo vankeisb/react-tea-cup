@@ -1,5 +1,34 @@
 # Changelog
 
+## v2.2.1 (02/09/2022)
+
+#### closed
+
+- [**closed**] support unmount [#87](https://github.com/vankeisb/react-tea-cup/pull/87)
+
+---
+
+## v2.2.0 (10/02/2022)
+
+#### closed
+
+- [**closed**] Adding support for React 17 [#73](https://github.com/vankeisb/react-tea-cup/pull/73)
+- [**closed**] eventlisteners with options [#66](https://github.com/vankeisb/react-tea-cup/pull/66)
+
+#### dependencies
+
+- [**dependencies**] Bump color-string from 1.5.3 to 1.9.0 [#76](https://github.com/vankeisb/react-tea-cup/pull/76)
+- [**dependencies**] Bump ws from 5.2.2 to 5.2.3 [#74](https://github.com/vankeisb/react-tea-cup/pull/74)
+- [**dependencies**] Bump tar from 4.4.13 to 4.4.19 [#75](https://github.com/vankeisb/react-tea-cup/pull/75)
+- [**dependencies**] Bump merge-deep from 3.0.2 to 3.0.3 [#68](https://github.com/vankeisb/react-tea-cup/pull/68)
+- [**dependencies**] Bump path-parse from 1.0.6 to 1.0.7 [#69](https://github.com/vankeisb/react-tea-cup/pull/69)
+- [**dependencies**] Bump tmpl from 1.0.4 to 1.0.5 [#70](https://github.com/vankeisb/react-tea-cup/pull/70)
+- [**dependencies**] Bump url-parse from 1.5.1 to 1.5.3 [#71](https://github.com/vankeisb/react-tea-cup/pull/71)
+- [**dependencies**] Bump url-parse from 1.4.7 to 1.5.1 [#64](https://github.com/vankeisb/react-tea-cup/pull/64)
+- [**dependencies**] Bump hosted-git-info from 2.8.8 to 2.8.9 [#65](https://github.com/vankeisb/react-tea-cup/pull/65)
+
+---
+
 ## v2.1.0 (03/05/2021)
 
 #### closed

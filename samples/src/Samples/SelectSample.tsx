@@ -47,7 +47,6 @@ export function init(): [Model, Cmd<Msg>] {
 
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
     const value = model.selected.withDefault("select me");
-    console.log("rendering value", value)
     return (
         <div className="select">
             <p><em>(Use me with Firefox, too.)</em></p>

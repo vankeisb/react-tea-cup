@@ -104,7 +104,9 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
       return noCmd({ ...model, started: !model.started });
     case 'raf':
       const delta = msg.t - model.t;
-      const fps = 1000 / delta;
+      const fps = delta === 0
+        ? model.fps
+        : 1000 / delta;
       return noCmd({
         ...model,
         t: msg.t,
