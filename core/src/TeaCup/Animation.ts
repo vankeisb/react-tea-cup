@@ -30,11 +30,9 @@ let subs: Array<RafSub<any>> = [];
 let ticking = false;
 
 function tick() {
-  console.log("tick()");
   if (!ticking) {
     ticking = true;
     requestAnimationFrame((t: number) => {
-      console.log("got RAF", t, "subs", subs.length);
       subs.forEach((s) => s.trigger(t));
       ticking = false;
     });
