@@ -41,37 +41,26 @@ function tick() {
   }
 }
 
-let rafSubId = 0;
-
 class RafSub<M> extends Sub<M> {
   readonly mapper: (t: number) => M;
-
-  private readonly uuid: string;
 
   constructor(mapper: (t: number) => M) {
     super();
     this.mapper = mapper;
-    this.uuid = "rafsub-" + rafSubId;
-    rafSubId++;
   }
 
   protected onInit() {
-    console.log("RafSub", this.uuid ,"onInit()");
     super.onInit();
     subs.push(this);
-    console.log("RafSub", this.uuid ,"onInit()", subs.length);
     tick();
   }
 
   protected onRelease() {
-    console.log("RafSub", this.uuid ,"onRelease()");
     super.onRelease();
     subs = subs.filter((s) => s !== this);
-    console.log("RafSub", this.uuid ,"onRelease()", subs.length);
   }
 
   trigger(t: number) {
-    console.log("RafSub", this.uuid ,"trigger(", t, ")");
     this.dispatch(this.mapper(t));
   }
 }
