@@ -77,7 +77,7 @@ describe('DocumentEvents Test', () => {
     expect(removeSpy.mock.calls.length).toBe(2);
   });
 
-  it('sub receives event from listener', () => {
+  it('sub receives event from listener', (done) => {
     const msgs: string[] = [];
     const collectMsgs = (msg: string): void => {
       msgs.push(msg);
@@ -90,10 +90,13 @@ describe('DocumentEvents Test', () => {
     const listener = addSpy.mock.calls[0][1];
 
     listener({ event: 'event' });
-    expect(msgs).toEqual(['clicked1']);
+    setTimeout(() => {
+      expect(msgs).toEqual(['clicked1']);
+      done();
+    }, 10);
   });
 
-  it('each sub receive events its listener', () => {
+  it('each sub receive events its listener', (done) => {
     const msgs: string[] = [];
     const collectMsgs = (msg: string): void => {
       msgs.push(msg);
@@ -114,12 +117,17 @@ describe('DocumentEvents Test', () => {
     const listener2 = addSpy.mock.calls[1][1];
 
     listener({ event: 'event' });
-    expect(msgs).toEqual(['clicked']);
-    listener2({ event: 'event' });
-    expect(msgs2).toEqual(['clicked2']);
+    setTimeout(() => {
+      expect(msgs).toEqual(['clicked']);
+      listener2({ event: 'event' });
+      setTimeout(() => {
+        expect(msgs2).toEqual(['clicked2']);
+        done();
+      }, 10)
+    }, 10)
   });
 
-  it('sub stops receiving events from listener', () => {
+  it('sub stops receiving events from listener', (done) => {
     const sub = documentEvents.on('click', (e) => 'clicked1');
 
     const msgs: string[] = [];
@@ -132,11 +140,16 @@ describe('DocumentEvents Test', () => {
 
     listener({ event: 'event' });
     listener({ event: 'event' });
-    expect(msgs).toEqual(['clicked1', 'clicked1']);
+    setTimeout(() => {
+      expect(msgs).toEqual(['clicked1', 'clicked1']);
 
-    sub.release();
-    listener({ event: 'event' });
-    expect(msgs).toEqual(['clicked1', 'clicked1']);
+      sub.release();
+      listener({ event: 'event' });
+      setTimeout(() => {
+        expect(msgs).toEqual(['clicked1', 'clicked1']);
+        done();
+      });
+    }, 10)
   });
 
 });
