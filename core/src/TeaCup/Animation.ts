@@ -27,25 +27,11 @@ import { Sub } from './Sub';
 
 let subs: Array<RafSub<any>> = [];
 
-let ticking = false;
-
 function tick() {
-  // console.log("tick()");
-  if (!ticking) {
-    ticking = true;
-    const subsNow = [...subs];
-    // console.log("tick() subsNow=" + subsNow);
-    if (subsNow.length > 0) {
-      requestAnimationFrame((t: number) => {
-        // console.log("tick() trigger subsNow=" + subsNow);
-        subsNow.forEach((s) => s.trigger(t));
-        ticking = false;
-        // console.log("tick() recursing");
-        tick();
-      });
-    } else {
-      ticking = false;
-    }
+  if (subs.length > 0) {
+    requestAnimationFrame((t: number) => {
+      subs.forEach((s) => s.trigger(t));
+    });
   }
 }
 
@@ -66,9 +52,6 @@ class RafSub<M> extends Sub<M> {
   protected onRelease() {
     super.onRelease();
     subs = subs.filter((s) => s !== this);
-    if (subs.length === 0) {
-      ticking = false;
-    }
   }
 
   trigger(t: number) {

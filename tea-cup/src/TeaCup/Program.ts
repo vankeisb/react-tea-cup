@@ -91,8 +91,10 @@ export class Program<Model, Msg> extends Component<ProgramProps<Model, Msg>, nev
 
       const d = this.dispatch.bind(this);
 
-      newSub.init(d);
-      prevSub?.release();
+      setTimeout(() => {
+        newSub.init(d);
+        prevSub?.release();
+      });
 
       // perform commands in a separate timout, to
       // make sure that this dispatch is done
