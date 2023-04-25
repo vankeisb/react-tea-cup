@@ -12,10 +12,12 @@
         "prettier": "2.0.5",
         "rimraf": "^2.6.3",
         "ts-jest": "24.0.2",
-        "typescript": "~3.9.7"
+        "typescript": "~3.9.7",
+        "bomlint": "file:/home/remi/projects/bomlint"
     },
     "scripts": {
         "release:gh": "gren release",
-        "release:changelog": "gren changelog --tags all --generate --override"
+        "release:changelog": "gren changelog --tags all --generate --override",
+        "bomlint": "bomlint"
     }
 }
