@@ -1,4 +1,5 @@
 yarn install &&     \
+yarn bomlint &&     \
 cd core &&          \
 ./build.sh &&       \
 cd ../tea-cup &&    \
