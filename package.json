@@ -11,11 +11,13 @@
         "jest": "24.9.0",
         "prettier": "2.0.5",
         "rimraf": "^2.6.3",
-        "ts-jest": "24.0.2",
-        "typescript": "~3.9.7"
+        "ts-jest": "^24.1.0",
+        "typescript": "~3.9.7",
+        "bomlint": "1.2.3"
     },
     "scripts": {
         "release:gh": "gren release",
-        "release:changelog": "gren changelog --tags all --generate --override"
+        "release:changelog": "gren changelog --tags all --generate --override",
+        "bomlint": "bomlint --allow-conflicts react package.json ./core/package.json ./tea-cup/package.json ./samples/package.json"
     }
 }

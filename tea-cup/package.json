@@ -23,7 +23,7 @@
   "dependencies": {},
   "peerDependencies": {
     "react": "^16.7.0 || ^17.0.1",
-    "tea-cup-core": "^2.2.2"
+    "tea-cup-core": "2.2.2"
   },
   "devDependencies": {
     "@types/jsdom": "^16.2.5",
