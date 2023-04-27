@@ -2612,10 +2612,12 @@ body-parser@1.20.1:
     type-is "~1.6.18"
     unpipe "1.0.0"
 
-bomlint@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/bomlint/-/bomlint-1.1.0.tgz#88ffa3d973beacfd55b5d2ca180bfeaad3254dd5"
-  integrity sha512-MWfvIQvI8RZJts7RKVJa8bEbGkrCt5oYC6/IYFM1aRUzY5ytpBzLv0bXtUwu8mL8o6AbMmFzx2oOkiBlV9gneQ==
+bomlint@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/bomlint/-/bomlint-1.2.0.tgz#d64deea823c5e0492bb92222c09169343248db12"
+  integrity sha512-2TE4FAl9YKSImhxMMBPG8s6itwZpWPpIUFfyJjKKODEo+juyARru5ze5fpJ78R3tls6CF0/cdxgk0P997P+LYA==
+  dependencies:
+    commander "^10.0.1"
 
 bonjour@^3.5.0:
   version "3.5.0"
@@ -3353,6 +3355,11 @@ combined-stream@^1.0.6, combined-stream@~1.0.6:
   integrity sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==
   dependencies:
     delayed-stream "~1.0.0"
+
+commander@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-10.0.1.tgz#881ee46b4f77d1c1dccc5823433aa39b022cbe06"
+  integrity sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==
 
 commander@^2.11.0, commander@^2.19.0, commander@^2.20.0:
   version "2.20.3"
