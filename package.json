@@ -13,7 +13,7 @@
         "rimraf": "^2.6.3",
         "ts-jest": "^24.1.0",
         "typescript": "~3.9.7",
-        "bomlint": "1.2.0"
+        "bomlint": "1.2.3"
     },
     "scripts": {
         "release:gh": "gren release",

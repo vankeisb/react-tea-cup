@@ -3,5 +3,5 @@
   "tea-cup-core": "2.2.2",
   "react-tea-cup": "2.2.2",
   "ts-jest": "^24.1.0",
-  "bomlint": "1.1.0"
+  "bomlint": "1.2.3"
 }
