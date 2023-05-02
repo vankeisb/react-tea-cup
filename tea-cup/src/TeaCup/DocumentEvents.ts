@@ -42,6 +42,11 @@ class DocSub<K extends keyof Map, Map, Msg> extends Sub<Msg> {
         this.listener = (e) => this.dispatch(this.mapper(e));
     }
 
+    protected dispatch(m: Msg): void {
+        const d = this.dispatcher;
+        d && setTimeout(() => d?.(m));
+    }
+
     protected onInit() {
         super.onInit();
         this.documentEvents.doAddListener(this.key, this.listener, this.options)
