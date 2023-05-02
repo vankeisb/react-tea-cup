@@ -28,13 +28,16 @@ import { Sub } from './Sub';
 let subs: Array<RafSub<any>> = [];
 
 let ticking = false;
+let triggerNext = 0;
+
 
 function tick() {
   if (!ticking) {
     ticking = true;
     requestAnimationFrame((t: number) => {
-      subs.forEach((s) => s.trigger(t));
       ticking = false;
+      subs[triggerNext]?.trigger(t)
+      triggerNext = (triggerNext + 1) % subs.length
     });
   }
 }
