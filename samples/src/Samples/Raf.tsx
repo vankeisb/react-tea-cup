@@ -23,22 +23,28 @@
  *
  */
 
-import { Dispatcher, Cmd, noCmd, Sub, onAnimationFrame } from 'tea-cup-core';
+import { Cmd, Dispatcher, noCmd, onAnimationFrame, Sub } from 'tea-cup-core';
 import * as React from 'react';
 
 export interface Model {
   readonly started: boolean;
   readonly t: number;
+  readonly t2: number;
   readonly fps: number;
   readonly animText: string;
 }
 
-export type Msg = { type: 'raf'; t: number } | { type: 'toggle' } | { type: 'text-changed'; text: string };
+export type Msg =
+  | { type: 'raf'; t: number }
+  | { type: 'toggle' }
+  | { type: 'text-changed'; text: string }
+  | { type: 'raf2'; t: number };
 
 export function init() {
   return noCmd<Model, Msg>({
     started: false,
     t: 0,
+    t2: 0,
     fps: 0,
     animText: 'This text gets animated...',
   });
@@ -54,6 +60,7 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
     <div>
       <div>
         <input
+          id={'sample-raf'}
           type="text"
           value={model.animText}
           onChange={(e) =>
@@ -64,8 +71,17 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
           }
         />
       </div>
-      <span>Time = {Math.round(model.t)}</span>
-      <button onClick={(_) => dispatch({ type: 'toggle' })}>{model.started ? 'Stop' : 'Start'}</button>
+      <span>
+        Time = <span id={'raf-time-1'}>{Math.round(model.t)}</span>
+      </span>
+      <br />
+      <span>
+        t2 = <span id={'raf-time-2'}>{Math.round(model.t2)}</span>
+      </span>
+      <br />
+      <button id="raf-start" onClick={(_) => dispatch({ type: 'toggle' })}>
+        {model.started ? 'Stop' : 'Start'}
+      </button>
       {fps}
       {anim}
     </div>
@@ -102,17 +118,22 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
   switch (msg.type) {
     case 'toggle':
       return noCmd({ ...model, started: !model.started });
-    case 'raf':
+    case 'raf': {
       const delta = msg.t - model.t;
-      const fps = delta === 0
-        ? model.fps
-        : 1000 / delta;
+      const fps = delta === 0 ? model.fps : 1000 / delta;
       return noCmd({
         ...model,
         t: msg.t,
         fps: fps,
       });
+    }
 
+    case 'raf2': {
+      return noCmd({
+        ...model,
+        t2: msg.t,
+      });
+    }
     case 'text-changed':
       return noCmd({
         ...model,
@@ -121,11 +142,16 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
   }
 }
 
-export function subscriptions(model: Model) {
+export function subscriptions(model: Model): Sub<Msg> {
   if (model.started) {
-    return onAnimationFrame((t: number) => {
-      return { type: 'raf', t: t } as Msg;
-    });
+    return Sub.batch([
+      onAnimationFrame((t: number) => {
+        return { type: 'raf', t: t } as Msg;
+      }),
+      onAnimationFrame((t: number) => {
+        return { type: 'raf2', t: t } as Msg;
+      }),
+    ]);
   } else {
     return Sub.none<Msg>();
   }

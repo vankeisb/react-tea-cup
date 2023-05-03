@@ -1,5 +1,27 @@
 # Changelog
 
+## v2.2.2 (24/04/2023)
+
+#### closed
+
+- [**closed**] DocSub async dispatch [#93](https://github.com/vankeisb/react-tea-cup/pull/93)
+- [**closed**] Fix model undef check, update README [#88](https://github.com/vankeisb/react-tea-cup/pull/88)
+
+#### dependencies
+
+- [**dependencies**] Bump decode-uri-component from 0.2.0 to 0.2.2 [#89](https://github.com/vankeisb/react-tea-cup/pull/89)
+- [**dependencies**] Bump qs from 6.5.2 to 6.5.3 [#90](https://github.com/vankeisb/react-tea-cup/pull/90)
+- [**dependencies**] Bump express from 4.17.1 to 4.18.2 [#91](https://github.com/vankeisb/react-tea-cup/pull/91)
+- [**dependencies**] Bump json5 from 1.0.1 to 1.0.2 [#92](https://github.com/vankeisb/react-tea-cup/pull/92)
+- [**dependencies**] Bump async from 2.6.3 to 2.6.4 [#80](https://github.com/vankeisb/react-tea-cup/pull/80)
+- [**dependencies**] Bump minimist from 1.2.5 to 1.2.6 [#79](https://github.com/vankeisb/react-tea-cup/pull/79)
+- [**dependencies**] Bump cross-fetch from 2.2.3 to 2.2.6 [#81](https://github.com/vankeisb/react-tea-cup/pull/81)
+- [**dependencies**] Bump eventsource from 1.0.7 to 1.1.1 [#82](https://github.com/vankeisb/react-tea-cup/pull/82)
+- [**dependencies**] Bump jsdom from 16.4.0 to 16.5.0 [#84](https://github.com/vankeisb/react-tea-cup/pull/84)
+- [**dependencies**] Bump terser from 4.8.0 to 4.8.1 [#85](https://github.com/vankeisb/react-tea-cup/pull/85)
+
+---
+
 ## v2.2.1 (02/09/2022)
 
 #### closed

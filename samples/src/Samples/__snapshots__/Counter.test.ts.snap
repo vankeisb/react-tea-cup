@@ -3,16 +3,21 @@
 exports[`Test Counter view state snapshot 1`] = `
 <div
   className="counter"
+  id="sample-counter"
 >
   <button
+    id="counter-sub"
     onClick={[Function]}
   >
     -
   </button>
-  <span>
+  <span
+    id="counter-value"
+  >
     1313
   </span>
   <button
+    id="counter-add"
     onClick={[Function]}
   >
     +

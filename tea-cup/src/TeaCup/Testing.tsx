@@ -172,10 +172,11 @@ class TestableSub<Msg> extends Sub<Msg> {
 
   protected onInit(): void {
     setTimeout(() => {
-      if (this.dispatcher !== undefined) {
-        const d = this.dispatcher.bind(this);
-        this.cmds.map((cmd) => cmd.execute(d));
-      }
+      this.isActive() && this.cmds.forEach((cmd) => cmd.execute((m) => this.dispatch(m)));
+      // if (this.dispatcher !== undefined) {
+      //   const d = this.dispatcher.bind(this);
+      //   this.cmds.map((cmd) => cmd.execute(d));
+      // }
     }, 0);
   }
 }
