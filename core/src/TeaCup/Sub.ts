@@ -27,6 +27,7 @@ import { Dispatcher } from './Dispatcher';
 
 export abstract class Sub<Msg> {
   protected dispatcher: Dispatcher<Msg> | undefined;
+  private active: boolean = false;
 
   static none<Msg>(): Sub<Msg> {
     return new SubNone();
@@ -38,16 +39,21 @@ export abstract class Sub<Msg> {
 
   init(dispatch: Dispatcher<Msg>): void {
     this.dispatcher = dispatch;
+    this.active = true;
     this.onInit();
   }
 
   release(): void {
-    this.dispatcher = undefined;
+    this.active = false;
     this.onRelease();
   }
 
+  isActive() {
+    return this.active;
+  }
+
   protected dispatch(m: Msg): void {
-    this.dispatcher && this.dispatcher(m);
+    this.dispatcher?.(m);
   }
 
   protected onInit() {}

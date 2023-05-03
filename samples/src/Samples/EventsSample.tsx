@@ -25,37 +25,41 @@
 
 import * as React from 'react';
 import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe } from 'tea-cup-core';
-import {DocumentEvents, WindowEvents} from "react-tea-cup";
+import { DocumentEvents, WindowEvents } from 'react-tea-cup';
 
 export type Model = {
-  clicked: Maybe<MousePosition>
-  moved: Maybe<MousePosition>
-  scrolled: Maybe<Position>
-  nbResizeLeft: number
-  nbResizeRight: number
+  clicked: Maybe<MousePosition>;
+  moved: Maybe<MousePosition>;
+  scrolled: Maybe<Position>;
+  nbResizeLeft: number;
+  nbResizeRight: number;
 };
 
 type MousePosition = {
   pos: Position;
   page: Position;
   offset: Position;
-}
-
-type Position = [number, number]
-
-export type Msg = {
-  type: 'clicked',
-  position: MousePosition
-} | {
-  type: 'moved',
-  position: MousePosition
-} | {
-  type: 'resized',
-  left: boolean
-} | {
-  type: 'scrolled',
-  scroll: Position
 };
+
+type Position = [number, number];
+
+export type Msg =
+  | {
+      type: 'clicked';
+      position: MousePosition;
+    }
+  | {
+      type: 'moved';
+      position: MousePosition;
+    }
+  | {
+      type: 'resized';
+      left: boolean;
+    }
+  | {
+      type: 'scrolled';
+      scroll: Position;
+    };
 
 export function init(): [Model, Cmd<Msg>] {
   return noCmd({
@@ -70,18 +74,9 @@ export function init(): [Model, Cmd<Msg>] {
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
   return (
     <div className="events">
-      {model.clicked
-        .map(viewMousePosition('Clicked'))
-        .withDefault(<div>Waiting for click ...</div>)
-      }
-      {model.moved
-        .map(viewMousePosition('Moved'))
-        .withDefault(<div>Waiting for move ...</div>)
-      }
-      {model.scrolled
-        .map(viewPosition('Scrolled'))
-        .withDefault(<div>Waiting for move ...</div>)
-      }
+      {model.clicked.map(viewMousePosition('Clicked')).withDefault(<div>Waiting for click ...</div>)}
+      {model.moved.map(viewMousePosition('Moved')).withDefault(<div>Waiting for move ...</div>)}
+      {model.scrolled.map(viewPosition('Scrolled')).withDefault(<div>Waiting for move ...</div>)}
       <div>resized left : {model.nbResizeLeft}</div>
       <div>resized right : {model.nbResizeRight}</div>
     </div>
@@ -93,21 +88,21 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
     case 'clicked': {
       const model1: Model = {
         ...model,
-        clicked: just(msg.position)
+        clicked: just(msg.position),
       };
       return [model1, Cmd.none()];
     }
     case 'moved': {
       const model1: Model = {
         ...model,
-        moved: just(msg.position)
+        moved: just(msg.position),
       };
       return [model1, Cmd.none()];
     }
     case 'scrolled': {
       const model1: Model = {
         ...model,
-        scrolled: just(msg.scroll)
+        scrolled: just(msg.scroll),
       };
       return [model1, Cmd.none()];
     }
@@ -126,40 +121,46 @@ const windowEvents = new WindowEvents<Msg>();
 
 export function subscriptions(model: Model): Sub<Msg> {
   return Sub.batch([
-    documentEvents.on('click', (e: MouseEvent) => (
-      {
-        type: 'clicked',
-        position: {
-          pos: [e.x, e.y],
-          page: [e.pageX, e.pageY],
-          offset: [e.offsetX, e.offsetY]
-        }
-      } as Msg
-    )),
-    documentEvents.on('mousemove', (e: MouseEvent) => ({
-      type: 'moved',
-      position: {
-        pos: [e.x, e.y],
-        page: [e.pageX, e.pageY],
-        offset: [e.offsetX, e.offsetY]
-      }
-    } as Msg)),
+    documentEvents.on(
+      'click',
+      (e: MouseEvent) =>
+        ({
+          type: 'clicked',
+          position: {
+            pos: [e.x, e.y],
+            page: [e.pageX, e.pageY],
+            offset: [e.offsetX, e.offsetY],
+          },
+        } as Msg),
+    ),
+    documentEvents.on(
+      'mousemove',
+      (e: MouseEvent) =>
+        ({
+          type: 'moved',
+          position: {
+            pos: [e.x, e.y],
+            page: [e.pageX, e.pageY],
+            offset: [e.offsetX, e.offsetY],
+          },
+        } as Msg),
+    ),
     windowEvents.on('scroll', (e: Event) => {
       return {
         type: 'scrolled',
-        scroll: [window.scrollX, window.scrollY]
+        scroll: [window.scrollX, window.scrollY],
       } as Msg;
     }),
     windowEvents.on('resize', () => {
       return {
         type: 'resized',
-        left: true
+        left: true,
       } as Msg;
     }),
     windowEvents.on('resize', () => {
       return {
         type: 'resized',
-        left: false
+        left: false,
       } as Msg;
     }),
   ]);
@@ -167,14 +168,15 @@ export function subscriptions(model: Model): Sub<Msg> {
 
 function viewMousePosition(title: string) {
   return (position: MousePosition) => {
-    return (<div>
-      <b>{title}: </b>
-      {viewPosition('Position')(position.pos)}&nbsp;
-      {viewPosition('Page')(position.page)}&nbsp;
-      {viewPosition('Offset')(position.offset)}
-    </div>
+    return (
+      <div>
+        <b>{title}: </b>
+        {viewPosition('Position')(position.pos)}&nbsp;
+        {viewPosition('Page')(position.page)}&nbsp;
+        {viewPosition('Offset')(position.offset)}
+      </div>
     );
-  }
+  };
 }
 
 function viewPosition(title: string) {
@@ -184,5 +186,5 @@ function viewPosition(title: string) {
         {title} {position[0]},{position[1]}&nbsp;
       </>
     );
-  }
+  };
 }

@@ -23,7 +23,7 @@
  *
  */
 
-import { Cmd, Dispatcher, noCmd, rafCmd, Sub } from 'tea-cup-core';
+import { Cmd, Dispatcher, noCmd, onAnimationFrame, Sub } from 'tea-cup-core';
 import * as React from 'react';
 
 export interface Model {
@@ -110,42 +110,22 @@ function viewAnim(text: String, t: number) {
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
   switch (msg.type) {
     case 'toggle':
-      const newModel: Model = {
-        ...model,
-        started: !model.started,
-      };
-      return [
-        newModel,
-        newModel.started
-          ? Cmd.batch([
-              rafCmd((t: number) => ({ type: 'raf', t } as Msg)),
-              rafCmd((t: number) => ({ type: 'raf2', t } as Msg)),
-            ])
-          : Cmd.none(),
-      ];
+      return noCmd({ ...model, started: !model.started });
     case 'raf': {
       const delta = msg.t - model.t;
       const fps = delta === 0 ? model.fps : 1000 / delta;
-      const cmd: Cmd<Msg> = model.started ? rafCmd((t: number) => ({ type: 'raf', t } as Msg)) : Cmd.none();
-      return [
-        {
-          ...model,
-          t: msg.t,
-          fps: fps,
-        },
-        cmd,
-      ];
+      return noCmd({
+        ...model,
+        t: msg.t,
+        fps: fps,
+      });
     }
 
     case 'raf2': {
-      const cmd: Cmd<Msg> = model.started ? rafCmd((t: number) => ({ type: 'raf2', t } as Msg)) : Cmd.none();
-      return [
-        {
-          ...model,
-          t2: msg.t,
-        },
-        cmd,
-      ];
+      return noCmd({
+        ...model,
+        t2: msg.t,
+      });
     }
     case 'text-changed':
       return noCmd({
@@ -156,5 +136,16 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 }
 
 export function subscriptions(model: Model): Sub<Msg> {
-  return Sub.none();
+  if (model.started) {
+    return Sub.batch([
+      onAnimationFrame((t: number) => {
+        return { type: 'raf', t: t } as Msg;
+      }),
+      onAnimationFrame((t: number) => {
+        return { type: 'raf2', t: t } as Msg;
+      }),
+    ]);
+  } else {
+    return Sub.none<Msg>();
+  }
 }

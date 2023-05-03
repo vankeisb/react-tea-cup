@@ -24,8 +24,6 @@
  */
 
 import { Sub } from './Sub';
-import { Cmd } from './Cmd';
-import { Dispatcher } from './Dispatcher';
 
 class RafSub<M> extends Sub<M> {
   readonly mapper: (t: number) => M;
@@ -38,7 +36,7 @@ class RafSub<M> extends Sub<M> {
   protected onInit() {
     super.onInit();
     setTimeout(() => {
-      requestAnimationFrame((t) => this.trigger(t));
+      this.isActive() && requestAnimationFrame((t) => this.trigger(t));
     });
   }
 
@@ -47,24 +45,6 @@ class RafSub<M> extends Sub<M> {
   }
 }
 
-/**
- * @deprecated Use {@link rafCmd} and manage
- * @param mapper
- */
 export function onAnimationFrame<M>(mapper: (t: number) => M): Sub<M> {
   return new RafSub(mapper);
-}
-
-class RafCmd<Msg> extends Cmd<Msg> {
-  constructor(private readonly mapper: (t: number) => Msg) {
-    super();
-  }
-
-  execute(dispatch: Dispatcher<Msg>): void {
-    requestAnimationFrame((t) => dispatch(this.mapper(t)));
-  }
-}
-
-export function rafCmd<Msg>(mapper: (t: number) => Msg): Cmd<Msg> {
-  return new RafCmd(mapper);
 }
