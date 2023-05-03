@@ -24,18 +24,7 @@
  */
 
 import React from 'react';
-import {
-  Cmd,
-  Dispatcher,
-  just,
-  map,
-  Maybe,
-  maybeOf,
-  noCmd,
-  nothing,
-  Sub,
-  Task,
-} from 'tea-cup-core';
+import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task } from 'tea-cup-core';
 import {
   DevTools,
   newUrl,
@@ -60,7 +49,7 @@ import * as TimeSample from './Samples/TimeSample';
 import * as EventsSample from './Samples/EventsSample';
 import * as SelectSample from './Samples/SelectSample';
 import * as PortsSample from './Samples/PortsSample';
-import { appSamplePorts } from "./Samples/PortsSample";
+import { appSamplePorts } from './Samples/PortsSample';
 
 enum Tab {
   All,
@@ -367,7 +356,7 @@ function mapPortsSample(m: PortsSample.Msg): Msg {
   return {
     type: 'portsSample',
     child: m,
-  }
+  };
 }
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
@@ -464,16 +453,16 @@ function viewTodos(dispatch: Dispatcher<Msg>, todoMvc: TodoMvc) {
         {active ? (
           <span>{label}</span>
         ) : (
-            <a
-              href="#x"
-              onClick={(e) => {
-                e.preventDefault();
-                dispatch({ type: 'tabClicked', tab: t });
-              }}
-            >
-              {label}
-            </a>
-          )}
+          <a
+            href="#x"
+            onClick={(e) => {
+              e.preventDefault();
+              dispatch({ type: 'tabClicked', tab: t });
+            }}
+          >
+            {label}
+          </a>
+        )}
       </li>
     );
   }
@@ -485,46 +474,46 @@ function viewTodos(dispatch: Dispatcher<Msg>, todoMvc: TodoMvc) {
       {todos.length === 0 ? (
         <p>You have nothing to do ! Neat !!</p>
       ) : (
-          <div>
-            <ul>
-              {viewTab(Tab.All)}
-              {viewTab(Tab.Open)}
-              {viewTab(Tab.Closed)}
-            </ul>
-            <ul>
-              {todos
-                .filter((todo) => {
-                  switch (tab) {
-                    case Tab.All:
-                      return true;
-                    case Tab.Open:
-                      return !todo.done;
-                    case Tab.Closed:
-                      return todo.done;
-                  }
-                  return false;
-                })
-                .map((todo) => {
-                  const style = {
-                    textDecoration: todo.done ? 'line-through' : 'none',
-                  };
-                  return (
-                    <li key={todo.id} style={style}>
-                      <a
-                        href="#x"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          dispatch(navigateTo(todoRoute(todo.id)));
-                        }}
-                      >
-                        {todo.text}
-                      </a>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
-        )}
+        <div>
+          <ul>
+            {viewTab(Tab.All)}
+            {viewTab(Tab.Open)}
+            {viewTab(Tab.Closed)}
+          </ul>
+          <ul>
+            {todos
+              .filter((todo) => {
+                switch (tab) {
+                  case Tab.All:
+                    return true;
+                  case Tab.Open:
+                    return !todo.done;
+                  case Tab.Closed:
+                    return todo.done;
+                }
+                return false;
+              })
+              .map((todo) => {
+                const style = {
+                  textDecoration: todo.done ? 'line-through' : 'none',
+                };
+                return (
+                  <li key={todo.id} style={style}>
+                    <a
+                      href="#x"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        dispatch(navigateTo(todoRoute(todo.id)));
+                      }}
+                    >
+                      {todo.text}
+                    </a>
+                  </li>
+                );
+              })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -566,7 +555,6 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
   return (
     <div>
       {backToHome(dispatch)}
-      <h1>Samples</h1>
       <p>
         This is the samples app for <code>react-tea-cup</code>.
       </p>
@@ -594,10 +582,14 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
       {SelectSample.view(map(dispatch, mapSelectSample), samples.select)}
       <h2>Ports</h2>
       {PortsSample.view(map(dispatch, mapPortsSample), samples.ports)}
-      <button onClick={() => {
-        // call ports without going through any update loop
-        appSamplePorts.setCounter.send(0)
-      }}>Reset using port</button>
+      <button
+        onClick={() => {
+          // call ports without going through any update loop
+          appSamplePorts.setCounter.send(0);
+        }}
+      >
+        Reset using port
+      </button>
     </div>
   );
 }
@@ -661,7 +653,7 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
         const macTime = TimeSample.update(msg.child, s.time);
         return [{ ...s, time: macTime[0] }, macTime[1].map(mapTimeSample)];
       });
-    case "portsSample":
+    case 'portsSample':
       return mapSample((s: Samples) => {
         const mac = PortsSample.update(msg.child, s.ports);
         return [{ ...s, ports: mac[0] }, mac[1].map(mapPortsSample)];

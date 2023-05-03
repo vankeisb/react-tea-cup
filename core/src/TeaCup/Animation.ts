@@ -25,20 +25,6 @@
 
 import { Sub } from './Sub';
 
-let subs: Array<RafSub<any>> = [];
-
-let ticking = false;
-
-function tick() {
-  if (!ticking) {
-    ticking = true;
-    requestAnimationFrame((t: number) => {
-      subs.forEach((s) => s.trigger(t));
-      ticking = false;
-    });
-  }
-}
-
 class RafSub<M> extends Sub<M> {
   readonly mapper: (t: number) => M;
 
@@ -49,13 +35,9 @@ class RafSub<M> extends Sub<M> {
 
   protected onInit() {
     super.onInit();
-    subs.push(this);
-    tick();
-  }
-
-  protected onRelease() {
-    super.onRelease();
-    subs = subs.filter((s) => s !== this);
+    setTimeout(() => {
+      this.isActive() && requestAnimationFrame((t) => this.trigger(t));
+    });
   }
 
   trigger(t: number) {

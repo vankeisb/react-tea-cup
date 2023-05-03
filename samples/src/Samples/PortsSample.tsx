@@ -53,7 +53,6 @@ export function init(): [Model, Cmd<Msg>] {
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
   return (
     <div>
-      <h2>Counter with ports</h2>
       <span>Value = {model}</span>
       <button onClick={() => dispatch({ tag: 'inc' })}>+</button>
     </div>
