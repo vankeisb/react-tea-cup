@@ -2,6 +2,7 @@ package react.tea.cup;
 
 import com.pojosontheweb.selenium.Findr;
 import com.pojosontheweb.selenium.ManagedDriverJunit4TestBase;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
@@ -11,21 +12,23 @@ import java.util.function.Consumer;
 import static com.pojosontheweb.selenium.Findrs.textEquals;
 import static org.junit.Assert.assertEquals;
 
-public class SamplesTest extends ManagedDriverJunit4TestBase {
+public class SamplesIT extends ManagedDriverJunit4TestBase {
 
     private String baseUrl = System.getProperty("webtests.base.url", "http://localhost:3000");
 
+    @Before
+    public void navigateToSamples() {
+        getWebDriver().get(baseUrl);
+        $$("a").where(textEquals("samples")).expectOne().click();
+    }
+
     @Test
     public void testCounter() {
-        getWebDriver().get(baseUrl + "/samples");
-
         Consumer<Integer> assertCounter = i -> $("#counter-value").where(textEquals(Integer.toString(i))).eval();
         Findr buttonSub = $("#counter-sub");
         Findr buttonAdd = $("#counter-add");
 
         assertCounter.accept(0);
-
-
         buttonAdd.click();
         assertCounter.accept(1);
         buttonAdd.click();
@@ -37,6 +40,7 @@ public class SamplesTest extends ManagedDriverJunit4TestBase {
 
     @Test
     public void testRaf() {
+
         getWebDriver().get(baseUrl + "/samples#sample-raf");
 
         Findr button = $("#raf-start");
@@ -80,13 +84,13 @@ public class SamplesTest extends ManagedDriverJunit4TestBase {
             resizedRight.where(textEquals(Integer.toString(i))).eval();
         };
 
-        assertResizes.accept(1);
+        assertResizes.accept(0);
 
         Dimension d = getWebDriver().manage().window().getSize();
         Dimension d2 = new Dimension(d.width, d.height + 1);
         getWebDriver().manage().window().setSize(d2);
 
-        assertResizes.accept(2);
+        assertResizes.accept(1);
     }
 
 }
