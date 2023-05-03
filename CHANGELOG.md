@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.3.0 (03/05/2023)
+
+#### closed
+
+- [**closed**] Fix subs [#96](https://github.com/vankeisb/react-tea-cup/pull/96)
+- [**closed**] BOM lint [#94](https://github.com/vankeisb/react-tea-cup/pull/94)
+
+---
+
 ## v2.2.2 (24/04/2023)
 
 #### closed
