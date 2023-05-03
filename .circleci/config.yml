@@ -1,4 +1,6 @@
-version: 2
+version: 2.1
+orbs:
+  browser-tools: circleci/browser-tools@1.1.1
 
 defaults: &defaults
   working_directory: ~/repo
@@ -15,6 +17,31 @@ jobs:
       - persist_to_workspace:
           root: ~/repo
           paths: .
+
+  webtests:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/openjdk:8-jdk-browsers
+    environment:
+      DISPLAY: :99
+
+    steps:
+      - run: sudo Xvfb :99 -screen 0 1920x1200x24 > /dev/null 2>&1 &
+      - attach_workspace:
+          at: ~/repo
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
+      - run:
+          command: |
+            google-chrome --version
+            chromedriver --version
+            ps -efa | grep Xvfb
+          name: Check install
+      - run: cd webtests && export DISPLAY=:99 && mvn clean install -Dwebdriver.chrome.driver=/usr/local/bin/chromedriver
+      - store_artifacts:
+          path: ~/repo/webtests/target/surefire-reports
+      - store_artifacts:
+          path: ~/repo/webtests/target/videos
 
   deploy:
     <<: *defaults
@@ -34,9 +61,13 @@ workflows:
           filters:
             tags:
               only: /\d+\.\d+\.\d+/
+      - webtests:
+          requires:
+            - build
       - deploy:
           requires:
             - build
+            - webtests
           filters:
             tags:
               only: /\d+\.\d+\.\d+/
