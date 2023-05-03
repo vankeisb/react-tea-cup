@@ -7,16 +7,21 @@ exports[`Test ParentChild view state snapshot initial 1`] = `
   >
     <div
       className="counter"
+      id="sample-counter"
     >
       <button
+        id="counter-sub"
         onClick={[Function]}
       >
         -
       </button>
-      <span>
+      <span
+        id="counter-value"
+      >
         0
       </span>
       <button
+        id="counter-add"
         onClick={[Function]}
       >
         +
@@ -28,16 +33,21 @@ exports[`Test ParentChild view state snapshot initial 1`] = `
   >
     <div
       className="counter"
+      id="sample-counter"
     >
       <button
+        id="counter-sub"
         onClick={[Function]}
       >
         -
       </button>
-      <span>
+      <span
+        id="counter-value"
+      >
         0
       </span>
       <button
+        id="counter-add"
         onClick={[Function]}
       >
         +
@@ -49,16 +59,21 @@ exports[`Test ParentChild view state snapshot initial 1`] = `
   >
     <div
       className="counter"
+      id="sample-counter"
     >
       <button
+        id="counter-sub"
         onClick={[Function]}
       >
         -
       </button>
-      <span>
+      <span
+        id="counter-value"
+      >
         0
       </span>
       <button
+        id="counter-add"
         onClick={[Function]}
       >
         +
