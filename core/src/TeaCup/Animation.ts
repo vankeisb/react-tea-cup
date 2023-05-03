@@ -24,20 +24,8 @@
  */
 
 import { Sub } from './Sub';
-
-let subs: Array<RafSub<any>> = [];
-
-let ticking = false;
-
-function tick() {
-  if (!ticking) {
-    ticking = true;
-    requestAnimationFrame((t: number) => {
-      subs.forEach((s) => s.trigger(t));
-      ticking = false;
-    });
-  }
-}
+import { Cmd } from './Cmd';
+import { Dispatcher } from './Dispatcher';
 
 class RafSub<M> extends Sub<M> {
   readonly mapper: (t: number) => M;
@@ -49,13 +37,9 @@ class RafSub<M> extends Sub<M> {
 
   protected onInit() {
     super.onInit();
-    subs.push(this);
-    tick();
-  }
-
-  protected onRelease() {
-    super.onRelease();
-    subs = subs.filter((s) => s !== this);
+    setTimeout(() => {
+      requestAnimationFrame((t) => this.trigger(t));
+    });
   }
 
   trigger(t: number) {
@@ -63,6 +47,24 @@ class RafSub<M> extends Sub<M> {
   }
 }
 
+/**
+ * @deprecated Use {@link rafCmd} and manage
+ * @param mapper
+ */
 export function onAnimationFrame<M>(mapper: (t: number) => M): Sub<M> {
   return new RafSub(mapper);
+}
+
+class RafCmd<Msg> extends Cmd<Msg> {
+  constructor(private readonly mapper: (t: number) => Msg) {
+    super();
+  }
+
+  execute(dispatch: Dispatcher<Msg>): void {
+    requestAnimationFrame((t) => dispatch(this.mapper(t)));
+  }
+}
+
+export function rafCmd<Msg>(mapper: (t: number) => Msg): Cmd<Msg> {
+  return new RafCmd(mapper);
 }
