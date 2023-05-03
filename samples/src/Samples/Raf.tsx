@@ -60,6 +60,7 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
     <div>
       <div>
         <input
+          id={'sample-raf'}
           type="text"
           value={model.animText}
           onChange={(e) =>
@@ -70,11 +71,17 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
           }
         />
       </div>
-      <span>Time = {Math.round(model.t)}</span>
+      <span>
+        Time = <span id={'raf-time-1'}>{Math.round(model.t)}</span>
+      </span>
       <br />
-      <span>t2 = {Math.round(model.t2)}</span>
+      <span>
+        t2 = <span id={'raf-time-2'}>{Math.round(model.t2)}</span>
+      </span>
       <br />
-      <button onClick={(_) => dispatch({ type: 'toggle' })}>{model.started ? 'Stop' : 'Start'}</button>
+      <button id="raf-start" onClick={(_) => dispatch({ type: 'toggle' })}>
+        {model.started ? 'Stop' : 'Start'}
+      </button>
       {fps}
       {anim}
     </div>

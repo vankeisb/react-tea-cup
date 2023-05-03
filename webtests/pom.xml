@@ -1,0 +1,145 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>react-tea-cup</groupId>
+    <artifactId>webtests</artifactId>
+    <version>LATEST-SNAPSHOT</version>
+    <packaging>war</packaging>
+    <name>webtests</name>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <frontend.react.sandbox.directory>${project.basedir}/../samples/build</frontend.react.sandbox.directory>
+        <backend.port>8080</backend.port>
+
+        <webtests.headless>false</webtests.headless>
+        <webtests.window.position/>
+        <webtests.video.enabled>true</webtests.video.enabled>
+        <webtests.findr.verbose>true</webtests.findr.verbose>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.pojosontheweb</groupId>
+            <artifactId>selenium-utils-core</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pojosontheweb</groupId>
+            <artifactId>monte-repack</artifactId>
+            <version>1.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.11.0</version>-->
+<!--            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <argLine>${failsafeArgLine}</argLine>
+                    <systemProperties>
+                        <webtests.browser>chrome</webtests.browser>
+                        <webtests.headless>${webtests.headless}</webtests.headless>
+                        <webtests.window.position>${webtests.window.position}</webtests.window.position>
+                        <webtests.findr.verbose>${webtests.findr.verbose}</webtests.findr.verbose>
+                        <webtests.video.enabled>${webtests.video.enabled}</webtests.video.enabled>
+                        <webtests.video.dir>${project.build.directory}/videos</webtests.video.dir>
+                        <webtests.base.url>http://localhost:${backend.port}</webtests.base.url>
+                    </systemProperties>
+                    <environmentVariables>
+                        <TZ>Europe/Paris</TZ>
+                    </environmentVariables>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.4.51.v20230217</version>
+                <configuration>
+                    <httpConnector>
+                        <port>${backend.port}</port>
+                    </httpConnector>
+                    <webApp>
+                        <contextPath>/dummy</contextPath>
+                        <!-- do not scan jars -->
+                        <webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
+                    </webApp>
+                    <contextHandlers>
+                        <contextHandler implementation="org.eclipse.jetty.server.handler.ContextHandler">
+                            <handler implementation="org.eclipse.jetty.server.handler.ResourceHandler"/>
+                            <contextPath>/</contextPath>
+                            <resourceBase>${frontend.react.sandbox.directory}</resourceBase>
+                        </contextHandler>
+                    </contextHandlers>
+                    <scanIntervalSeconds>13</scanIntervalSeconds>
+                    <stopPort>9966</stopPort>
+                    <stopKey>stop-jetty</stopKey>
+                    <stopWait>10</stopWait>
+                    <!-- use with jetty:run-forked (runs at port 8080) -->
+                    <jvmArgs>-Xdebug -agentlib:jdwp=transport=dt_socket,address=9999,server=y,suspend=n</jvmArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-jetty</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <scanIntervalSeconds>0</scanIntervalSeconds>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-jetty</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

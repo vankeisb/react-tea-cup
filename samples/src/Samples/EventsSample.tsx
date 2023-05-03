@@ -73,13 +73,19 @@ export function init(): [Model, Cmd<Msg>] {
 
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
   return (
-    <div className="events">
-      {model.clicked.map(viewMousePosition('Clicked')).withDefault(<div>Waiting for click ...</div>)}
+    <span className="events" id="sample-events">
+      {model.clicked
+        .map(viewMousePosition('Clicked'))
+        .withDefault(<div className="wait-for-click">Waiting for click ...</div>)}
       {model.moved.map(viewMousePosition('Moved')).withDefault(<div>Waiting for move ...</div>)}
       {model.scrolled.map(viewPosition('Scrolled')).withDefault(<div>Waiting for move ...</div>)}
-      <div>resized left : {model.nbResizeLeft}</div>
-      <div>resized right : {model.nbResizeRight}</div>
-    </div>
+      <div>
+        resized left : <span id={'resized-left'}>{model.nbResizeLeft}</span>
+      </div>
+      <div>
+        resized right : <span id={'resized-right'}>{model.nbResizeRight}</span>
+      </div>
+    </span>
   );
 }
 
@@ -169,8 +175,10 @@ export function subscriptions(model: Model): Sub<Msg> {
 function viewMousePosition(title: string) {
   return (position: MousePosition) => {
     return (
-      <div>
-        <b>{title}: </b>
+      <div className={'view-mouse-pos'} data-title={title}>
+        <b>
+          <span className={'vmp-title'}>{title}</span>:{' '}
+        </b>
         {viewPosition('Position')(position.pos)}&nbsp;
         {viewPosition('Page')(position.page)}&nbsp;
         {viewPosition('Offset')(position.offset)}

@@ -42,10 +42,14 @@ export function init(): [Model, Cmd<Msg>] {
 // need this "dispatch" arg, so that you can emit Msgs
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
   return (
-    <div className="counter">
-      <button onClick={(_) => dispatch({ type: 'dec' })}>-</button>
-      <span>{model}</span>
-      <button onClick={(_) => dispatch({ type: 'inc' })}>+</button>
+    <div className="counter" id="sample-counter">
+      <button id="counter-sub" onClick={(_) => dispatch({ type: 'dec' })}>
+        -
+      </button>
+      <span id="counter-value">{model}</span>
+      <button id="counter-add" onClick={(_) => dispatch({ type: 'inc' })}>
+        +
+      </button>
     </div>
   );
 }
