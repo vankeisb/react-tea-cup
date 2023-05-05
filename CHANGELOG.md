@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.3 (05/05/2023)
+*No changelog for this release.*
+
+---
+
 ## v2.3.0 (03/05/2023)
 
 #### closed
