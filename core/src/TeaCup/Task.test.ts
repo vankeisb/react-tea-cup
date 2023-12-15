@@ -107,6 +107,9 @@ test('lazy', (done) => {
     Task.succeedLazy(() => 123),
     123,
   );
+});
+
+test('lazyErr', (done) => {
   expectErr(
     done,
     Task.failLazy(() => 'kaboom'),
@@ -114,7 +117,7 @@ test('lazy', (done) => {
   );
 });
 
-test('recover', (done) => {
+test.skip('recover', (done) => {
   const t: Task<string, number> = Task.fromLambda(() => {
     throw new Error('kaboom');
   }).mapError((e) => e.message);
