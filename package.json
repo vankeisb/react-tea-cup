@@ -3,7 +3,8 @@
     "private": true,
     "workspaces": [
         "core",
-        "tea-cup"
+        "tea-cup",
+        "samples"
     ],
     "devDependencies": {
         "@types/jest": "29.5.11",

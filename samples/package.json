@@ -1,0 +1,38 @@
+{
+  "name": "samples",
+  "version": "0.0.1",
+  "private": true,
+  "proxy": "https://api.github.com",
+  "scripts": {
+    "dev": "webpack serve",
+    "build": "webpack"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-tea-cup": "2.2.3",
+    "tea-cup-core": "2.2.3"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "@types/copy-webpack-plugin": "^10.1.0",
+    "@types/jest": "^23.3.14",
+    "@types/node": "16.11.39",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "jest-fetch-mock": "^2.1.2",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+}
