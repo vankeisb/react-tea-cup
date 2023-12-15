@@ -213,7 +213,9 @@ class TLambda<R> extends Task<Error, R> {
     try {
       callback(ok(this.f()));
     } catch (e) {
-      callback(err(e));
+      e instanceof Error
+        ? callback(err(e))
+        : callback(err(new Error(String(e))));
     }
   }
 }

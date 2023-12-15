@@ -46,7 +46,8 @@ export class Decoder<T> {
       const o = JSON.parse(s);
       return this.decodeValue(o);
     } catch (e) {
-      return err(e.message ?? 'unknown JSON error');
+      const msg = e instanceof Error ? e.message : 'unknown JSON error';
+      return err(msg);
     }
   }
 

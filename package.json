@@ -3,21 +3,21 @@
     "private": true,
     "workspaces": [
         "core",
-        "tea-cup",
-        "samples"
+        "tea-cup"
     ],
     "devDependencies": {
-        "github-release-notes": "0.17.2",
-        "jest": "24.9.0",
-        "prettier": "2.0.5",
-        "rimraf": "^2.6.3",
-        "ts-jest": "^24.1.0",
-        "typescript": "~3.9.7",
-        "bomlint": "1.2.3"
+        "@types/jest": "29.5.11",
+        "bomlint": "~2.0.0",
+        "github-release-notes": "^0.13.1",
+        "jest": "~29.7.0",
+        "prettier": "~3.1.1",
+        "rimraf": "~5.0.5",
+        "ts-jest": "~29.1.1",
+        "typescript": "~5.3.3"
     },
     "scripts": {
         "release:gh": "gren release",
         "release:changelog": "gren changelog --tags all --generate --override",
-        "bomlint": "bomlint --allow-conflicts react package.json ./core/package.json ./tea-cup/package.json ./samples/package.json"
+        "bomlint": "bomlint check package.json ./core/package.json ./tea-cup/package.json"
     }
 }
