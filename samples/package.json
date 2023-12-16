@@ -5,7 +5,8 @@
   "proxy": "https://api.github.com",
   "scripts": {
     "dev": "webpack serve",
-    "build": "webpack"
+    "build": "webpack",
+    "test": "jest"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -20,6 +21,8 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
     "@types/copy-webpack-plugin": "^10.1.0",
     "@types/jest": "^23.3.14",
     "@types/node": "16.11.39",
@@ -27,6 +30,7 @@
     "@types/react-dom": "^18.2.17",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
+    "jest-environment-jsdom": "^29.7.0",
     "jest-fetch-mock": "^2.1.2",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.5.1",
