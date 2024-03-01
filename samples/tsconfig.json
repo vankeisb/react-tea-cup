@@ -1,27 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "jsx": "react",
     "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "noEmit": true,
-    "jsx": "preserve",
-    "isolatedModules": true,
-    "inlineSourceMap": true,
-    "inlineSources": true
+    "moduleResolution": "node"
   },
-  "include": [
-    "src"
-  ]
-}
+  "include": ["src"]
+} 

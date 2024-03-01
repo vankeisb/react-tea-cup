@@ -23,7 +23,7 @@
  *
  */
 
-import React from 'react';
+import * as React from 'react';
 import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task } from 'tea-cup-core';
 import {
   DevTools,
@@ -49,7 +49,6 @@ import * as TimeSample from './Samples/TimeSample';
 import * as EventsSample from './Samples/EventsSample';
 import * as SelectSample from './Samples/SelectSample';
 import * as PortsSample from './Samples/PortsSample';
-import { appSamplePorts } from './Samples/PortsSample';
 
 enum Tab {
   All,
@@ -585,7 +584,7 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
       <button
         onClick={() => {
           // call ports without going through any update loop
-          appSamplePorts.setCounter.send(0);
+          PortsSample.appSamplePorts.setCounter.send(0);
         }}
       >
         Reset using port

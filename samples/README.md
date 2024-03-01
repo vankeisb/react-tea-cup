@@ -14,13 +14,8 @@ test everything. They are not meant to be "good practises".
     yarn run compile
 
     # run the samples 
-        # With React 16 (default)
+        # With React 18 (default)
         cd ../samples
-        yarn start
-    
-        # With React 17
-        cd ../samples
-        yarn upgrade react@^17.0.1 react-dom@^17.0.1 @types/react@^17.0.1 @types/react-dom@^17.0.1
         yarn start
 
-The samples app is made with `create-react-app`. See the scripts in `package.json`.
+The samples app is made with `webpack`. See the scripts in `package.json`.

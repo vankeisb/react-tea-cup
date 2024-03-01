@@ -32,6 +32,6 @@ export function Try<T>(f: () => T): Result<Error, T> {
     if (e instanceof Error) {
       return err(e);
     }
-    return err(new Error(e));
+    return err(new Error(String(e)));
   }
 }

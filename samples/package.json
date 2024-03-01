@@ -3,25 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "proxy": "https://api.github.com",
+  "scripts": {
+    "dev": "webpack serve",
+    "build": "webpack",
+    "test": "jest"
+  },
   "dependencies": {
-    "@types/node": "10.12.19",
-    "@types/react": "^16.7.22",
-    "@types/react-dom": "16.0.11",
-    "jest-enzyme": "^7.1.1",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
-    "react-scripts": "3.4.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-tea-cup": "2.2.3",
     "tea-cup-core": "2.2.3"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": [
     ">0.2%",
@@ -30,12 +21,22 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@types/enzyme": "^3.10.3",
-    "@types/enzyme-adapter-react-16": "^1.0.5",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@types/copy-webpack-plugin": "^10.1.0",
     "@types/jest": "^23.3.14",
-    "enzyme": "^3.10.0",
-    "enzyme-adapter-react-16": "^1.15.1",
-    "enzyme-to-json": "^3.4.2",
-    "jest-fetch-mock": "^2.1.2"
+    "@types/node": "16.11.39",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-fetch-mock": "^2.1.2",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
   }
 }

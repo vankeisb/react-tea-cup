@@ -99,7 +99,7 @@ class FetchTask extends Task<Error, Response> {
       fetch(this.request, this.init)
         .then((response: Response) => callback(ok(response)))
         .catch((e: Error) => callback(err(e)));
-    } catch (e) {
+    } catch (e: any) {
       callback(err(e));
     }
   }

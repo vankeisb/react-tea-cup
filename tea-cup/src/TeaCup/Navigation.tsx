@@ -140,7 +140,7 @@ class RegexPathElem<T> extends PathElem<T> {
 
   constructor(regex: RegExp, converter: (s: string) => Maybe<T>) {
     super();
-    this.regex = regex.compile();
+    this.regex = regex;
     this.converter = converter;
   }
 

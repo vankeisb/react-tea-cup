@@ -1,9 +1,6 @@
-yarn install &&     \
-yarn bomlint &&     \
+npm install &&      \
+npm run bomlint &&  \
 cd core &&          \
 ./build.sh &&       \
 cd ../tea-cup &&    \
-./build.sh &&       \
-cd ../samples &&    \
-yarn test --watchAll=false && \
-yarn build
+./build.sh

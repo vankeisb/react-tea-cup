@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-yarn compile && yarn test
+npm run compile && npm run test
