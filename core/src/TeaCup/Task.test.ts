@@ -101,30 +101,43 @@ test('parallel', (done) => {
   });
 });
 
-test('lazy', (done) => {
-  expectOk(
-    done,
-    Task.succeedLazy(() => 123),
-    123,
-  );
-  expectErr(
-    done,
-    Task.failLazy(() => 'kaboom'),
-    'kaboom',
-  );
+describe('lazy', () => {
+  test('ok', (done) => {
+    expectOk(
+      done,
+      Task.succeedLazy(() => 123),
+      123,
+    );
+  });
+  test('ko', (done) => {
+    expectErr(
+      done,
+      Task.failLazy(() => 'kaboom'),
+      'kaboom',
+    );
+  });
 });
 
-test('recover', (done) => {
+describe('recover', () => {
   const t: Task<string, number> = Task.fromLambda(() => {
     throw new Error('kaboom');
   }).mapError((e) => e.message);
-  expectErr(done, t, 'kaboom');
   const t2: Task<never, number> = t.recover((e) => e.length);
-  expectOk(done, t2, 6);
   const t3: Task<string, number> = t2.andThen(() => Task.succeed(123));
-  expectOk(done, t3, 123);
-  const t4: Task<string, number> = t3.andThen(() => Task.fail('yalla'));
-  expectErr(done, t4, 'yalla');
+
+  test('ko', (done) => {
+    expectErr(done, t, 'kaboom');
+  });
+  test('ok 1', (done) => {
+    expectOk(done, t2, 6);
+  });
+  test('ok 2', (done) => {
+    expectOk(done, t3, 123);
+  });
+  test('ko again', (done) => {
+    const t4: Task<string, number> = t3.andThen(() => Task.fail('yalla'));
+    expectErr(done, t4, 'yalla');
+  });
 });
 
 export function attempt<E, R>(t: Task<E, R>, callback: (r: Result<E, R>) => void) {
