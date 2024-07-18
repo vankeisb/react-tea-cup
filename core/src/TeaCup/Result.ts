@@ -127,3 +127,10 @@ export function ok<E, R>(r: R): Result<E, R> {
 export function err<E, R>(e: E): Result<E, R> {
   return new Err(e);
 }
+
+export function asError(e: unknown): Error {
+  if (e instanceof Error) {
+    return e;
+  }
+  return new Error("" + e);
+}

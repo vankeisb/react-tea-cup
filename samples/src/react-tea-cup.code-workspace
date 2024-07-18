@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "core",
+			"path": "../../core"
+		},
+		{
+			"name": "tea-cup",
+			"path": "../../tea-cup"
+		},
+		{
+			"name": "samples",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"jest.disabledWorkspaceFolders": []
+	}
+}
