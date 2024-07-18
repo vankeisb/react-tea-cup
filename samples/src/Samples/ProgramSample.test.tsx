@@ -1,9 +1,11 @@
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { Cmd, Dispatcher, noCmd, Port, Sub, Task } from 'tea-cup-core';
 import { DevTools, extendJest, Program, ProgramProps, updateUntilIdle } from 'react-tea-cup';
 import React from 'react';
+import * as matchers from '@testing-library/jest-dom/matchers'
 
 extendJest(expect);
+expect.extend(matchers)
 
 // const toCmd = (msg: string) => Task.perform(Time.in(0), () => msg);
 const toCmd = (msg: string) => Task.perform(Task.succeed(0), () => msg);
@@ -31,10 +33,10 @@ describe('Test Program using updateUntilIdle()', () => {
       update: update1,
       subscriptions: () => Sub.none<string>(),
     };
-    return updateUntilIdle(props, mount).then(([model, wrapper]) => {
+    return updateUntilIdle(props, e => render(e).container).then(([model, wrapper]) => {
       expect(model).toEqual(6);
       // expect(wrapper).toHaveHTML('')
-      expect(wrapper.find('.count')).toHaveText('6');
+      expect(wrapper.querySelector('.count')).toHaveTextContent('6');
     });
   });
 });
@@ -70,7 +72,7 @@ describe('Test Program using DevTools', () => {
       devTools,
     };
 
-    const wrapper = mount(<Program {...props} />);
+    const renderResult = render(<Program {...props} />);
 
     expect(devTools.lastEvent().tag).toEqual('init');
     expect(devTools.lastEvent().model).toEqual([]);
@@ -88,7 +90,7 @@ describe('Test Program using DevTools', () => {
     expect(devTools.lastEvent().msg).toEqual('second');
     expect(devTools.lastModel()).toEqual(['first', 'second']);
 
-    wrapper.unmount();
+    renderResult.unmount();
 
     port1.send('too-late');
 

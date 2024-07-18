@@ -2,6 +2,6 @@
   "@types/react": "^16.7.22",
   "tea-cup-core": "2.2.3",
   "react-tea-cup": "2.2.3",
-  "ts-jest": "^24.1.0",
+  "ts-jest": "^29.2.2",
   "bomlint": "1.2.3"
 }

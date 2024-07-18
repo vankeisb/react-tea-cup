@@ -24,46 +24,48 @@
  */
 
 import { view, Msg, update } from "./Counter";
-import { shallow } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 import { extendJest, Testing } from "react-tea-cup";
+import * as matchers from '@testing-library/jest-dom/matchers'
 
 extendJest(expect);
 const testing = new Testing<Msg>();
+expect.extend(matchers)
 
 describe("Test Counter", () => {
 
     describe("view state", () => {
 
         test("render counter", () => {
-            const wrapper = shallow(view(testing.noop, 13))
-            expect(wrapper.find('.counter')).toExist();
-            expect(wrapper.find('.counter > span')).toHaveText("13");
+            const { container } = render(view(testing.noop, 13))
+            expect(container.querySelector('.counter')).not.toBeNull();
+            expect(container.querySelector('.counter > span')).toHaveTextContent("13");
         });
 
         test("render buttons", () => {
-            const wrapper = shallow(view(testing.noop, 1));
-            expect(wrapper.find('.counter > button')).toHaveLength(2);
-            expect(wrapper.find('.counter > button').at(0)).toHaveText('-');
-            expect(wrapper.find('.counter > button').at(1)).toHaveText('+');
+            const { container } = render(view(testing.noop, 1));
+            expect(container.querySelectorAll('.counter > button')).toHaveLength(2);
+            expect(container.querySelectorAll('.counter > button').item(0)).toHaveTextContent('-');
+            expect(container.querySelectorAll('.counter > button').item(1)).toHaveTextContent('+');
         });
 
         test("snapshot", () => {
-            const wrapper = shallow(view(testing.noop, 1313))
-            expect(wrapper).toMatchSnapshot();
+            const { container } = render(view(testing.noop, 1313))
+            expect(container).toMatchSnapshot();
         });
     });
 
     describe("clicks generate messages", () => {
 
         test("decrement", () => {
-            const wrapper = shallow(view(testing.dispatcher, 1));
-            wrapper.find('.counter > button').at(0).simulate('click');
+            const { container } = render(view(testing.dispatcher, 1));
+            fireEvent.click(container.querySelectorAll('.counter > button').item(0));
             expect(testing).toHaveDispatchedMsg({ type: "dec" });
         });
 
         test("increment", () => {
-            const wrapper = shallow(view(testing.dispatcher, 1));
-            wrapper.find('.counter > button').at(1).simulate('click');
+            const { container } = render(view(testing.dispatcher, 1));
+            fireEvent.click(container.querySelectorAll('.counter > button').item(1));
             expect(testing).toHaveDispatchedMsg({ type: "inc" });
         });
 
@@ -71,12 +73,12 @@ describe("Test Counter", () => {
 
     describe("messages update state", () => {
         test("decrement", () => {
-            const [newState, cmd] = update({ type: "dec" }, 13);
+            const [newState] = update({ type: "dec" }, 13);
             expect(newState).toBe(12);
         });
 
         test("increment", () => {
-            const [newState, cmd] = update({ type: "inc" }, 13);
+            const [newState] = update({ type: "inc" }, 13);
             expect(newState).toBe(14);
         });
     });

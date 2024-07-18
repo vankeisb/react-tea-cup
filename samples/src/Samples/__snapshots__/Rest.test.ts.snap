@@ -2,78 +2,63 @@
 
 exports[`Test Rest view state snapshot error 1`] = `
 <div>
-  <p>
-    This shows how to use Http and decode. Click to list commits using the github API.
-  </p>
-  <button
-    disabled={false}
-    onClick={[Function]}
-  >
-    List commits
-  </button>
-  <div
-    style={
-      Object {
-        "minHeight": "300px",
-      }
-    }
-  >
+  <div>
     <p>
-      Ooops ! There was an error : 
-      boom
+      This shows how to use Http and decode. Click to list commits using the github API.
     </p>
+    <button>
+      List commits
+    </button>
+    <div
+      style="min-height: 300px;"
+    >
+      <p>
+        Ooops ! There was an error : 
+        boom
+      </p>
+    </div>
   </div>
 </div>
 `;
 
 exports[`Test Rest view state snapshot initial 1`] = `
 <div>
-  <p>
-    This shows how to use Http and decode. Click to list commits using the github API.
-  </p>
-  <button
-    disabled={true}
-    onClick={[Function]}
-  >
-    Loading...
-  </button>
-  <div
-    style={
-      Object {
-        "minHeight": "300px",
-      }
-    }
-  />
+  <div>
+    <p>
+      This shows how to use Http and decode. Click to list commits using the github API.
+    </p>
+    <button
+      disabled=""
+    >
+      Loading...
+    </button>
+    <div
+      style="min-height: 300px;"
+    />
+  </div>
 </div>
 `;
 
 exports[`Test Rest view state snapshot loaded 1`] = `
 <div>
-  <p>
-    This shows how to use Http and decode. Click to list commits using the github API.
-  </p>
-  <button
-    disabled={false}
-    onClick={[Function]}
-  >
-    List commits
-  </button>
-  <div
-    style={
-      Object {
-        "minHeight": "300px",
-      }
-    }
-  >
-    <ul>
-      <li
-        key="13131313"
-      >
-        13131313
-         - 
-        Toto
-      </li>
-    </ul>
+  <div>
+    <p>
+      This shows how to use Http and decode. Click to list commits using the github API.
+    </p>
+    <button>
+      List commits
+    </button>
+    <div
+      style="min-height: 300px;"
+    >
+      <ul>
+        <li>
+          13131313
+           - 
+          Toto
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
 `;

@@ -24,12 +24,14 @@
  */
 
 import { view, Msg, init, Model } from './Rest';
-import { mount } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 import { extendJest, Testing } from 'react-tea-cup';
 import { Cmd } from 'tea-cup-core';
+import * as matchers from '@testing-library/jest-dom/matchers'
 
 extendJest(expect);
 const testing = new Testing<Msg>();
+expect.extend(matchers)
 
 describe('Test Rest', () => {
   describe('init state', () => {
@@ -40,11 +42,11 @@ describe('Test Rest', () => {
   });
 
   describe('view state', () => {
-    const [initialState, _cmd] = init();
+    const [initialState] = init();
 
     test('snapshot initial', () => {
-      const wrapper = mount(view(testing.noop, initialState));
-      expect(wrapper).toMatchSnapshot();
+      const { container } = render(view(testing.noop, initialState));
+      expect(container).toMatchSnapshot();
     });
 
     test('snapshot loaded', () => {
@@ -52,8 +54,8 @@ describe('Test Rest', () => {
         tag: 'loaded',
         commits: [{ sha: '13131313', author: 'Toto' }],
       };
-      const wrapper = mount(view(testing.noop, loaded));
-      expect(wrapper).toMatchSnapshot();
+      const { container } = render(view(testing.noop, loaded));
+      expect(container).toMatchSnapshot();
     });
 
     test('snapshot error', () => {
@@ -61,8 +63,8 @@ describe('Test Rest', () => {
         tag: 'load-error',
         error: new Error('boom'),
       };
-      const wrapper = mount(view(testing.noop, errored));
-      expect(wrapper).toMatchSnapshot();
+      const { container } = render(view(testing.noop, errored));
+      expect(container).toMatchSnapshot();
     });
   });
 
@@ -72,8 +74,8 @@ describe('Test Rest', () => {
         tag: 'loaded',
         commits: [{ sha: '13131313', author: 'Toto' }],
       };
-      const wrapper = mount(view(testing.dispatcher, loaded));
-      wrapper.find('div > button').simulate('click');
+      const { container } = render(view(testing.dispatcher, loaded));
+      fireEvent.click(container.querySelectorAll('div > button').item(0));
 
       const [newState, cmd] = testing.dispatched!(loaded);
       expect(newState).toEqual({ tag: 'loading' });
@@ -85,8 +87,8 @@ describe('Test Rest', () => {
         tag: 'loaded',
         commits: [{ sha: '13131313', author: 'Toto' }],
       };
-      const wrapper = mount(view(testing.dispatcher, loaded));
-      wrapper.find('div > button').simulate('click');
+      const { container } = render(view(testing.dispatcher, loaded));
+      fireEvent.click(container.querySelectorAll('div > button').item(0));
 
       const [newState, cmd] = testing.dispatched!(loaded);
       expect(newState).toEqual({ tag: 'loading' });
@@ -110,8 +112,8 @@ describe('Test Rest', () => {
         tag: 'load-error',
         error: new Error('boom'),
       };
-      const wrapper = mount(view(testing.dispatcher, errored));
-      wrapper.find('div > button').simulate('click');
+      const { container } = render(view(testing.dispatcher, errored));
+      fireEvent.click(container.querySelectorAll('div > button').item(0));
 
       const [newState, cmd] = testing.dispatched!(errored);
       expect(newState).toEqual({ tag: 'loading' });

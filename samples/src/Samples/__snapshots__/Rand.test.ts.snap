@@ -2,29 +2,30 @@
 
 exports[`Test Rand view state snapshot 1`] = `
 <div>
-  <p>
-    This is a random number :
-    13
-  </p>
-  <br />
-  <button
-    onClick={[Function]}
-  >
-    Randomize
-  </button>
+  <div>
+    <p>
+      This is a random number :
+      13
+    </p>
+    <br />
+    <button>
+      Randomize
+    </button>
+  </div>
 </div>
 `;
 
 exports[`Test Rand view state snapshot nothing 1`] = `
 <div>
-  <p>
-    This is a random number :
-  </p>
-  <br />
-  <button
-    onClick={[Function]}
-  >
-    Randomize
-  </button>
+  <div>
+    <p>
+      This is a random number :
+      
+    </p>
+    <br />
+    <button>
+      Randomize
+    </button>
+  </div>
 </div>
 `;

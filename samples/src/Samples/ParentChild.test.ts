@@ -24,19 +24,20 @@
  */
 
 import { view, Msg, update, init, Model } from "./ParentChild";
-import { mount } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 import { extendJest, Testing } from "react-tea-cup";
+import * as matchers from '@testing-library/jest-dom/matchers'
 
 extendJest(expect);
 const testing = new Testing<Msg>();
-
+expect.extend(matchers)
 
 describe("Test ParentChild", () => {
 
     describe("init state", () => {
 
         test("counter model x3", async () => {
-            const [state, cmd] = init();
+            const [state] = init();
             expect(state).toHaveLength(3);
             // TODO batched Cmd.none() untestable
         });
@@ -48,24 +49,24 @@ describe("Test ParentChild", () => {
         const [initialState, _cmd] = init();
 
         test("snapshot initial", () => {
-            const wrapper = mount(view(testing.noop, initialState))
-            expect(wrapper).toMatchSnapshot();
+            const { container } = render(view(testing.noop, initialState))
+            expect(container).toMatchSnapshot();
         });
 
         test("three counters", () => {
-            const wrapper = mount(view(testing.noop, initialState))
-            expect(wrapper.find('.counter')).toHaveLength(3);
+            const { container } = render(view(testing.noop, initialState))
+            expect(container.querySelectorAll('.counter')).toHaveLength(3);
         });
 
     });
 
     describe("clicking generates messages", () => {
 
-        const [initialState, _cmd] = init();
+        const [initialState] = init();
 
         test('decrement first child', () => {
-            const wrapper = mount(view(testing.dispatcher, initialState))
-            wrapper.find('.counter > button').at(0).simulate('click')
+            const { container } = render(view(testing.dispatcher, initialState))
+            fireEvent.click(container.querySelectorAll('.counter > button').item(0));
             expect(testing).toHaveDispatchedMsg({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
@@ -75,10 +76,10 @@ describe("Test ParentChild", () => {
 
     describe("messages update state", () => {
 
-        const [initialState, _cmd] = init();
+        const [initialState] = init();
 
         test("decrement first counter", () => {
-            const [newState, cmd] = update({
+            const [newState] = update({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
             }, initialState);
