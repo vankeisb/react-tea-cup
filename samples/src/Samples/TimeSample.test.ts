@@ -24,12 +24,14 @@
  */
 
 import { view, Msg, update, init } from './TimeSample';
-import { mount } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 import { extendJest, Testing } from 'react-tea-cup';
 import { Cmd } from 'tea-cup-core';
+import * as matchers from '@testing-library/jest-dom/matchers'
 
 extendJest(expect);
 const testing = new Testing<Msg>();
+expect.extend(matchers)
 
 describe('Test TimeSample', () => {
   describe('init state', () => {
@@ -40,34 +42,34 @@ describe('Test TimeSample', () => {
   });
 
   describe('view state', () => {
-    const [initialState, _cmd] = init();
+    const [initialState] = init();
 
     describe('render initial state', () => {
       test('current time', () => {
-        const wrapper = mount(view(testing.noop, initialState));
+        const { container } = render(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(0)).toIncludeText('Current time :');
-        expect(wrapper.find('div > button').at(0)).toHaveText('Get current time');
+        expect(container.querySelectorAll('div').item(0)).toHaveTextContent('Current time :');
+        expect(container.querySelectorAll('div > button').item(0)).toHaveTextContent('Get current time');
       });
 
       test('trigger in', () => {
-        const wrapper = mount(view(testing.noop, initialState));
+        const { container } = render(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(1)).toIncludeText('In :');
-        expect(wrapper.find('div > button').at(1)).toHaveText('Trigger in');
+        expect(container.querySelectorAll('div').item(1)).toHaveTextContent('In :');
+        expect(container.querySelectorAll('div > button').item(1)).toHaveTextContent('Trigger in');
       });
 
       test('ticks', () => {
-        const wrapper = mount(view(testing.noop, initialState));
+        const { container } = render(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 :');
-        expect(wrapper.find('div').at(2)).toIncludeText(', ticks2 :');
-        expect(wrapper.find('div > button').at(2)).toHaveText('start ticking');
+        expect(container.querySelectorAll('div').item(2)).toHaveTextContent('Ticks1 :');
+        expect(container.querySelectorAll('div').item(2)).toHaveTextContent(', ticks2 :');
+        expect(container.querySelectorAll('div > button').item(2)).toHaveTextContent('start ticking');
       });
 
       test('snapshot initial', () => {
-        const wrapper = mount(view(testing.noop, initialState));
-        expect(wrapper).toMatchSnapshot();
+        const { container } = render(view(testing.noop, initialState));
+        expect(container).toMatchSnapshot();
       });
     });
 
@@ -88,63 +90,63 @@ describe('Test TimeSample', () => {
       };
 
       test('current time', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(0)).toIncludeText('Current time : 1313');
+        const { container } = render(view(testing.noop, state1));
+        expect(container.querySelectorAll('div').item(0)).toHaveTextContent('Current time : 1313');
       });
 
       test('trigger in', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(1)).toIncludeText('In :true');
+        const { container } = render(view(testing.noop, state1));
+        expect(container.querySelectorAll('div').item(1)).toHaveTextContent('In :true');
       });
 
       test('trigger in progress', () => {
-        const wrapper = mount(view(testing.noop, state2));
-        expect(wrapper.find('div').at(1)).toIncludeText('In :...');
+        const { container } = render(view(testing.noop, state2));
+        expect(container.querySelectorAll('div').item(1)).toHaveTextContent('In :...');
       });
 
       test('ticks', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 : 13');
-        expect(wrapper.find('div').at(2)).toIncludeText('ticks2 : 131313');
-        expect(wrapper.find('div > button').at(2)).toIncludeText('stop ticking');
+        const { container } = render(view(testing.noop, state1));
+        expect(container.querySelectorAll('div').item(2)).toHaveTextContent('Ticks1 : 13');
+        expect(container.querySelectorAll('div').item(2)).toHaveTextContent('ticks2 : 131313');
+        expect(container.querySelectorAll('div > button').item(2)).toHaveTextContent('stop ticking');
       });
 
       test('snapshot state1', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper).toMatchSnapshot();
+        const { container } = render(view(testing.noop, state1));
+        expect(container).toMatchSnapshot();
       });
 
       test('snapshot state2', () => {
-        const wrapper = mount(view(testing.noop, state2));
-        expect(wrapper).toMatchSnapshot();
+        const { container } = render(view(testing.noop, state2));
+        expect(container).toMatchSnapshot();
       });
     });
   });
 
   describe('clicking generates messages', () => {
-    const [initialState, _cmd] = init();
+    const [initialState] = init();
 
     test('get current time', () => {
-      const wrapper = mount(view(testing.dispatcher, initialState));
-      wrapper.find('div > button').at(0).simulate('click');
+      const { container } = render(view(testing.dispatcher, initialState));
+      fireEvent.click(container.querySelectorAll('div > button').item(0));
       expect(testing).toHaveDispatchedMsg({ tag: 'get-cur-time' });
     });
 
     test('get in', () => {
-      const wrapper = mount(view(testing.dispatcher, initialState));
-      wrapper.find('div > button').at(1).simulate('click');
+      const { container } = render(view(testing.dispatcher, initialState));
+      fireEvent.click(container.querySelectorAll('div > button').item(1));
       expect(testing).toHaveDispatchedMsg({ tag: 'get-in' });
     });
 
     test('toggle tick', () => {
-      const wrapper = mount(view(testing.dispatcher, initialState));
-      wrapper.find('div > button').at(2).simulate('click');
+      const { container } = render(view(testing.dispatcher, initialState));
+      fireEvent.click(container.querySelectorAll('div > button').item(2));
       expect(testing).toHaveDispatchedMsg({ tag: 'toggle-tick' });
     });
   });
 
   describe('message updates state', () => {
-    const [initialState, _cmd] = init();
+    const [initialState] = init();
 
     test('get-cur-time', () => {
       const [newState, cmd] = update({ tag: 'get-cur-time' }, initialState);

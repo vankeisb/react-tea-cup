@@ -1,26 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Test Counter view state snapshot 1`] = `
-<div
-  className="counter"
-  id="sample-counter"
->
-  <button
-    id="counter-sub"
-    onClick={[Function]}
+<div>
+  <div
+    class="counter"
+    id="sample-counter"
   >
-    -
-  </button>
-  <span
-    id="counter-value"
-  >
-    1313
-  </span>
-  <button
-    id="counter-add"
-    onClick={[Function]}
-  >
-    +
-  </button>
+    <button
+      id="counter-sub"
+    >
+      -
+    </button>
+    <span
+      id="counter-value"
+    >
+      1313
+    </span>
+    <button
+      id="counter-add"
+    >
+      +
+    </button>
+  </div>
 </div>
 `;

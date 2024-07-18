@@ -24,12 +24,14 @@
  */
 
 import { view, Msg, update, init } from "./Rand";
-import { shallow } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 import { extendJest, Testing } from "react-tea-cup";
 import { Cmd, nothing, just } from "tea-cup-core";
+import * as matchers from '@testing-library/jest-dom/matchers'
 
 extendJest(expect);
 const testing = new Testing<Msg>();
+expect.extend(matchers)
 
 describe("Test Rand", () => {
 
@@ -46,38 +48,38 @@ describe("Test Rand", () => {
     describe("view state", () => {
 
         test("render nothing", () => {
-            const wrapper = shallow(view(testing.noop, nothing))
-            expect(wrapper.find('div > p')).toHaveText('This is a random number :');
+            const { container } = render(view(testing.noop, nothing))
+            expect(container.querySelector('div > p')).toHaveTextContent('This is a random number :');
         });
 
         test("render something", () => {
-            const wrapper = shallow(view(testing.noop, just(13)));
-            expect(wrapper.find('div > p')).toIncludeText('13');
+            const { container } = render(view(testing.noop, just(13)));
+            expect(container.querySelector('div > p')).toHaveTextContent('13');
         });
 
         test("render button", () => {
-            const wrapper = shallow(view(testing.noop, just(13)));
-            expect(wrapper.find('div > p')).toIncludeText('13');
-            expect(wrapper.find('div > button')).toHaveLength(1);
-            expect(wrapper.find('div > button')).toHaveText('Randomize');
+            const { container } = render(view(testing.noop, just(13)));
+            expect(container.querySelector('div > p')).toHaveTextContent('13');
+            expect(container.querySelectorAll('div > button')).toHaveLength(1);
+            expect(container.querySelector('div > button')).toHaveTextContent('Randomize');
         });
 
         test("snapshot nothing", () => {
-            const wrapper = shallow(view(testing.noop, nothing))
-            expect(wrapper).toMatchSnapshot();
+            const { container } = render(view(testing.noop, nothing))
+            expect(container).toMatchSnapshot();
         });
 
         test("snapshot", () => {
-            const wrapper = shallow(view(testing.noop, just(13)))
-            expect(wrapper).toMatchSnapshot();
+            const { container } = render(view(testing.noop, just(13)))
+            expect(container).toMatchSnapshot();
         });
     });
 
     describe("click generate message", () => {
 
         test("clicked message", () => {
-            const wrapper = shallow(view(testing.dispatcher, nothing));
-            wrapper.find('div > button').at(0).simulate('click');
+            const { container } = render(view(testing.dispatcher, nothing));
+            fireEvent.click(container.querySelectorAll('div > button').item(0));
             expect(testing).toHaveDispatchedMsg({ type: "clicked" });
         });
     });
