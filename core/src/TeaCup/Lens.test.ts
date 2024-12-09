@@ -106,6 +106,49 @@ describe('lens', () => {
     expect(UserPageUserPrism.update(userPage, (u) => u + '!')).toEqual(just({ tag: 'user', user: 'gnu!' }));
     expect(UserPageUserPrism.update(homePage, (u) => u + '!')).toEqual(nothing);
   });
+
+  test('discriminated sub twice ', () => {
+
+    const ArtistsPrism = Lenses
+        .id<MusicPlayer>()
+        .sub<Player>(Lenses.discriminate('tag', 'player'))
+        .field("tab")
+        .sub<Artists>(Lenses.discriminate("tag", "artists"))
+        .field("count");
+
+    const player: MusicPlayer = {
+      tag: "player",
+      tab: {
+        tag: "artists",
+        count: 123
+      }
+    }
+
+    const playerHome: MusicPlayer = {
+      tag: "home",
+    }
+
+    const playerAlbums: MusicPlayer = {
+      tag: "player",
+      tab: {
+        tag: "albums",
+      }
+    }
+
+    expect(ArtistsPrism.get(player)).toEqual(just(123));
+    expect(ArtistsPrism.get(playerHome)).toEqual(nothing);
+    expect(ArtistsPrism.get(playerAlbums)).toEqual(nothing);
+    expect(ArtistsPrism.update(player, c => c + 1)).toEqual(just({
+      tag: "player",
+      tab: {
+        tag: "artists",
+        count: 124
+      }
+    }));
+    expect(ArtistsPrism.update(playerHome, c => c + 1)).toEqual(nothing);
+    expect(ArtistsPrism.update(playerAlbums, c => c + 1)).toEqual(nothing);
+  });
+
 });
 
 interface Street {
@@ -132,3 +175,8 @@ type UserPage = { readonly tag: 'user'; readonly user: string };
 
 type Page2 = { readonly tag: 'home'; readonly tag2: 'home2' } | UserPage2;
 type UserPage2 = { readonly tag: 'user'; readonly tag2: 'user2'; readonly user: string };
+
+type MusicPlayer = { tag: "home" } | Player
+type Player = { tag: "player", tab: Tab }
+type Tab = {tag: "albums"} | Artists;
+type Artists = {tag:"artists"; count: number}
