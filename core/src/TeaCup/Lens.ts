@@ -23,7 +23,7 @@
  *
  */
 
-import { just, Maybe, maybeOf, nothing } from './Maybe';
+import { just, Maybe, nothing } from './Maybe';
 
 export class LensWithResult<A, B, R> {
   constructor(readonly get: (a: A) => B, readonly update: (a: A, f: (b: B) => [B, R]) => [A, R]) {}
@@ -191,22 +191,20 @@ export class Prism<A, B> {
 
 export type SubTypeGuard<A, B extends A> = (a: A) => Maybe<B>;
 
-export class Lenses {
-  static id<A>(): Lens<A, A> {
-    return new Lens(
-      (a) => a,
-      (a, f) => f(a),
-    );
-  }
+export function idLens<A>(): Lens<A, A> {
+  return new Lens(
+    (a) => a,
+    (a, f) => f(a),
+  );
+}
 
-  static idWithResult<A, R>(): LensWithResult<A, A, R> {
-    return new LensWithResult<A, A, R>(
-      (a) => a,
-      (a, f) => f(a),
-    );
-  }
+export function idLensWithResult<A, R>(): LensWithResult<A, A, R> {
+  return new LensWithResult<A, A, R>(
+    (a) => a,
+    (a, f) => f(a),
+  );
+}
 
-  static discriminate<B, C extends B, K extends keyof B>(tag: K, v: C[K]): SubTypeGuard<B, C> {
-    return (o) => (o[tag] === v ? just(o as C) : nothing);
-  }
+export function discriminate<B, C extends B, K extends keyof B>(tag: K, v: C[K]): SubTypeGuard<B, C> {
+  return (o) => (o[tag] === v ? just(o as C) : nothing);
 }

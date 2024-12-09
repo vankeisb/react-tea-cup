@@ -23,31 +23,31 @@
  *
  */
 
-import { Lenses, SubTypeGuard } from './Lens';
+import { discriminate, idLens, idLensWithResult, SubTypeGuard } from './Lens';
 import { just, nothing } from './Maybe';
 
 describe('lens', () => {
   test('id', () => {
-    const lens = Lenses.id<string>();
+    const lens = idLens<string>();
     expect(lens.get('foo')).toEqual('foo');
     expect(lens.update('foo', (a) => a + 'bar')).toEqual('foobar');
   });
 
   test('id with result', () => {
-    const lens = Lenses.idWithResult<string, number>();
+    const lens = idLensWithResult<string, number>();
     expect(lens.get('foo')).toEqual('foo');
     expect(lens.update('foo', (a) => [a + 'bar', 123])).toEqual(['foobar', 123]);
   });
 
   test('field', () => {
-    const StreetNameLens = Lenses.id<Street>().field('name');
+    const StreetNameLens = idLens<Street>().field('name');
     const street: Street = { name: 'main street', number: 42 };
     expect(StreetNameLens.get(street)).toEqual('main street');
     expect(StreetNameLens.update(street, (n) => 'small ' + n)).toEqual({ name: 'small main street', number: 42 });
   });
 
   test('field with result', () => {
-    const StreetNameLens = Lenses.idWithResult<Street, string>().field('name');
+    const StreetNameLens = idLensWithResult<Street, string>().field('name');
     const street: Street = { name: 'main street', number: 42 };
     expect(StreetNameLens.get(street)).toEqual('main street');
     expect(StreetNameLens.update(street, (n) => ['small ' + n, 'yalla'])).toEqual([
@@ -57,7 +57,7 @@ describe('lens', () => {
   });
 
   test('deeper', () => {
-    const AdressStreetNameLens = Lenses.id<Address>().field('street').field('name');
+    const AdressStreetNameLens = idLens<Address>().field('street').field('name');
     const address: Address = {
       street: { name: 'main street', number: 42 },
       city: { name: 'Big', zip: '4242' },
@@ -70,7 +70,7 @@ describe('lens', () => {
   });
 
   test('deeper with result', () => {
-    const AdressStreetNameLens = Lenses.idWithResult<Address, number>().field('street').field('name');
+    const AdressStreetNameLens = idLensWithResult<Address, number>().field('street').field('name');
     const address: Address = {
       street: { name: 'main street', number: 42 },
       city: { name: 'Big', zip: '4242' },
@@ -86,7 +86,7 @@ describe('lens', () => {
   });
 
   test('discriminated guard s', () => {
-    const d: SubTypeGuard<Page, UserPage> = Lenses.discriminate('tag', 'user');
+    const d: SubTypeGuard<Page, UserPage> = discriminate('tag', 'user');
 
     const userPage: Page = { tag: 'user', user: 'gnu' };
     const homePage: Page = { tag: 'home' };
@@ -96,8 +96,8 @@ describe('lens', () => {
   });
 
   test('discriminated guard with several tags', () => {
-    const d: SubTypeGuard<Page2, UserPage2> = Lenses.discriminate('tag', 'user');
-    const d2: SubTypeGuard<Page2, UserPage2> = Lenses.discriminate('tag2', 'user2');
+    const d: SubTypeGuard<Page2, UserPage2> = discriminate('tag', 'user');
+    const d2: SubTypeGuard<Page2, UserPage2> = discriminate('tag2', 'user2');
 
     const userPage: Page2 = { tag: 'user', tag2: 'user2', user: 'gnu' };
     const homePage: Page2 = { tag: 'home', tag2: 'home2' };
@@ -109,7 +109,7 @@ describe('lens', () => {
   });
 
   test('discriminated sub type prism', () => {
-    const UserPageUserPrism = Lenses.id<Page>().sub(Lenses.discriminate('tag', 'user'));
+    const UserPageUserPrism = idLens<Page>().sub(discriminate('tag', 'user'));
 
     const userPage: Page = { tag: 'user', user: 'gnu' };
     const homePage: Page = { tag: 'home' };
@@ -124,7 +124,7 @@ describe('lens', () => {
   });
 
   test('discriminated sub type prism with result', () => {
-    const UserPageUserPrism = Lenses.idWithResult<Page, number>().sub(Lenses.discriminate('tag', 'user'));
+    const UserPageUserPrism = idLensWithResult<Page, number>().sub(discriminate('tag', 'user'));
 
     const userPage: Page = { tag: 'user', user: 'gnu' };
     const homePage: Page = { tag: 'home' };
@@ -158,12 +158,12 @@ describe('lens', () => {
   };
 
   test('discriminated sub type field prism', () => {
-    // const UserPageUserPrism = Lenses.id<Page>().sub(p => p.tag === 'user' ? p as UserPage : undefined).field('user')
+    // const UserPageUserPrism = idLens<Page>().sub(p => p.tag === 'user' ? p as UserPage : undefined).field('user')
 
-    const d: SubTypeGuard<Page, UserPage> = Lenses.discriminate('tag', 'user');
-    const UserPageUserPrism = Lenses.id<Page>().sub(d).field('user');
+    const d: SubTypeGuard<Page, UserPage> = discriminate('tag', 'user');
+    const UserPageUserPrism = idLens<Page>().sub(d).field('user');
     // WONTWORK
-    // const UserPageUserPrism2 = Lenses.id<Page>().sub(Lenses.descriminate('tag', 'user')).field('user')
+    // const UserPageUserPrism2 = idLens<Page>().sub(Lenses.descriminate('tag', 'user')).field('user')
 
     const userPage: Page = { tag: 'user', user: 'gnu' };
     const homePage: Page = { tag: 'home' };
@@ -176,10 +176,10 @@ describe('lens', () => {
   });
 
   test('discriminated sub twice', () => {
-    const ArtistsPrism = Lenses.id<MusicPlayer>()
-      .sub<Player>(Lenses.discriminate('tag', 'player'))
+    const ArtistsPrism = idLens<MusicPlayer>()
+      .sub<Player>(discriminate('tag', 'player'))
       .field('tab')
-      .sub<Artists>(Lenses.discriminate('tag', 'artists'))
+      .sub<Artists>(discriminate('tag', 'artists'))
       .field('count');
 
     expect(ArtistsPrism.get(player)).toEqual(just(123));
@@ -199,10 +199,10 @@ describe('lens', () => {
   });
 
   test('discriminated sub twice with result', () => {
-    const ArtistsPrism = Lenses.idWithResult<MusicPlayer, number>()
-      .sub<Player>(Lenses.discriminate('tag', 'player'))
+    const ArtistsPrism = idLensWithResult<MusicPlayer, number>()
+      .sub<Player>(discriminate('tag', 'player'))
       .field('tab')
-      .sub<Artists>(Lenses.discriminate('tag', 'artists'))
+      .sub<Artists>(discriminate('tag', 'artists'))
       .field('count');
 
     expect(ArtistsPrism.update(player, (c) => [c + 1, 123])).toEqual(
