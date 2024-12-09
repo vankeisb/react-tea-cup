@@ -24,7 +24,7 @@
  */
 
 import { Lenses, SubTypeGuard } from './Lens';
-import {just, nothing} from './Maybe';
+import { just, nothing } from './Maybe';
 
 describe('lens', () => {
   test('id', () => {
@@ -34,7 +34,7 @@ describe('lens', () => {
   });
 
   test('id with result', () => {
-    const lens = Lenses.idWithResult<string,number>();
+    const lens = Lenses.idWithResult<string, number>();
     expect(lens.get('foo')).toEqual('foo');
     expect(lens.update('foo', (a) => [a + 'bar', 123])).toEqual(['foobar', 123]);
   });
@@ -50,7 +50,10 @@ describe('lens', () => {
     const StreetNameLens = Lenses.idWithResult<Street, string>().field('name');
     const street: Street = { name: 'main street', number: 42 };
     expect(StreetNameLens.get(street)).toEqual('main street');
-    expect(StreetNameLens.update(street, (n) => ['small ' + n, "yalla"])).toEqual([{ name: 'small main street', number: 42 }, "yalla"]);
+    expect(StreetNameLens.update(street, (n) => ['small ' + n, 'yalla'])).toEqual([
+      { name: 'small main street', number: 42 },
+      'yalla',
+    ]);
   });
 
   test('deeper', () => {
@@ -73,10 +76,13 @@ describe('lens', () => {
       city: { name: 'Big', zip: '4242' },
     };
     expect(AdressStreetNameLens.get(address)).toEqual('main street');
-    expect(AdressStreetNameLens.update(address, (n) => ['small ' + n, 123])).toEqual([{
-      street: { name: 'small main street', number: 42 },
-      city: { name: 'Big', zip: '4242' },
-    }, 123]);
+    expect(AdressStreetNameLens.update(address, (n) => ['small ' + n, 123])).toEqual([
+      {
+        street: { name: 'small main street', number: 42 },
+        city: { name: 'Big', zip: '4242' },
+      },
+      123,
+    ]);
   });
 
   test('discriminated guard s', () => {
@@ -111,8 +117,10 @@ describe('lens', () => {
     expect(UserPageUserPrism.get(userPage)).toEqual(just(userPage));
     expect(UserPageUserPrism.get(homePage)).toEqual(nothing);
 
-    expect(UserPageUserPrism.update(userPage, (u) => ({...u, user: "gnu!" }))).toEqual(just({ tag: 'user', user: 'gnu!' }));
-    expect(UserPageUserPrism.update(homePage, (u) => ({...u, user: "gnu!" }))).toEqual(nothing);
+    expect(UserPageUserPrism.update(userPage, (u) => ({ ...u, user: 'gnu!' }))).toEqual(
+      just({ tag: 'user', user: 'gnu!' }),
+    );
+    expect(UserPageUserPrism.update(homePage, (u) => ({ ...u, user: 'gnu!' }))).toEqual(nothing);
   });
 
   test('discriminated sub type prism with result', () => {
@@ -124,28 +132,30 @@ describe('lens', () => {
     expect(UserPageUserPrism.get(userPage)).toEqual(just(userPage));
     expect(UserPageUserPrism.get(homePage)).toEqual(nothing);
 
-    expect(UserPageUserPrism.update(userPage, (u) => [{...u, user: "gnu!" }, 123])).toEqual(just([{ tag: 'user', user: 'gnu!' }, 123]));
-    expect(UserPageUserPrism.update(homePage, (u) => [{...u, user: "gnu!" }, 123])).toEqual(nothing);
+    expect(UserPageUserPrism.update(userPage, (u) => [{ ...u, user: 'gnu!' }, 123])).toEqual(
+      just([{ tag: 'user', user: 'gnu!' }, 123]),
+    );
+    expect(UserPageUserPrism.update(homePage, (u) => [{ ...u, user: 'gnu!' }, 123])).toEqual(nothing);
   });
 
   const player: MusicPlayer = {
-    tag: "player",
+    tag: 'player',
     tab: {
-      tag: "artists",
-      count: 123
-    }
-  }
+      tag: 'artists',
+      count: 123,
+    },
+  };
 
   const playerHome: MusicPlayer = {
-    tag: "home",
-  }
+    tag: 'home',
+  };
 
   const playerAlbums: MusicPlayer = {
-    tag: "player",
+    tag: 'player',
     tab: {
-      tag: "albums",
-    }
-  }
+      tag: 'albums',
+    },
+  };
 
   test('discriminated sub type field prism', () => {
     // const UserPageUserPrism = Lenses.id<Page>().sub(p => p.tag === 'user' ? p as UserPage : undefined).field('user')
@@ -166,49 +176,50 @@ describe('lens', () => {
   });
 
   test('discriminated sub twice', () => {
-
-    const ArtistsPrism = Lenses
-        .id<MusicPlayer>()
-        .sub<Player>(Lenses.discriminate('tag', 'player'))
-        .field("tab")
-        .sub<Artists>(Lenses.discriminate("tag", "artists"))
-        .field("count");
+    const ArtistsPrism = Lenses.id<MusicPlayer>()
+      .sub<Player>(Lenses.discriminate('tag', 'player'))
+      .field('tab')
+      .sub<Artists>(Lenses.discriminate('tag', 'artists'))
+      .field('count');
 
     expect(ArtistsPrism.get(player)).toEqual(just(123));
     expect(ArtistsPrism.get(playerHome)).toEqual(nothing);
     expect(ArtistsPrism.get(playerAlbums)).toEqual(nothing);
-    expect(ArtistsPrism.update(player, c => c + 1)).toEqual(just({
-      tag: "player",
-      tab: {
-        tag: "artists",
-        count: 124
-      }
-    }));
-    expect(ArtistsPrism.update(playerHome, c => c + 1)).toEqual(nothing);
-    expect(ArtistsPrism.update(playerAlbums, c => c + 1)).toEqual(nothing);
+    expect(ArtistsPrism.update(player, (c) => c + 1)).toEqual(
+      just({
+        tag: 'player',
+        tab: {
+          tag: 'artists',
+          count: 124,
+        },
+      }),
+    );
+    expect(ArtistsPrism.update(playerHome, (c) => c + 1)).toEqual(nothing);
+    expect(ArtistsPrism.update(playerAlbums, (c) => c + 1)).toEqual(nothing);
   });
 
   test('discriminated sub twice with result', () => {
+    const ArtistsPrism = Lenses.idWithResult<MusicPlayer, number>()
+      .sub<Player>(Lenses.discriminate('tag', 'player'))
+      .field('tab')
+      .sub<Artists>(Lenses.discriminate('tag', 'artists'))
+      .field('count');
 
-    const ArtistsPrism = Lenses
-        .idWithResult<MusicPlayer, number>()
-        .sub<Player>(Lenses.discriminate('tag', 'player'))
-        .field("tab")
-        .sub<Artists>(Lenses.discriminate("tag", "artists"))
-        .field("count");
-
-
-    expect(ArtistsPrism.update(player, c => [c + 1, 123])).toEqual(just([{
-      tag: "player",
-      tab: {
-        tag: "artists",
-        count: 124
-      }
-    }, 123]));
-    expect(ArtistsPrism.update(playerHome, c => [c + 1, 123])).toEqual(nothing);
-    expect(ArtistsPrism.update(playerAlbums, c => [c + 1, 123])).toEqual(nothing);
+    expect(ArtistsPrism.update(player, (c) => [c + 1, 123])).toEqual(
+      just([
+        {
+          tag: 'player',
+          tab: {
+            tag: 'artists',
+            count: 124,
+          },
+        },
+        123,
+      ]),
+    );
+    expect(ArtistsPrism.update(playerHome, (c) => [c + 1, 123])).toEqual(nothing);
+    expect(ArtistsPrism.update(playerAlbums, (c) => [c + 1, 123])).toEqual(nothing);
   });
-
 });
 
 interface Street {
@@ -236,7 +247,7 @@ type UserPage = { readonly tag: 'user'; readonly user: string };
 type Page2 = { readonly tag: 'home'; readonly tag2: 'home2' } | UserPage2;
 type UserPage2 = { readonly tag: 'user'; readonly tag2: 'user2'; readonly user: string };
 
-type MusicPlayer = { tag: "home" } | Player
-type Player = { tag: "player", tab: Tab }
-type Tab = {tag: "albums"} | Artists;
-type Artists = {tag:"artists"; count: number}
+type MusicPlayer = { tag: 'home' } | Player;
+type Player = { tag: 'player'; tab: Tab };
+type Tab = { tag: 'albums' } | Artists;
+type Artists = { tag: 'artists'; count: number };
