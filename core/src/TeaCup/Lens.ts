@@ -91,7 +91,20 @@ export class Prism<A, B> {
   }
 
   sub<C extends B>(f: (b: B) => Maybe<C>): Prism<A, C> {
-    throw "";
+    return new Prism(
+        (a) => {
+          const b = this.get(a);
+          return b.andThen(f);
+        },
+        (a, f2) => {
+          const b = this.get(a);
+          const mc = b.andThen(f);
+          return mc.andThen(c => {
+            const c2 = f2(c);
+            return this.update(a, () => c2);
+          })
+        },
+      );
   }
 }
 
