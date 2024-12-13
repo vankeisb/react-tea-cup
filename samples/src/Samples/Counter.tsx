@@ -64,6 +64,6 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
   }
 }
 
-export function subscriptions(model: Model) {
+export function subscriptions(_model: Model) {
   return Sub.none<Msg>();
 }

@@ -43,13 +43,13 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
       <button onClick={() => dispatch('add')}>Add</button>
       <button onClick={() => dispatch('remove')}>Remove</button>
       <MyComponent initialValue={123} />
-      {memoizedView(dispatch, model)}
+      {memoizedView(model)}
     </div>
   );
 }
 
-function memoizedView(dispatch: Dispatcher<Msg>, model: Model) {
-  return memo(model)((m: Model) => (
+function memoizedView(model: Model) {
+  return memo(model)(() => (
     <div>
       I am memoized, and I include another stateful component...
       <MyComponent initialValue={456} />

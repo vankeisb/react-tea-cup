@@ -71,7 +71,7 @@ export function init(): [Model, Cmd<Msg>] {
   });
 }
 
-export function view(dispatch: Dispatcher<Msg>, model: Model) {
+export function view(_dispatch: Dispatcher<Msg>, model: Model) {
   return (
     <span className="events" id="sample-events">
       {model.clicked
@@ -125,7 +125,7 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 const documentEvents = new DocumentEvents<Msg>();
 const windowEvents = new WindowEvents<Msg>();
 
-export function subscriptions(model: Model): Sub<Msg> {
+export function subscriptions(_model: Model): Sub<Msg> {
   return Sub.batch([
     documentEvents.on(
       'click',
@@ -151,7 +151,7 @@ export function subscriptions(model: Model): Sub<Msg> {
           },
         } as Msg),
     ),
-    windowEvents.on('scroll', (e: Event) => {
+    windowEvents.on('scroll', () => {
       return {
         type: 'scrolled',
         scroll: [window.scrollX, window.scrollY],

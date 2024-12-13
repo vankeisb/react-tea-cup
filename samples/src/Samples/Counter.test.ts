@@ -75,12 +75,12 @@ describe("Test Counter", () => {
 
     describe("messages update state", () => {
         test("decrement", () => {
-            const [newState, cmd] = update({ type: "dec" }, 13);
+            const [newState, _cmd] = update({ type: "dec" }, 13);
             expect(newState).toBe(12);
         });
 
         test("increment", () => {
-            const [newState, cmd] = update({ type: "inc" }, 13);
+            const [newState, _cmd] = update({ type: "inc" }, 13);
             expect(newState).toBe(14);
         });
     });

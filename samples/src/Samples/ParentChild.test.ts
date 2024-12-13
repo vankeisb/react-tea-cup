@@ -39,7 +39,7 @@ describe("Test ParentChild", () => {
     describe("init state", () => {
 
         test("counter model x3", async () => {
-            const [state, cmd] = init();
+            const [state, _cmd] = init();
             expect(state).toHaveLength(3);
             // TODO batched Cmd.none() untestable
         });
@@ -81,7 +81,7 @@ describe("Test ParentChild", () => {
         const [initialState, _cmd] = init();
 
         test("decrement first counter", () => {
-            const [newState, cmd] = update({
+            const [newState, _cmd] = update({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
             }, initialState);

@@ -38,7 +38,7 @@ configure({ adapter: new EnzymeAdapter() });
 describe('Test TimeSample', () => {
   describe('init state', () => {
     test('triggers no message', () => {
-      const [state, cmd] = init();
+      const [_state, cmd] = init();
       expect(cmd).toEqual(Cmd.none());
     });
   });
