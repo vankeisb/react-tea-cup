@@ -1,4 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Test Rest > view state > snapshot error 1`] = `ReactWrapper {}`;
+
+exports[`Test Rest > view state > snapshot initial 1`] = `ReactWrapper {}`;
+
+exports[`Test Rest > view state > snapshot loaded 1`] = `ReactWrapper {}`;
 
 exports[`Test Rest view state snapshot error 1`] = `
 <div>

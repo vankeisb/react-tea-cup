@@ -1,16 +1,18 @@
 {
-  "include": ["src"],
-  "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "./dist",
-    "strict": true,
-    "jsx": "react",
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "esModuleInterop": true
-  },
-  "compileOnSave": true,
-  "exclude": ["node_modules", "dist"]
-}
+    "include": ["src"],
+    "compilerOptions": {
+      "target": "es6",
+      "module": "ESNext",
+      "declaration": true,
+      "outDir": "./dist",
+      "strict": true,
+      "jsx": "react",
+      "inlineSourceMap": true,
+      "inlineSources": true,
+      "esModuleInterop": false,
+      "moduleResolution": "bundler"
+    },
+    "compileOnSave": true,
+    "exclude": ["node_modules", "dist"]
+  }
+  

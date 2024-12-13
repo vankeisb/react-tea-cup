@@ -25,6 +25,7 @@
 
 import { JSDOM } from 'jsdom';
 import { DocumentEvents } from './DocumentEvents';
+import { describe, expect, it, beforeEach, vi } from "vitest";
 
 const dom = new JSDOM();
 global.document = dom.window.document;
@@ -32,8 +33,8 @@ global.document = dom.window.document;
 describe('DocumentEvents Test', () => {
   let documentEvents = new DocumentEvents();
 
-  const addSpy = jest.fn();
-  const removeSpy = jest.fn();
+  const addSpy = vi.fn();
+  const removeSpy = vi.fn();
 
   document.addEventListener = addSpy;
   document.removeEventListener = removeSpy;
@@ -77,7 +78,7 @@ describe('DocumentEvents Test', () => {
     expect(removeSpy.mock.calls.length).toBe(2);
   });
 
-  it('sub receives event from listener', (done) => {
+  it('sub receives event from listener', () => new Promise<void>(done => {
     const msgs: string[] = [];
     const collectMsgs = (msg: string): void => {
       msgs.push(msg);
@@ -94,9 +95,9 @@ describe('DocumentEvents Test', () => {
       expect(msgs).toEqual(['clicked1']);
       done();
     }, 10);
-  });
+  }));
 
-  it('each sub receive events its listener', (done) => {
+  it('each sub receive events its listener', () => new Promise<void>(done => {
     const msgs: string[] = [];
     const collectMsgs = (msg: string): void => {
       msgs.push(msg);
@@ -125,9 +126,9 @@ describe('DocumentEvents Test', () => {
         done();
       }, 10)
     }, 10)
-  });
+  }));
 
-  it('sub stops receiving events from listener', (done) => {
+  it('sub stops receiving events from listener', () => new Promise<void>(done => {
     const sub = documentEvents.on('click', (e) => 'clicked1');
 
     const msgs: string[] = [];
@@ -150,6 +151,6 @@ describe('DocumentEvents Test', () => {
         done();
       });
     }, 10)
-  });
+  }));
 
 });

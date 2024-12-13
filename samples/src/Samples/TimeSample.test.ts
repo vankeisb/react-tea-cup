@@ -25,16 +25,20 @@
 
 import { view, Msg, update, init } from './TimeSample';
 import { mount } from 'enzyme';
-import { extendJest, Testing } from 'react-tea-cup';
+import { Testing } from 'react-tea-cup';
 import { Cmd } from 'tea-cup-core';
+import { describe, test, expect } from "vitest";
+import { configure } from 'enzyme';
+import EnzymeAdapter from 'enzyme-adapter-react-16';
+import 'jsdom-global/register';
 
-extendJest(expect);
 const testing = new Testing<Msg>();
+configure({ adapter: new EnzymeAdapter() });
 
 describe('Test TimeSample', () => {
   describe('init state', () => {
     test('triggers no message', () => {
-      const [state, cmd] = init();
+      const [_state, cmd] = init();
       expect(cmd).toEqual(Cmd.none());
     });
   });
@@ -46,23 +50,23 @@ describe('Test TimeSample', () => {
       test('current time', () => {
         const wrapper = mount(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(0)).toIncludeText('Current time :');
-        expect(wrapper.find('div > button').at(0)).toHaveText('Get current time');
+        expect(wrapper.find('div').at(0).text()).toContain('Current time :');
+        expect(wrapper.find('div > button').at(0).text()).toEqual('Get current time');
       });
 
       test('trigger in', () => {
         const wrapper = mount(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(1)).toIncludeText('In :');
-        expect(wrapper.find('div > button').at(1)).toHaveText('Trigger in');
+        expect(wrapper.find('div').at(1).text()).toContain('In :');
+        expect(wrapper.find('div > button').at(1).text()).toEqual('Trigger in');
       });
 
       test('ticks', () => {
         const wrapper = mount(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 :');
-        expect(wrapper.find('div').at(2)).toIncludeText(', ticks2 :');
-        expect(wrapper.find('div > button').at(2)).toHaveText('start ticking');
+        expect(wrapper.find('div').at(2).text()).toContain('Ticks1 :');
+        expect(wrapper.find('div').at(2).text()).toContain(', ticks2 :');
+        expect(wrapper.find('div > button').at(2).text()).toEqual('start ticking');
       });
 
       test('snapshot initial', () => {
@@ -89,24 +93,24 @@ describe('Test TimeSample', () => {
 
       test('current time', () => {
         const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(0)).toIncludeText('Current time : 1313');
+        expect(wrapper.find('div').at(0).text()).toContain('Current time : 1313');
       });
 
       test('trigger in', () => {
         const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(1)).toIncludeText('In :true');
+        expect(wrapper.find('div').at(1).text()).toContain('In :true');
       });
 
       test('trigger in progress', () => {
         const wrapper = mount(view(testing.noop, state2));
-        expect(wrapper.find('div').at(1)).toIncludeText('In :...');
+        expect(wrapper.find('div').at(1).text()).toContain('In :...');
       });
 
       test('ticks', () => {
         const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(2)).toIncludeText('Ticks1 : 13');
-        expect(wrapper.find('div').at(2)).toIncludeText('ticks2 : 131313');
-        expect(wrapper.find('div > button').at(2)).toIncludeText('stop ticking');
+        expect(wrapper.find('div').at(2).text()).toContain('Ticks1 : 13');
+        expect(wrapper.find('div').at(2).text()).toContain('ticks2 : 131313');
+        expect(wrapper.find('div > button').at(2).text()).toContain('stop ticking');
       });
 
       test('snapshot state1', () => {
@@ -127,19 +131,19 @@ describe('Test TimeSample', () => {
     test('get current time', () => {
       const wrapper = mount(view(testing.dispatcher, initialState));
       wrapper.find('div > button').at(0).simulate('click');
-      expect(testing).toHaveDispatchedMsg({ tag: 'get-cur-time' });
+      expect(testing.dispatched).toEqual({ tag: 'get-cur-time' });
     });
 
     test('get in', () => {
       const wrapper = mount(view(testing.dispatcher, initialState));
       wrapper.find('div > button').at(1).simulate('click');
-      expect(testing).toHaveDispatchedMsg({ tag: 'get-in' });
+      expect(testing.dispatched).toEqual({ tag: 'get-in' });
     });
 
     test('toggle tick', () => {
       const wrapper = mount(view(testing.dispatcher, initialState));
       wrapper.find('div > button').at(2).simulate('click');
-      expect(testing).toHaveDispatchedMsg({ tag: 'toggle-tick' });
+      expect(testing.dispatched).toEqual({ tag: 'toggle-tick' });
     });
   });
 

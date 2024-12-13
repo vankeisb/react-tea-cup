@@ -27,6 +27,7 @@ import { Cmd } from './Cmd';
 import { Dispatcher } from './Dispatcher';
 import { err, Err, ok, Ok, Result } from './Result';
 import { just, Maybe, nothing } from './Maybe';
+import { asError } from './Try';
 
 /**
  * Base class for Tasks.
@@ -213,7 +214,7 @@ class TLambda<R> extends Task<Error, R> {
     try {
       callback(ok(this.f()));
     } catch (e) {
-      callback(err(e));
+      callback(err(asError(e)));
     }
   }
 }

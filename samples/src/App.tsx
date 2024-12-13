@@ -595,7 +595,7 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
 }
 
 function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
-  function mapSample<CM>(f: (s: Samples) => [Samples, Cmd<Msg>]): [Model, Cmd<Msg>] {
+  function mapSample(f: (s: Samples) => [Samples, Cmd<Msg>]): [Model, Cmd<Msg>] {
     switch (model.tag) {
       case 'samples':
         const sac: [Samples, Cmd<Msg>] = f(model.samples);

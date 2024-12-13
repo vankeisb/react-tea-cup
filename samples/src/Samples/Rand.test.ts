@@ -25,11 +25,15 @@
 
 import { view, Msg, update, init } from "./Rand";
 import { shallow } from 'enzyme';
-import { extendJest, Testing } from "react-tea-cup";
+import { Testing } from "react-tea-cup";
 import { Cmd, nothing, just } from "tea-cup-core";
+import { describe, test, expect } from "vitest";
+import { configure } from 'enzyme';
+import EnzymeAdapter from 'enzyme-adapter-react-16';
+import 'jsdom-global/register';
 
-extendJest(expect);
 const testing = new Testing<Msg>();
+configure({ adapter: new EnzymeAdapter() });
 
 describe("Test Rand", () => {
 
@@ -47,19 +51,19 @@ describe("Test Rand", () => {
 
         test("render nothing", () => {
             const wrapper = shallow(view(testing.noop, nothing))
-            expect(wrapper.find('div > p')).toHaveText('This is a random number :');
+            expect(wrapper.find('div > p').at(0).text()).toEqual('This is a random number :');
         });
 
         test("render something", () => {
             const wrapper = shallow(view(testing.noop, just(13)));
-            expect(wrapper.find('div > p')).toIncludeText('13');
+            expect(wrapper.find('div > p').at(0).text()).toEqual('This is a random number :13');
         });
 
         test("render button", () => {
             const wrapper = shallow(view(testing.noop, just(13)));
-            expect(wrapper.find('div > p')).toIncludeText('13');
+            expect(wrapper.find('div > p').at(0).text()).toEqual('This is a random number :13');
             expect(wrapper.find('div > button')).toHaveLength(1);
-            expect(wrapper.find('div > button')).toHaveText('Randomize');
+            expect(wrapper.find('div > button').at(0).text()).toEqual('Randomize');
         });
 
         test("snapshot nothing", () => {
@@ -78,7 +82,7 @@ describe("Test Rand", () => {
         test("clicked message", () => {
             const wrapper = shallow(view(testing.dispatcher, nothing));
             wrapper.find('div > button').at(0).simulate('click');
-            expect(testing).toHaveDispatchedMsg({ type: "clicked" });
+            expect(testing.dispatched).toEqual({ type: "clicked" });
         });
     });
 

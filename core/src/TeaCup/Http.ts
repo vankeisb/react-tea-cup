@@ -26,6 +26,7 @@
 import { Task } from './Task';
 import { err, ok, Result } from './Result';
 import { Decoder } from './Decode';
+import { asError } from './Try';
 
 /**
  * Turns JS's fetch into Tasks.
@@ -100,7 +101,7 @@ class FetchTask extends Task<Error, Response> {
         .then((response: Response) => callback(ok(response)))
         .catch((e: Error) => callback(err(e)));
     } catch (e) {
-      callback(err(e));
+      callback(err(asError(e)));
     }
   }
 }
