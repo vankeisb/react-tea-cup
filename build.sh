@@ -1,3 +1,6 @@
+echo "Node version : "
+node -v
+
 npm install &&     \
 npm run bomlint &&     \
 cd core &&          \
