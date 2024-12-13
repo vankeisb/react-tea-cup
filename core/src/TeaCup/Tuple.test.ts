@@ -24,6 +24,7 @@
  */
 
 import { Tuple } from './Tuple';
+import { expect, test } from "vitest";
 
 const t = Tuple.t2('foo', 123);
 

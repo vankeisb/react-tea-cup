@@ -1,4 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Test ParentChild > view state > snapshot initial 1`] = `ReactWrapper {}`;
 
 exports[`Test ParentChild view state snapshot initial 1`] = `
 <div>

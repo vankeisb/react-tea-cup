@@ -25,10 +25,14 @@
 
 import { view, Msg, update } from "./Counter";
 import { shallow } from 'enzyme';
-import { extendJest, Testing } from "react-tea-cup";
+import { Testing } from "react-tea-cup";
+import { describe, test, expect } from "vitest";
 
-extendJest(expect);
+import { configure } from 'enzyme';
+import EnzymeAdapter from 'enzyme-adapter-react-16';
+
 const testing = new Testing<Msg>();
+configure({ adapter: new EnzymeAdapter() });
 
 describe("Test Counter", () => {
 
@@ -36,15 +40,15 @@ describe("Test Counter", () => {
 
         test("render counter", () => {
             const wrapper = shallow(view(testing.noop, 13))
-            expect(wrapper.find('.counter')).toExist();
-            expect(wrapper.find('.counter > span')).toHaveText("13");
+            expect(wrapper.find('.counter')).toHaveLength(1);
+            expect(wrapper.find('.counter > span').text()).toEqual("13");
         });
 
         test("render buttons", () => {
             const wrapper = shallow(view(testing.noop, 1));
             expect(wrapper.find('.counter > button')).toHaveLength(2);
-            expect(wrapper.find('.counter > button').at(0)).toHaveText('-');
-            expect(wrapper.find('.counter > button').at(1)).toHaveText('+');
+            expect(wrapper.find('.counter > button').at(0).text()).toEqual('-');
+            expect(wrapper.find('.counter > button').at(1).text()).toEqual('+');
         });
 
         test("snapshot", () => {
@@ -58,13 +62,13 @@ describe("Test Counter", () => {
         test("decrement", () => {
             const wrapper = shallow(view(testing.dispatcher, 1));
             wrapper.find('.counter > button').at(0).simulate('click');
-            expect(testing).toHaveDispatchedMsg({ type: "dec" });
+            expect(testing.dispatched).toEqual({ type: "dec" });
         });
 
         test("increment", () => {
             const wrapper = shallow(view(testing.dispatcher, 1));
             wrapper.find('.counter > button').at(1).simulate('click');
-            expect(testing).toHaveDispatchedMsg({ type: "inc" });
+            expect(testing.dispatched).toEqual({ type: "inc" });
         });
 
     });

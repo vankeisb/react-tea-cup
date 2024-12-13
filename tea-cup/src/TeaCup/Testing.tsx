@@ -28,29 +28,29 @@ import { ReactElement } from 'react';
 import { ProgramProps, Program } from '.';
 import React from 'react';
 
-export function extendJest<M>(expect: jest.Expect) {
-  expect.extend({
-    toHaveDispatchedMsg(received: Testing<M>, expected: M) {
-      const pass = this.equals(received.dispatched, expected);
+// export function extendJest<M>(expect: jest.Expect) {
+//   expect.extend({
+//     toHaveDispatchedMsg(received: Testing<M>, expected: M) {
+//       const pass = this.equals(received.dispatched, expected);
 
-      const message = () =>
-        this.utils.matcherHint('toBe', undefined, undefined) +
-        '\n\n' +
-        `Expected: ${this.utils.printExpected(expected)}\n` +
-        `Received: ${this.utils.printReceived(received.dispatched)}`;
+//       const message = () =>
+//         this.utils.matcherHint('toBe', undefined, undefined) +
+//         '\n\n' +
+//         `Expected: ${this.utils.printExpected(expected)}\n` +
+//         `Received: ${this.utils.printReceived(received.dispatched)}`;
 
-      return { actual: received, message, pass };
-    },
-  });
-}
+//       return { actual: received, message, pass };
+//     },
+//   });
+// }
 
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toHaveDispatchedMsg<M>(value: M): CustomMatcherResult;
-    }
-  }
-}
+// declare global {
+//   namespace jest {
+//     interface Matchers<R> {
+//       toHaveDispatchedMsg<M>(value: M): CustomMatcherResult;
+//     }
+//   }
+// }
 
 export class Testing<M> {
   private _dispatched: M | undefined;

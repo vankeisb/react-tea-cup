@@ -24,6 +24,7 @@
  */
 
 import { just, map2, Maybe, nothing } from './Maybe';
+import { expect, test, assert } from "vitest";
 
 test('just with default', () => {
   expect(just(1).withDefault(2)).toBe(1);
@@ -92,7 +93,7 @@ test('switch nothing', () => {
   const m: Maybe<number> = nothing;
   switch (m.type) {
     case 'Just':
-      fail('expected nothing');
+      assert.fail('expected nothing');
       break;
     case 'Nothing':
       // all good !
@@ -107,7 +108,7 @@ test('switch just', () => {
       expect(m.value).toBe(1);
       break;
     case 'Nothing':
-      fail('expected a Just');
+      assert.fail('expected a Just');
       break;
   }
 });

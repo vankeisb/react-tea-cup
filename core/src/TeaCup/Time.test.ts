@@ -25,18 +25,19 @@
 
 import { Time } from './Time';
 import { perform } from './Task.test';
+import { expect, test } from "vitest";
 
 const margin = 10;
 
-test('now', (done) => {
+test('now', () => new Promise<void>(done => {
   const now = new Date().getTime();
   perform(Time.now(), (r) => {
     expect(r - now).toBeLessThan(margin);
     done();
   });
-});
+}));
 
-test('in', (done) => {
+test('in', () => new Promise<void>(done => {
   const now = new Date().getTime();
   const timeout = 500;
   perform(Time.in(timeout), (r) => {
@@ -45,4 +46,4 @@ test('in', (done) => {
     expect(elapsed).toBeGreaterThanOrEqual(timeout);
     done();
   });
-});
+}));

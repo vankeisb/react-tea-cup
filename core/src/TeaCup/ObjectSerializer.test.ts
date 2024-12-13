@@ -24,6 +24,7 @@
  */
 
 import { ObjectSerializer } from './ObjectSerializer';
+import { expect, test } from "vitest";
 
 class Customer {
   readonly name: string;

@@ -8,5 +8,5 @@ cd core &&          \
 cd ../tea-cup &&    \
 ./build.sh &&       \
 cd ../samples &&    \
-npm run test -- --watchAll=false && \
+npm run test && \
 npm run build

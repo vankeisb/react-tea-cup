@@ -24,6 +24,7 @@
  */
 
 import { ListWithSelection } from './ListWithSelection';
+import { describe, expect, test } from "vitest";
 
 describe('ListWithSelection', () => {
   test('empty', () => {

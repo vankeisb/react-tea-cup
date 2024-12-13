@@ -23,13 +23,16 @@
  *
  */
 
-import { view, Msg, update, init, Model } from "./ParentChild";
+import { view, Msg, update, init } from "./ParentChild";
 import { mount } from 'enzyme';
-import { extendJest, Testing } from "react-tea-cup";
+import { Testing } from "react-tea-cup";
+import { describe, test, expect } from "vitest";
+import { configure } from 'enzyme';
+import EnzymeAdapter from 'enzyme-adapter-react-16';
+import 'jsdom-global/register';
 
-extendJest(expect);
 const testing = new Testing<Msg>();
-
+configure({ adapter: new EnzymeAdapter() });
 
 describe("Test ParentChild", () => {
 
@@ -66,7 +69,7 @@ describe("Test ParentChild", () => {
         test('decrement first child', () => {
             const wrapper = mount(view(testing.dispatcher, initialState))
             wrapper.find('.counter > button').at(0).simulate('click')
-            expect(testing).toHaveDispatchedMsg({
+            expect(testing.dispatched).toEqual({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
             })
