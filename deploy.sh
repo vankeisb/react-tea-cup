@@ -1,4 +1,4 @@
 cd ./core &&     \
-yarn publish &&  \
+npm publish &&  \
 cd ../tea-cup && \
-yarn publish
+npm publish
