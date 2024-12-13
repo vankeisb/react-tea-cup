@@ -26,32 +26,33 @@
 import { Task } from './Task';
 import { Result } from './Result';
 import { Time } from './Time';
+import { expect, test, assert } from "vitest";
 
-test('succeed', (done) => {
+test('succeed', () => new Promise<void>(done => {
   expectOk(done, Task.succeed(123), 123);
-});
+}));
 
-test('fail', (done) => {
+test('fail', () => new Promise<void>(done => {
   expectErr(done, Task.fail('wtf?'), 'wtf?');
-});
+}));
 
-test('map', (done) => {
+test('map', () => new Promise<void>(done => {
   expectOk(
     done,
     Task.succeed(1).map((i) => i + 1),
     2,
   );
-});
+}));
 
-test('mapError', (done) => {
+test('mapError', () => new Promise<void>(done => {
   expectErr(
     done,
     Task.fail('wtf').mapError((s) => s + ' is wrong?'),
     'wtf is wrong?',
   );
-});
+}));
 
-test('andThen', (done) => {
+test('andThen', () => new Promise<void>(done => {
   expectOk(
     done,
     Task.succeed(1).andThen((i: number) => {
@@ -59,9 +60,9 @@ test('andThen', (done) => {
     }),
     11,
   );
-});
+}));
 
-test('more complex stuff', (done) => {
+test('more complex stuff', () => new Promise<void>(done => {
   expectOk(
     done,
     Task.succeed('hello')
@@ -70,9 +71,9 @@ test('more complex stuff', (done) => {
       .map((s) => s + ' and dolphins'),
     'hello world and people and dolphins',
   );
-});
+}));
 
-test('more complex stuff with err', (done) => {
+test('more complex stuff with err', () => new Promise<void>(done => {
   expectErr(
     done,
     Task.fail('hello')
@@ -80,14 +81,14 @@ test('more complex stuff with err', (done) => {
       .andThen((s) => Task.fail(s + ' foo')), // this should not appear ! second task never gets executed
     'hello world',
   );
-});
+}));
 
-test('from lambda', (done) => {
+test('from lambda', () => new Promise<void>(done => {
   const t: Task<Error, number> = Task.fromLambda(() => 123);
   expectOk(done, t, 123);
-});
+}));
 
-test('parallel', (done) => {
+test('parallel', () => new Promise<void>(done => {
   const t1 = Time.in(1000).map(() => 1);
   const t2 = Time.in(2000).map(() => 2);
   const t3 = Time.in(1000).map(() => 4);
@@ -99,9 +100,9 @@ test('parallel', (done) => {
     expect(elapsed < 2100).toBeTruthy();
     done();
   });
-});
+}));
 
-test('lazy', (done) => {
+test('lazy', () => new Promise<void>(done => {
   expectOk(
     done,
     Task.succeedLazy(() => 123),
@@ -112,9 +113,9 @@ test('lazy', (done) => {
     Task.failLazy(() => 'kaboom'),
     'kaboom',
   );
-});
+}));
 
-test('recover', (done) => {
+test('recover', () => new Promise<void>(done => {
   const t: Task<string, number> = Task.fromLambda(() => {
     throw new Error('kaboom');
   }).mapError((e) => e.message);
@@ -125,7 +126,7 @@ test('recover', (done) => {
   expectOk(done, t3, 123);
   const t4: Task<string, number> = t3.andThen(() => Task.fail('yalla'));
   expectErr(done, t4, 'yalla');
-});
+}));
 
 export function attempt<E, R>(t: Task<E, R>, callback: (r: Result<E, R>) => void) {
   Task.attempt(t, (m) => m).execute(callback);
@@ -139,7 +140,7 @@ export function expectOk<E, R>(done: () => void, t: Task<E, R>, r: R) {
   attempt(t, (result) => {
     result.match(
       (res: R) => expect(res).toBe(r),
-      () => fail('expected a success'),
+      () => assert.fail('expected a success'),
     );
     done();
   });
@@ -148,7 +149,7 @@ export function expectOk<E, R>(done: () => void, t: Task<E, R>, r: R) {
 export function expectErr<E, R>(done: () => void, t: Task<E, R>, e: E) {
   attempt(t, (result) => {
     result.match(
-      (_: R) => fail('expected an error'),
+      (_: R) => assert.fail('expected an error'),
       (err: E) => expect(err).toBe(e),
     );
     done();

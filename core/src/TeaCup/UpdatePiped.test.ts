@@ -25,6 +25,7 @@
 
 import { Cmd } from './Cmd';
 import { genericUpdatePiped, updatePiped } from './UpdatePiped';
+import { describe, expect, test } from "vitest";
 
 describe('UpdatePiped', () => {
   type MyModel = number;

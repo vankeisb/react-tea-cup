@@ -7,12 +7,14 @@
         "samples"
     ],
     "devDependencies": {
+        "vite": "^6.0.1",
+        "vitest": "^2.1.8",    
+        "@vitejs/plugin-react": "^4.3.4",
+        "@types/node": "^22.10.1",
         "github-release-notes": "0.17.2",
-        "jest": "24.9.0",
         "prettier": "2.0.5",
         "rimraf": "^2.6.3",
-        "ts-jest": "^24.1.0",
-        "typescript": "~3.9.7",
+        "typescript": "~5.6.2",
         "bomlint": "1.2.3"
     },
     "scripts": {

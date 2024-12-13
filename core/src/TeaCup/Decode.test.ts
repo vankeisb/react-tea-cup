@@ -28,9 +28,10 @@ import { err, ok, Result } from './Result';
 import { just, nothing } from './Maybe';
 const num = Decode.num;
 const field = Decode.field;
+import { describe, expect, test } from "vitest";
 
 test('syntax error', () => {
-  expect(num.decodeString(' { broken ')).toEqual(err('Unexpected token b in JSON at position 3'));
+  expect(num.decodeString(' { broken ')).toEqual(err('Expected property name or \'}\' in JSON at position 3'));
 });
 
 test('primitives', () => {
@@ -257,7 +258,7 @@ describe('mapObject', () => {
     expect(Decode.mapObject<MyType2>(decoder).decodeValue(value)).toEqual(ok(expected));
   });
 
-  it('decode array of mapObject', () => {
+  test('decode array of mapObject', () => {
     type MyItem = { gnu: number; foo: string };
 
     const MyItemDecoder: Decoder<MyItem> = Decode.mapObject(

@@ -93,9 +93,9 @@ export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 
 const documentEvents = new DocumentEvents<Msg>();
 
-export function subscriptions(model: Model): Sub<Msg> {
+export function subscriptions(_model: Model): Sub<Msg> {
     return Sub.batch([
-        documentEvents.on('mouseup', (e: MouseEvent) => (
+        documentEvents.on('mouseup', () => (
             {
                 type: 'mouse-up',
             } as Msg

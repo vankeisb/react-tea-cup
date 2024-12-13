@@ -23,20 +23,23 @@
  *
  */
 
-import { view, Msg, update, init, Model } from "./ParentChild";
+import { view, Msg, update, init } from "./ParentChild";
 import { mount } from 'enzyme';
-import { extendJest, Testing } from "react-tea-cup";
+import { Testing } from "react-tea-cup";
+import { describe, test, expect } from "vitest";
+import { configure } from 'enzyme';
+import EnzymeAdapter from 'enzyme-adapter-react-16';
+import 'jsdom-global/register';
 
-extendJest(expect);
 const testing = new Testing<Msg>();
-
+configure({ adapter: new EnzymeAdapter() });
 
 describe("Test ParentChild", () => {
 
     describe("init state", () => {
 
         test("counter model x3", async () => {
-            const [state, cmd] = init();
+            const [state, _cmd] = init();
             expect(state).toHaveLength(3);
             // TODO batched Cmd.none() untestable
         });
@@ -66,7 +69,7 @@ describe("Test ParentChild", () => {
         test('decrement first child', () => {
             const wrapper = mount(view(testing.dispatcher, initialState))
             wrapper.find('.counter > button').at(0).simulate('click')
-            expect(testing).toHaveDispatchedMsg({
+            expect(testing.dispatched).toEqual({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
             })
@@ -78,7 +81,7 @@ describe("Test ParentChild", () => {
         const [initialState, _cmd] = init();
 
         test("decrement first counter", () => {
-            const [newState, cmd] = update({
+            const [newState, _cmd] = update({
                 childIndex: 0,
                 childMsg: { type: 'dec' }
             }, initialState);

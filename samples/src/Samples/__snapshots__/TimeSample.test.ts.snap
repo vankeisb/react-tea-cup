@@ -1,4 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Test TimeSample > view state > render initial state > snapshot initial 1`] = `ReactWrapper {}`;
+
+exports[`Test TimeSample > view state > render some state > snapshot state1 1`] = `ReactWrapper {}`;
+
+exports[`Test TimeSample > view state > render some state > snapshot state2 1`] = `ReactWrapper {}`;
 
 exports[`Test TimeSample view state render initial state snapshot initial 1`] = `
 Array [

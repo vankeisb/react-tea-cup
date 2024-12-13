@@ -25,6 +25,7 @@
 
 
 import {memoize} from "./Memoize";
+import { beforeEach, describe, expect, test } from "vitest";
 
 interface User {
   readonly name: string;

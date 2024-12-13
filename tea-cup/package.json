@@ -12,13 +12,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "tsc-v": "tsc -v",
-    "test": "jest",
-    "test-watch": "jest --watch",
+    "test": "vitest --run",
     "prettify": "prettier --write .",
     "tsc": "tsc",
     "compile:ts": "tsc",
-    "compile": "rimraf dist && tsc",
-    "samples": "tsc --outFile ./dist/Samples/index.js && cp ./src/Samples/index.html ./dist/Samples"
+    "compile": "rimraf dist && tsc"
   },
   "dependencies": {},
   "peerDependencies": {

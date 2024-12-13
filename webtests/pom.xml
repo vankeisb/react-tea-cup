@@ -12,7 +12,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <frontend.react.sandbox.directory>${project.basedir}/../samples/build</frontend.react.sandbox.directory>
+        <frontend.react.sandbox.directory>${project.basedir}/../samples/dist</frontend.react.sandbox.directory>
         <backend.port>8080</backend.port>
 
         <webtests.headless>false</webtests.headless>
