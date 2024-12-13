@@ -26,6 +26,7 @@
 import { err, ok, Result } from './Result';
 import { just, Maybe, nothing } from './Maybe';
 import { List } from './List';
+import { asError } from './Try';
 
 /**
  * Decoder for a given type.
@@ -46,7 +47,7 @@ export class Decoder<T> {
       const o = JSON.parse(s);
       return this.decodeValue(o);
     } catch (e) {
-      return err(e.message ?? 'unknown JSON error');
+      return err(asError(e).message);
     }
   }
 

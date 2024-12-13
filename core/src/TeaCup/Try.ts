@@ -29,9 +29,13 @@ export function Try<T>(f: () => T): Result<Error, T> {
   try {
     return ok(f());
   } catch (e) {
-    if (e instanceof Error) {
-      return err(e);
-    }
-    return err(new Error(e));
+    return err(asError(e));
   }
+}
+
+export function asError(e: unknown): Error {
+  if (e instanceof Error) {
+    return e;
+  }
+  return new Error('' + e);
 }

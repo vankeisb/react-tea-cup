@@ -5,5 +5,5 @@ cd core &&          \
 cd ../tea-cup &&    \
 ./build.sh &&       \
 cd ../samples &&    \
-npm run test && \
-npm build
+npm run test -- --watchAll=false && \
+npm run build
