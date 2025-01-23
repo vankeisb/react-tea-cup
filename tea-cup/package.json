@@ -18,12 +18,13 @@
     "compile:ts": "tsc",
     "compile": "rimraf dist && tsc"
   },
-  "dependencies": {},
   "peerDependencies": {
     "react": "^19.0.0",
     "tea-cup-core": "2.4.1"
   },
   "devDependencies": {
-    "@types/react": "^19.0.8"
+    "@types/jsdom": "^21.1.7",
+    "@types/react": "^19.0.8",
+    "jsdom": "^26.0.0"
   }
 }

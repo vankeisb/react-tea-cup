@@ -46,7 +46,7 @@ export interface NavProps<Model, Msg> {
  */
 export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, never> {
   private listener: Maybe<EventListener>;
-  private readonly ref: RefObject<Program<Model, Msg>> = createRef();
+  private readonly ref: RefObject<Program<Model, Msg> | null> = createRef();
 
   constructor(props: Readonly<NavProps<Model, Msg>>) {
     super(props);
