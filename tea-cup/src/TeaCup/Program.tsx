@@ -26,7 +26,6 @@
 import * as React from 'react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { Cmd, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-core';
-import { DevTools, DevToolsEvent } from './DevTools';
 
 export class DispatchBridge<Msg> {
   private d?: Dispatcher<Msg>;
@@ -40,57 +39,66 @@ export class DispatchBridge<Msg> {
   }
 }
 
+export type SetModelFunc<Model> = (model: Model) => void;
+
+export class SetModelBridge<Model> {
+  private sm: SetModelFunc<Model> | undefined;
+
+  subscribe(sm: SetModelFunc<Model>): void {
+    this.sm = sm;
+  }
+
+  setModel(model: Model) {
+    this.sm?.(model);
+  }
+}
+
+export type ProgramListener<Model, Msg> = (e: ProgramEvent<Model, Msg>) => void;
+
+export type ProgramEvent<Model, Msg> =
+  | { tag: 'init'; count: number; mac: [Model, Cmd<Msg>] }
+  | { tag: 'update'; count: number; msg: Msg; mac: [Model, Cmd<Msg>] };
+
 /**
  * The program props : asks for init, view, update and subs in order
  * to start the TEA MVU loop.
  */
-export interface FProgramProps<Model, Msg> {
+export interface ProgramProps<Model, Msg> {
   init: () => [Model, Cmd<Msg>];
   view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode;
   update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
   subscriptions: (model: Model) => Sub<Msg>;
   dispatchBridge?: DispatchBridge<Msg>;
-  devTools?: DevTools<Model, Msg>;
+  setModelBridge?: SetModelBridge<Model>;
+  listener?: ProgramListener<Model, Msg>;
+  paused?: () => boolean;
 }
 
 /**
  * A React component that holds a TEA "program", implementing the MVU loop.
  */
-export function FProgram<Model, Msg>(props: FProgramProps<Model, Msg>) {
+export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const [model, setModel] = useState<Maybe<Model>>(nothing);
-  const [count, setCount] = useState(0);
 
-  const cmd = useRef<Cmd<Msg>>(Cmd.none());
+  const cmd = useRef<Cmd<Msg> | undefined>();
   // this could go in state only but as we need it effects it's easier with a ref
   const modelRef = useRef(model);
   const sub = useRef<Sub<Msg>>(Sub.none());
 
-  const { devTools } = props;
+  const count = useRef(0);
 
   const dispatch = (msg: Msg) => {
-    if (devTools && devTools.isPaused()) {
+    if (props.paused?.() === true) {
       // do not process messages if we are paused
       return;
     }
 
-    const c = count + 1;
-    setCount(c);
+    const c = count.current + 1;
+    count.current = c;
 
     if (modelRef.current.type === 'Just') {
       const m = modelRef.current.value;
       const [uModel, uCmd] = props.update(msg, m);
-      if (devTools) {
-        fireEvent({
-          tag: 'updated',
-          msgNum: count,
-          time: new Date().getTime(),
-          msg: msg,
-          modelBefore: m,
-          modelAfter: uModel,
-          cmd: uCmd,
-        });
-      }
-
       modelRef.current = just(uModel);
       cmd.current = uCmd;
       setModel(just(uModel));
@@ -98,25 +106,21 @@ export function FProgram<Model, Msg>(props: FProgramProps<Model, Msg>) {
       newSub.init(dispatch);
       sub.current.release();
       sub.current = newSub;
+      props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
     }
-  };
-
-  const fireEvent = (e: DevToolsEvent<Model, Msg>) => {
-    props.devTools?.onEvent(e);
   };
 
   // init : run once (good old componentDidMount)
   useEffect(() => {
     if (modelRef.current.isNothing()) {
-      // init from dev tools snap if any
-      const mac = (props.devTools && props.devTools.initFromSnapshot()) || props.init();
-      if (props.devTools) {
-        fireEvent({
-          tag: 'init',
-          time: new Date().getTime(),
-          model: mac[0],
-        });
-      }
+      // sub to bridges if any
+      props.setModelBridge?.subscribe((model) => {
+        setModel(just(model));
+      });
+      props.dispatchBridge?.subscribe(dispatch);
+
+      // init
+      const mac = props.init();
 
       // and start the MVU
       const [uModel, uCmd] = mac;
@@ -126,24 +130,17 @@ export function FProgram<Model, Msg>(props: FProgramProps<Model, Msg>) {
       const newSub = props.subscriptions(uModel);
       sub.current = newSub;
       newSub.init(dispatch);
+      props.listener?.({ tag: 'init', count: count.current, mac });
     }
   });
 
   // executed at every render
   useEffect(() => {
-    props.dispatchBridge?.subscribe(dispatch);
-    cmd.current.execute(dispatch);
+    if (cmd.current) {
+      cmd.current.execute(dispatch);
+      cmd.current = undefined;
+    }
   });
 
   return model.map((m) => props.view(dispatch, m)).withDefault(<></>);
-}
-
-class Guid {
-  static newGuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      const r = (Math.random() * 16) | 0,
-        v = c == 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
 }

@@ -23,200 +23,160 @@
  *
  */
 
-import { Cmd, noCmd, ObjectSerializer } from 'tea-cup-core';
-import { Program } from './Program';
+import { ProgramEvent, ProgramListener, SetModelBridge } from './Program';
 
-export interface HasTime {
-  readonly time: number;
+export interface PartialProgramProps<Model, Msg> {
+  readonly setModelBridge?: SetModelBridge<Model>;
+  readonly listener?: ProgramListener<Model, Msg>;
+  readonly paused?: () => boolean;
 }
-
-interface HasTag {
-  readonly tag: string;
-}
-
-export type DevToolsEvent<Model, Msg> = Init<Model, Msg> | Updated<Model, Msg>;
-
-export interface Init<Model, Msg> extends HasTime, HasTag {
-  readonly tag: 'init';
-  readonly model: Model;
-}
-
-export interface Updated<Model, Msg> extends HasTime, HasTag {
-  readonly tag: 'updated';
-  readonly msgNum: number;
-  readonly msg: Msg;
-  readonly modelBefore: Model;
-  readonly modelAfter: Model;
-  readonly cmd: Cmd<Msg>;
-}
-
-const snapshotKey = 'teaCupSnapshot';
-
-export type DevToolsListener<Model, Msg> = (e: DevToolsEvent<Model, Msg>) => void;
 
 export class DevTools<Model, Msg> {
-  private program?: Program<Model, Msg>;
-  private events: DevToolsEvent<Model, Msg>[] = [];
-  private pausedOnEvent: number = -1;
-  private listeners: DevToolsListener<Model, Msg>[] = [];
-  private objectSerializer: ObjectSerializer;
-  private maxEvents: number = -1;
+  private _pausedOnEvent?: number;
+  private _maxEvents: number = 1000;
+  private _events: ProgramEvent<Model, Msg>[] = [];
+  private _verbose: boolean = true;
 
-  constructor(objectSerializer: ObjectSerializer) {
-    this.objectSerializer = objectSerializer;
+  private _setModelBridge: SetModelBridge<Model> = new SetModelBridge();
+
+  asGlobal(name?: string): DevTools<Model, Msg> {
+    // @ts-ignore
+    window[name ?? 'teaCupDevTools'] = this;
+    return this;
   }
 
-  static init<Model, Msg>(window: Window, objectSerializer?: ObjectSerializer): DevTools<Model, Msg> {
-    const dt = new DevTools<Model, Msg>(objectSerializer || ObjectSerializer.withTeaCupClasses());
-    // @ts-ignore
-    window['teaCupDevTools'] = dt;
-    return dt;
+  get events(): readonly ProgramEvent<Model, Msg>[] {
+    return this._events;
+  }
+
+  getMaxEvents(): number {
+    return this._maxEvents;
+  }
+
+  getProgramProps(): PartialProgramProps<Model, Msg> {
+    return {
+      setModelBridge: this._setModelBridge,
+      listener: this.onEvent.bind(this),
+      paused: () => {
+        return this.isPaused();
+      },
+    };
+  }
+
+  setMaxEvents(max: number): DevTools<Model, Msg> {
+    this._maxEvents = max < 0 ? -1 : max;
+    this.removeEventsIfNeeded();
+    return this;
+  }
+
+  setVerbose(v: boolean): DevTools<Model, Msg> {
+    this._verbose = v;
+    return this;
   }
 
   isPaused(): boolean {
-    return this.pausedOnEvent !== -1;
+    return this._pausedOnEvent !== undefined;
   }
 
-  connected(program: Program<Model, Msg>) {
-    this.program = program;
-  }
-
-  onEvent(e: DevToolsEvent<Model, Msg>): void {
-    this.events.push(e);
+  private onEvent(e: ProgramEvent<Model, Msg>): void {
+    if (this._verbose) {
+      switch (e.tag) {
+        case 'init': {
+          console.log('[tea-cup]', e.count, e.tag, e.mac[0], e.mac[1]);
+          break;
+        }
+        case 'update': {
+          console.log('[tea-cup]', e.count, e.tag, e.msg, e.mac[0], e.mac[1]);
+          break;
+        }
+      }
+    }
+    this._events.push(e);
     this.removeEventsIfNeeded();
-    this.listeners.forEach((l) => l(e));
   }
 
   travelTo(evtNum: number) {
-    if (this.program) {
-      const evt: DevToolsEvent<Model, Msg> = this.events[evtNum];
-      if (evt) {
-        const model = this.getEventModel(evt);
-        this.pausedOnEvent = evtNum;
-        this.program.setModel(model, false);
-      }
+    console.log('[tea-cup] travelling to', evtNum);
+    const evt = this._events[evtNum];
+    if (evt) {
+      const model = this.getEventModel(evt);
+      this._pausedOnEvent = evtNum;
+      this._setModelBridge.setModel(model);
+    } else {
+      console.warn('[tea-cup] no such event', evtNum);
     }
   }
 
-  private getEventModel(e: DevToolsEvent<Model, Msg>): Model {
+  private getEventModel(e: ProgramEvent<Model, Msg>): Model {
     switch (e.tag) {
       case 'init':
-        return e.model;
-      case 'updated':
-        return e.modelAfter;
+        return e.mac[0];
+      case 'update':
+        return e.mac[0];
     }
   }
 
   resume() {
-    if (this.program) {
-      if (this.events.length > 0) {
-        const lastEvent = this.events[this.events.length - 1];
-        if (lastEvent) {
-          const model = this.getEventModel(lastEvent);
-          this.pausedOnEvent = -1;
-          this.program.setModel(model, true);
-        }
+    if (this._events.length > 0 && this._pausedOnEvent !== undefined) {
+      console.log('[tea-cup] resuming (paused on ' + this._pausedOnEvent + ')');
+      const lastEvent = this.lastEvent();
+      if (lastEvent) {
+        const model = this.getEventModel(lastEvent);
+        this._setModelBridge.setModel(model);
       }
+      console.log('[tea-cup] resumed');
+      this._pausedOnEvent = undefined;
+    } else {
+      console.warn('[tea-cup] not paused');
     }
   }
 
   forward() {
-    if (this.pausedOnEvent >= 0 && this.pausedOnEvent < this.events.length - 1) {
-      this.travelTo(this.pausedOnEvent + 1);
+    console.log('[tea-cup] forward');
+    if (this._pausedOnEvent === undefined) {
+      console.warn('[tea-cup] not paused');
+      return;
+    }
+    if (this._pausedOnEvent >= 0 && this._pausedOnEvent < this._events.length - 1) {
+      this.travelTo(this._pausedOnEvent + 1);
     }
   }
 
   backward() {
-    if (this.pausedOnEvent >= 1) {
-      this.travelTo(this.pausedOnEvent - 1);
+    console.log('[tea-cup] backward');
+    if (this._pausedOnEvent === undefined) {
+      console.warn('[tea-cup] not paused');
+      return;
+    }
+    if (this._pausedOnEvent >= 1) {
+      this.travelTo(this._pausedOnEvent - 1);
     }
   }
 
-  addListener(l: DevToolsListener<Model, Msg>): void {
-    this.listeners.push(l);
-  }
-
-  removeListener(l: DevToolsListener<Model, Msg>): void {
-    this.listeners = this.listeners.filter((x) => x !== l);
-  }
-
-  lastEvent(): DevToolsEvent<Model, Msg> {
-    return this.events[this.events.length - 1];
+  lastEvent(): ProgramEvent<Model, Msg> {
+    return this._events[this._events.length - 1];
   }
 
   lastModel(): Model {
     const e = this.lastEvent();
-    switch (e.tag) {
-      case 'init': {
-        return e.model;
-      }
-      case 'updated': {
-        return e.modelAfter;
-      }
-    }
-  }
-
-  snapshot() {
-    localStorage.setItem(snapshotKey, this.objectSerializer.serialize(this.lastModel()));
-    console.log(
-      '********************************************************************\n' +
-        '*** The current application state has been saved to local storage.\n' +
-        '*** The application will now load with this initial state.\n' +
-        "*** Call 'teaCupDevTools.clearSnapshot()' to restore normal loading.\n" +
-        '********************************************************************',
-    );
-  }
-
-  initFromSnapshot(): [Model, Cmd<Msg>] | undefined {
-    const json = localStorage.getItem(snapshotKey);
-    if (json) {
-      try {
-        // @ts-ignore
-        const model = this.objectSerializer.deserialize(json) as Model;
-        console.log(
-          '**********************************************************************************************\n' +
-            "*** The application has initialized from a state saved by calling 'teaCupDevTools.snapshot()'.\n" +
-            "*** Call 'teaCupDevTools.clearSnapshot()' if you want to restore normal loading.\n" +
-            '**********************************************************************************************',
-        );
-        return noCmd(model);
-      } catch (e) {
-        console.log('*** Error restoring state from local storage: ', e);
-      }
-    }
-  }
-
-  clearSnapshot() {
-    localStorage.removeItem(snapshotKey);
-    console.log(
-      '***********************************************************************\n' +
-        '*** Application state cleared, the application will now start normally.\n' +
-        '***********************************************************************',
-    );
+    return this.getEventModel(e);
   }
 
   clear() {
     if (this.isPaused()) {
       this.resume();
     }
-    this.events = [];
-    console.log('All events cleared');
+    this._events = [];
+    console.log('[tea-cup] all events cleared');
   }
 
-  setMaxEvents(maxEvents: number): DevTools<Model, Msg> {
-    this.maxEvents = maxEvents;
-    this.removeEventsIfNeeded();
-    return this;
-  }
-
-  private removeEventsIfNeeded(): DevTools<Model, Msg> {
-    if (this.maxEvents > 0) {
-      const delta = this.events.length - this.maxEvents;
+  private removeEventsIfNeeded(): void {
+    if (this._maxEvents > 0) {
+      const delta = this._events.length - this._maxEvents;
       if (delta > 0) {
-        const newEvents = this.events.slice(delta, this.events.length);
-        this.events = newEvents;
+        const newEvents = this._events.slice(delta, this._events.length);
+        this._events = newEvents;
       }
     }
-    return this;
   }
 }

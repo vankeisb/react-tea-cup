@@ -14,8 +14,8 @@
     "tsc-v": "tsc -v",
     "test": "vitest --run",
     "prettify": "prettier --write .",
-    "tsc": "tsc",
     "compile:ts": "tsc",
+    "watch:ts": "tsc -w",
     "compile": "rimraf dist && tsc"
   },
   "peerDependencies": {
