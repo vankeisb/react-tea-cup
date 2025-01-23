@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  browser-tools: circleci/browser-tools@1.1.1
+  browser-tools: circleci/browser-tools@1.4.6
 
 defaults: &defaults
   working_directory: ~/repo
@@ -21,7 +21,7 @@ jobs:
   webtests:
     working_directory: ~/repo
     docker:
-      - image: cimg/openjdk:21.0-browsers
+      - image: cimg/openjdk:17.0-browsers
     environment:
       DISPLAY: :99
 

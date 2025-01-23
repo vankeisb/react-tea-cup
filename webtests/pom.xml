@@ -10,8 +10,8 @@
     <name>webtests</name>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <frontend.react.sandbox.directory>${project.basedir}/../samples/dist</frontend.react.sandbox.directory>
         <backend.port>8080</backend.port>
 
