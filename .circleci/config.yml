@@ -21,7 +21,7 @@ jobs:
   webtests:
     working_directory: ~/repo
     docker:
-      - image: circleci/openjdk:11-jdk-browsers
+      - image: cimg/openjdk:21.0-browsers
     environment:
       DISPLAY: :99
 
@@ -73,4 +73,3 @@ workflows:
               only: /\d+\.\d+\.\d+/
             branches:
               ignore: /.*/
-
