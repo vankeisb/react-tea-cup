@@ -61,6 +61,7 @@ export function FProgram<Model, Msg>(props: FProgramProps<Model, Msg>) {
   const [count, setCount] = useState(0);
 
   const cmd = useRef<Cmd<Msg>>(Cmd.none());
+  // this could go in state only but as we need it effects it's easier with a ref
   const modelRef = useRef(model);
   const sub = useRef<Sub<Msg>>(Sub.none());
 
@@ -104,11 +105,9 @@ export function FProgram<Model, Msg>(props: FProgramProps<Model, Msg>) {
     props.devTools?.onEvent(e);
   };
 
-  // init : run once (componentDidMount)
+  // init : run once (good old componentDidMount)
   useEffect(() => {
     if (modelRef.current.isNothing()) {
-      console.log('*** init ***');
-
       // init from dev tools snap if any
       const mac = (props.devTools && props.devTools.initFromSnapshot()) || props.init();
       if (props.devTools) {
@@ -132,7 +131,6 @@ export function FProgram<Model, Msg>(props: FProgramProps<Model, Msg>) {
 
   // executed at every render
   useEffect(() => {
-    console.log('*** render ***', cmd.current);
     props.dispatchBridge?.subscribe(dispatch);
     cmd.current.execute(dispatch);
   });
