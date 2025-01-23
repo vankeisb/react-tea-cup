@@ -59,19 +59,22 @@ export type ProgramEvent<Model, Msg> =
   | { tag: 'init'; count: number; mac: [Model, Cmd<Msg>] }
   | { tag: 'update'; count: number; msg: Msg; mac: [Model, Cmd<Msg>] };
 
-/**
- * The program props : asks for init, view, update and subs in order
- * to start the TEA MVU loop.
- */
-export interface ProgramProps<Model, Msg> {
-  init: () => [Model, Cmd<Msg>];
-  view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode;
-  update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
-  subscriptions: (model: Model) => Sub<Msg>;
+export interface ProgramInterop<Model, Msg> {
   dispatchBridge?: DispatchBridge<Msg>;
   setModelBridge?: SetModelBridge<Model>;
   listener?: ProgramListener<Model, Msg>;
   paused?: () => boolean;
+}
+
+/**
+ * The program props : asks for init, view, update and subs in order
+ * to start the TEA MVU loop.
+ */
+export interface ProgramProps<Model, Msg> extends ProgramInterop<Model, Msg> {
+  init: () => [Model, Cmd<Msg>];
+  view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode;
+  update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
+  subscriptions: (model: Model) => Sub<Msg>;
 }
 
 /**

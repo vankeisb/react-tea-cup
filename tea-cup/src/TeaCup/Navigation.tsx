@@ -23,23 +23,20 @@
  *
  */
 
-import { DispatchBridge, Program, ProgramListener, SetModelBridge } from './Program';
+import { DispatchBridge, Program, ProgramInterop } from './Program';
 import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-core';
 import * as React from 'react';
-import { Component, useEffect, useRef, createRef, ReactNode, RefObject } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
 
 /**
  * Props for the ProgramWithNav.
  */
-export interface NavProps<Model, Msg> {
+export interface NavProps<Model, Msg> extends ProgramInterop<Model, Msg> {
   readonly onUrlChange: (l: Location) => Msg;
   readonly init: (l: Location) => [Model, Cmd<Msg>];
   readonly view: (dispatch: Dispatcher<Msg>, m: Model) => ReactNode;
   readonly update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
   readonly subscriptions: (model: Model) => Sub<Msg>;
-  readonly listener?: ProgramListener<Model, Msg>;
-  readonly setModelBridge?: SetModelBridge<Model>;
-  readonly paused?: () => boolean;
 }
 
 export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {

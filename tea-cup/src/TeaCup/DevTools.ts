@@ -23,13 +23,7 @@
  *
  */
 
-import { ProgramEvent, ProgramListener, SetModelBridge } from './Program';
-
-export interface PartialProgramProps<Model, Msg> {
-  readonly setModelBridge?: SetModelBridge<Model>;
-  readonly listener?: ProgramListener<Model, Msg>;
-  readonly paused?: () => boolean;
-}
+import { ProgramEvent, ProgramInterop, SetModelBridge } from './Program';
 
 export class DevTools<Model, Msg> {
   private _pausedOnEvent?: number;
@@ -53,7 +47,7 @@ export class DevTools<Model, Msg> {
     return this._maxEvents;
   }
 
-  getProgramProps(): PartialProgramProps<Model, Msg> {
+  getProgramProps(): ProgramInterop<Model, Msg> {
     return {
       setModelBridge: this._setModelBridge,
       listener: this.onEvent.bind(this),
