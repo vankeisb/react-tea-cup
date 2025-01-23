@@ -4,8 +4,6 @@
   "private": true,
   "proxy": "https://api.github.com",
   "dependencies": {
-    "@types/react": "^16.7.22",
-    "@types/react-dom": "16.0.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-tea-cup": "2.4.1",
@@ -15,6 +13,7 @@
     "dev": "vite",
     "compile": "tsc",
     "build": "tsc -b && vite build",
+    "test:updatestanpshots": "vitest -u",
     "test": "vitest --run"
   },
   "eslintConfig": {
@@ -27,6 +26,10 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.2.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4"
   }
 }

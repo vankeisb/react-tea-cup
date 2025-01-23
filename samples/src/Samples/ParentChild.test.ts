@@ -23,74 +23,63 @@
  *
  */
 
-import { view, Msg, update, init } from "./ParentChild";
-import { mount } from 'enzyme';
-import { Testing } from "react-tea-cup";
-import { describe, test, expect } from "vitest";
-import { configure } from 'enzyme';
-import EnzymeAdapter from 'enzyme-adapter-react-16';
-import 'jsdom-global/register';
+import { view, Msg, update, init } from './ParentChild';
+import { Testing } from 'react-tea-cup';
+import { describe, test, expect } from 'vitest';
+import { render, fireEvent } from '@testing-library/react';
 
 const testing = new Testing<Msg>();
-configure({ adapter: new EnzymeAdapter() });
 
-describe("Test ParentChild", () => {
+describe('Test ParentChild', () => {
+  describe('init state', () => {
+    test('counter model x3', async () => {
+      const [state] = init();
+      expect(state).toHaveLength(3);
+      // TODO batched Cmd.none() untestable
+    });
+  });
 
-    describe("init state", () => {
+  describe('view state', () => {
+    const [initialState, _cmd] = init();
 
-        test("counter model x3", async () => {
-            const [state, _cmd] = init();
-            expect(state).toHaveLength(3);
-            // TODO batched Cmd.none() untestable
-        });
-
+    test('snapshot initial', () => {
+      const { container } = render(view(testing.noop, initialState));
+      expect(container).toMatchSnapshot();
     });
 
-    describe("view state", () => {
-
-        const [initialState, _cmd] = init();
-
-        test("snapshot initial", () => {
-            const wrapper = mount(view(testing.noop, initialState))
-            expect(wrapper).toMatchSnapshot();
-        });
-
-        test("three counters", () => {
-            const wrapper = mount(view(testing.noop, initialState))
-            expect(wrapper.find('.counter')).toHaveLength(3);
-        });
-
+    test('three counters', () => {
+      const { container } = render(view(testing.noop, initialState));
+      expect(container.querySelectorAll('.counter')).toHaveLength(3);
     });
+  });
 
-    describe("clicking generates messages", () => {
+  describe('clicking generates messages', () => {
+    const [initialState] = init();
 
-        const [initialState, _cmd] = init();
-
-        test('decrement first child', () => {
-            const wrapper = mount(view(testing.dispatcher, initialState))
-            wrapper.find('.counter > button').at(0).simulate('click')
-            expect(testing.dispatched).toEqual({
-                childIndex: 0,
-                childMsg: { type: 'dec' }
-            })
-        });
+    test('decrement first child', () => {
+      const { container } = render(view(testing.dispatcher, initialState));
+      fireEvent.click(container.querySelectorAll('.counter > button').item(0));
+      expect(testing.dispatched).toEqual({
+        childIndex: 0,
+        childMsg: { type: 'dec' },
+      });
     });
+  });
 
-    describe("messages update state", () => {
+  describe('messages update state', () => {
+    const [initialState] = init();
 
-        const [initialState, _cmd] = init();
-
-        test("decrement first counter", () => {
-            const [newState, _cmd] = update({
-                childIndex: 0,
-                childMsg: { type: 'dec' }
-            }, initialState);
-            expect(newState[0]).toBe(initialState[0] - 1);
-            expect(newState[1]).toBe(initialState[1]);
-            expect(newState[1]).toBe(initialState[2]);
-        });
-
+    test('decrement first counter', () => {
+      const [newState, _cmd] = update(
+        {
+          childIndex: 0,
+          childMsg: { type: 'dec' },
+        },
+        initialState,
+      );
+      expect(newState[0]).toBe(initialState[0] - 1);
+      expect(newState[1]).toBe(initialState[1]);
+      expect(newState[1]).toBe(initialState[2]);
     });
-
+  });
 });
-
