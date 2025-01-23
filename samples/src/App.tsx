@@ -27,8 +27,8 @@ import React from 'react';
 import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task } from 'tea-cup-core';
 import {
   DevTools,
+  FProgramWithNav,
   newUrl,
-  ProgramWithNav,
   QueryParams,
   route0,
   route1,
@@ -710,7 +710,7 @@ function onUrlChange(l: Location): Msg {
 
 const App = () => (
   <React.StrictMode>
-    <ProgramWithNav
+    <FProgramWithNav
       init={init}
       view={view}
       update={update}
