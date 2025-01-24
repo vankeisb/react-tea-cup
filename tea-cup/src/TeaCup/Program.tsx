@@ -83,7 +83,7 @@ export interface ProgramProps<Model, Msg> extends ProgramInterop<Model, Msg> {
 export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const [model, setModel] = useState<Maybe<Model>>(nothing);
 
-  const cmd = useRef<Cmd<Msg> | undefined>();
+  const cmd = useRef<Cmd<Msg>>(Cmd.none());
   // this could go in state only but as we need it effects it's easier with a ref
   const modelRef = useRef(model);
   const sub = useRef<Sub<Msg>>(Sub.none());
@@ -110,6 +110,10 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       sub.current.release();
       sub.current = newSub;
       props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
+
+      setTimeout(() => {
+        uCmd.execute(dispatch);
+      });
     }
   };
 
@@ -134,16 +138,124 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       sub.current = newSub;
       newSub.init(dispatch);
       props.listener?.({ tag: 'init', count: count.current, mac });
-    }
-  });
 
-  // executed at every render
-  useEffect(() => {
-    if (cmd.current) {
-      cmd.current.execute(dispatch);
-      cmd.current = undefined;
+      setTimeout(() => {
+        uCmd.execute(dispatch);
+      });
     }
   });
 
   return model.map((m) => props.view(dispatch, m)).withDefault(<></>);
 }
+
+// export class Program<Model, Msg> extends React.Component<ProgramProps<Model, Msg>, never> {
+//   readonly uuid = nextUuid();
+//   private readonly bd: Dispatcher<Msg>;
+//   private count: number = 0;
+//   private initialCmd?: Cmd<any>;
+//   private currentModel?: Model;
+//   private currentSub?: Sub<Msg>;
+
+//   constructor(props: Readonly<ProgramProps<Model, Msg>>) {
+//     super(props);
+//     this.bd = this.dispatch.bind(this);
+//   }
+
+//   dispatch(msg: Msg) {
+//     console.log('dispatch', msg);
+
+//     if (this.currentSub === undefined) {
+//       return;
+//     }
+//     if (this.props.paused?.()) {
+//       // do not process messages if we are paused
+//       return;
+//     }
+
+//     this.count++;
+//     const count = this.count;
+//     const currentModel = this.currentModel;
+//     if (currentModel !== undefined) {
+//       const updated = this.props.update(msg, currentModel);
+//       if (this.props.listener) {
+//         this.props.listener({ tag: 'update', count: count, msg, mac: updated });
+//       }
+//       const newSub = this.props.subscriptions(updated[0]);
+//       const prevSub = this.currentSub;
+
+//       const d = this.dispatch.bind(this);
+
+//       newSub.init(d);
+//       prevSub?.release();
+
+//       // perform commands in a separate timout, to
+//       // make sure that this dispatch is done
+//       const cmd = updated[1];
+//       if (!(cmd instanceof CmdNone)) {
+//         setTimeout(() => {
+//           // console.log("dispatch: processing commands");
+//           // debug("performing command", updated[1]);
+//           updated[1].execute(d);
+//           // debug("<<<  done");
+//         }, 0);
+//       }
+
+//       const needsUpdate = this.currentModel !== updated[0];
+
+//       this.currentModel = updated[0];
+//       this.currentSub = newSub;
+
+//       // trigger rendering
+//       if (needsUpdate) {
+//         this.forceUpdate();
+//       }
+//     }
+//   }
+
+//   componentWillUnmount() {
+//     this.currentSub?.release();
+//     this.currentSub = undefined;
+//   }
+
+//   componentDidMount() {
+//     const mac = this.props.init();
+//     this.props.listener?.({ tag: 'init', count: 0, mac });
+//     const sub = this.props.subscriptions(mac[0]);
+//     this.currentModel = mac[0];
+//     this.currentSub = sub;
+//     // connect to sub
+//     sub.init(this.bd);
+//     this.initialCmd = mac[1];
+
+//     // trigger initial command
+//     setTimeout(() => {
+//       this.initialCmd && this.initialCmd.execute(this.bd);
+//     }, 0);
+
+//     // trigger rendering after mount
+//     this.forceUpdate();
+//   }
+
+//   render(): ReactNode {
+//     if (this.currentModel !== undefined && this.bd) {
+//       return this.props.view(this.bd, this.currentModel);
+//     }
+//     return null;
+//   }
+
+//   setModel(model: Model, withSubs: boolean) {
+//     if (this.bd) {
+//       let newSub: Sub<Msg>;
+//       if (withSubs) {
+//         newSub = this.props.subscriptions(model);
+//       } else {
+//         newSub = Sub.none();
+//       }
+//       newSub.init(this.bd);
+//       this.currentSub && this.currentSub.release();
+//       this.currentModel = model;
+//       this.currentSub = newSub;
+//       this.forceUpdate();
+//     }
+//   }
+// }
