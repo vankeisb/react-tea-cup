@@ -73,49 +73,6 @@ export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
   );
 }
 
-// export class ProgramWithNav<Model, Msg> extends React.Component<NavProps<Model, Msg>, never> {
-//   private listener: Maybe<EventListener>;
-//   private readonly ref: React.RefObject<Program<Model, Msg>> = React.createRef();
-
-//   constructor(props: Readonly<NavProps<Model, Msg>>) {
-//     super(props);
-//     this.listener = nothing;
-//   }
-
-//   render(): React.ReactNode {
-//     return (
-//       <Program
-//         init={() => this.props.init(window.location)}
-//         view={this.props.view}
-//         update={this.props.update}
-//         subscriptions={this.props.subscriptions}
-//         ref={this.ref}
-//         dispatchBridge={this.props.dispatchBridge}
-//         setModelBridge={this.props.setModelBridge}
-//         listener={this.props.listener}
-//         paused={this.props.paused}
-//       />
-//     );
-//   }
-
-//   componentDidMount(): void {
-//     const l = () => {
-//       if (this.ref.current) {
-//         this.ref.current.dispatch(this.props.onUrlChange(window.location));
-//       }
-//     };
-//     this.listener = just(l);
-//     window.addEventListener('popstate', l);
-//   }
-
-//   componentWillUnmount() {
-//     if (this.listener.type === 'Just') {
-//       window.removeEventListener('popstate', this.listener.value);
-//       this.listener = nothing;
-//     }
-//   }
-// }
-
 /**
  * Return a Task that will eventually change the browser location via historty.pushState,
  * and send back a Msg into the Program

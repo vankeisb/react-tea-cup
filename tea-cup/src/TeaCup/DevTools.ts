@@ -25,6 +25,10 @@
 
 import { ProgramEvent, ProgramInterop, SetModelBridge } from './Program';
 
+// @ts-ignore
+import * as pkg from '../package.json';
+import React from 'react';
+
 export class DevTools<Model, Msg> {
   private _pausedOnEvent?: number;
   private _maxEvents: number = 1000;
@@ -34,8 +38,13 @@ export class DevTools<Model, Msg> {
   private _setModelBridge: SetModelBridge<Model> = new SetModelBridge();
 
   asGlobal(name?: string): DevTools<Model, Msg> {
+    const varName = name ?? 'teaCupDevTools';
     // @ts-ignore
-    window[name ?? 'teaCupDevTools'] = this;
+    window[varName] = this;
+    console.log(`🍵 react-tea-cup 🍵
+version: ${pkg.version}
+react: ${React.version}
+devTools available as '${varName}'`);
     return this;
   }
 
@@ -76,11 +85,11 @@ export class DevTools<Model, Msg> {
     if (this._verbose) {
       switch (e.tag) {
         case 'init': {
-          console.log('[tea-cup]', e.count, e.tag, e.mac[0], e.mac[1]);
+          console.log('🍵', e.count, e.tag, e.mac[0], e.mac[1]);
           break;
         }
         case 'update': {
-          console.log('[tea-cup]', e.count, e.tag, e.msg, e.mac[0], e.mac[1]);
+          console.log('🍵', e.count, e.tag, e.msg, e.mac[0], e.mac[1]);
           break;
         }
       }
@@ -90,14 +99,14 @@ export class DevTools<Model, Msg> {
   }
 
   travelTo(evtNum: number) {
-    console.log('[tea-cup] travelling to', evtNum);
+    console.log('🍵 travelling to', evtNum);
     const evt = this._events[evtNum];
     if (evt) {
       const model = this.getEventModel(evt);
       this._pausedOnEvent = evtNum;
       this._setModelBridge.setModel(model);
     } else {
-      console.warn('[tea-cup] no such event', evtNum);
+      console.warn('🍵 no such event', evtNum);
     }
   }
 
@@ -112,23 +121,23 @@ export class DevTools<Model, Msg> {
 
   resume() {
     if (this._events.length > 0 && this._pausedOnEvent !== undefined) {
-      console.log('[tea-cup] resuming (paused on ' + this._pausedOnEvent + ')');
+      console.log('🍵 resuming (paused on ' + this._pausedOnEvent + ')');
       const lastEvent = this.lastEvent();
       if (lastEvent) {
         const model = this.getEventModel(lastEvent);
         this._setModelBridge.setModel(model);
       }
-      console.log('[tea-cup] resumed');
+      console.log('🍵 resumed');
       this._pausedOnEvent = undefined;
     } else {
-      console.warn('[tea-cup] not paused');
+      console.warn('🍵 not paused');
     }
   }
 
   forward() {
-    console.log('[tea-cup] forward');
+    console.log('🍵 forward');
     if (this._pausedOnEvent === undefined) {
-      console.warn('[tea-cup] not paused');
+      console.warn('🍵 not paused');
       return;
     }
     if (this._pausedOnEvent >= 0 && this._pausedOnEvent < this._events.length - 1) {
@@ -137,9 +146,9 @@ export class DevTools<Model, Msg> {
   }
 
   backward() {
-    console.log('[tea-cup] backward');
+    console.log('🍵 backward');
     if (this._pausedOnEvent === undefined) {
-      console.warn('[tea-cup] not paused');
+      console.warn('🍵 not paused');
       return;
     }
     if (this._pausedOnEvent >= 1) {
@@ -161,7 +170,7 @@ export class DevTools<Model, Msg> {
       this.resume();
     }
     this._events = [];
-    console.log('[tea-cup] all events cleared');
+    console.log('🍵 all events cleared');
   }
 
   private removeEventsIfNeeded(): void {
