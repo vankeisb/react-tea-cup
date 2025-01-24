@@ -15,6 +15,7 @@
     "test": "vitest --run",
     "prettify": "prettier --write .",
     "tsc": "tsc",
-    "compile": "rimraf dist && tsc"
+    "compile": "rimraf dist && tsc",
+    "watch:ts": "tsc -w"
   }
 }

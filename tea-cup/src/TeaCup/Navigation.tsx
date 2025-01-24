@@ -26,7 +26,7 @@
 import { DispatchBridge, Program, ProgramInterop } from './Program';
 import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-core';
 import * as React from 'react';
-import { useEffect, useRef, ReactNode } from 'react';
+import { useEffect, useRef, ReactNode, useState } from 'react';
 
 /**
  * Props for the ProgramWithNav.
@@ -41,14 +41,14 @@ export interface NavProps<Model, Msg> extends ProgramInterop<Model, Msg> {
 
 export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
   const dispatchBridge = useRef<DispatchBridge<Msg>>(new DispatchBridge());
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     // use bridge to dispatch into program on URL change
     const l = () => {
-      if (dispatchBridge.current) {
-        const msg = props.onUrlChange(window.location);
-        dispatchBridge.current.dispatch(msg);
-      }
+      const msg = props.onUrlChange(window.location);
+      dispatchBridge.current.dispatch(msg);
+      setCount(count + 1);
     };
     window.addEventListener('popstate', l);
     // and cleanup when needed
@@ -61,7 +61,10 @@ export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
     <Program
       init={() => props.init(window.location)}
       view={props.view}
-      update={props.update}
+      update={(msg, model) => {
+        console.log('nav up', msg, model);
+        return props.update(msg, model);
+      }}
       subscriptions={props.subscriptions}
       dispatchBridge={dispatchBridge.current}
       listener={props.listener}
@@ -70,6 +73,49 @@ export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
     />
   );
 }
+
+// export class ProgramWithNav<Model, Msg> extends React.Component<NavProps<Model, Msg>, never> {
+//   private listener: Maybe<EventListener>;
+//   private readonly ref: React.RefObject<Program<Model, Msg>> = React.createRef();
+
+//   constructor(props: Readonly<NavProps<Model, Msg>>) {
+//     super(props);
+//     this.listener = nothing;
+//   }
+
+//   render(): React.ReactNode {
+//     return (
+//       <Program
+//         init={() => this.props.init(window.location)}
+//         view={this.props.view}
+//         update={this.props.update}
+//         subscriptions={this.props.subscriptions}
+//         ref={this.ref}
+//         dispatchBridge={this.props.dispatchBridge}
+//         setModelBridge={this.props.setModelBridge}
+//         listener={this.props.listener}
+//         paused={this.props.paused}
+//       />
+//     );
+//   }
+
+//   componentDidMount(): void {
+//     const l = () => {
+//       if (this.ref.current) {
+//         this.ref.current.dispatch(this.props.onUrlChange(window.location));
+//       }
+//     };
+//     this.listener = just(l);
+//     window.addEventListener('popstate', l);
+//   }
+
+//   componentWillUnmount() {
+//     if (this.listener.type === 'Just') {
+//       window.removeEventListener('popstate', this.listener.value);
+//       this.listener = nothing;
+//     }
+//   }
+// }
 
 /**
  * Return a Task that will eventually change the browser location via historty.pushState,
