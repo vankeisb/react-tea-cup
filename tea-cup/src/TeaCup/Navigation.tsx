@@ -62,7 +62,6 @@ export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
       init={() => props.init(window.location)}
       view={props.view}
       update={(msg, model) => {
-        console.log('nav up', msg, model);
         return props.update(msg, model);
       }}
       subscriptions={props.subscriptions}
