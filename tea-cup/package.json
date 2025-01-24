@@ -14,18 +14,17 @@
     "tsc-v": "tsc -v",
     "test": "vitest --run",
     "prettify": "prettier --write .",
-    "tsc": "tsc",
     "compile:ts": "tsc",
+    "watch:ts": "tsc -w",
     "compile": "rimraf dist && tsc"
   },
-  "dependencies": {},
   "peerDependencies": {
-    "react": "^16.7.0 || ^17.0.1",
+    "react": "^18.0.0",
     "tea-cup-core": "2.4.1"
   },
   "devDependencies": {
-    "@types/jsdom": "^16.2.5",
-    "@types/react": "^16.7.22",
-    "jsdom": "^16.5.0"
+    "@types/jsdom": "^21.1.7",
+    "@types/react": "^18.0.0",
+    "jsdom": "^26.0.0"
   }
 }

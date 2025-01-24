@@ -23,84 +23,71 @@
  *
  */
 
-import { view, Msg, update, init } from "./Rand";
-import { shallow } from 'enzyme';
-import { Testing } from "react-tea-cup";
-import { Cmd, nothing, just } from "tea-cup-core";
-import { describe, test, expect } from "vitest";
-import { configure } from 'enzyme';
-import EnzymeAdapter from 'enzyme-adapter-react-16';
-import 'jsdom-global/register';
+import { view, Msg, update, init } from './Rand';
+import { Testing } from 'react-tea-cup';
+import { Cmd, nothing, just } from 'tea-cup-core';
+import { describe, test, expect } from 'vitest';
+import { render, fireEvent } from '@testing-library/react';
 
 const testing = new Testing<Msg>();
-configure({ adapter: new EnzymeAdapter() });
 
-describe("Test Rand", () => {
+describe('Test Rand', () => {
+  describe('init state', () => {
+    test('triggers message', () => {
+      const [state, cmd] = init();
+      expect(state).toEqual(nothing);
+      expect(cmd).not.toEqual(Cmd.none());
+    });
+  });
 
-    describe("init state", () => {
-
-        test("triggers message", () => {
-            const [state, cmd] = init();
-            expect(state).toEqual(nothing);
-            expect(cmd).not.toEqual(Cmd.none());
-        });
-
+  describe('view state', () => {
+    test('render nothing', () => {
+      const { container } = render(view(testing.noop, nothing));
+      expect(container.querySelector('div > p')?.textContent).toEqual('This is a random number :');
     });
 
-    describe("view state", () => {
-
-        test("render nothing", () => {
-            const wrapper = shallow(view(testing.noop, nothing))
-            expect(wrapper.find('div > p').at(0).text()).toEqual('This is a random number :');
-        });
-
-        test("render something", () => {
-            const wrapper = shallow(view(testing.noop, just(13)));
-            expect(wrapper.find('div > p').at(0).text()).toEqual('This is a random number :13');
-        });
-
-        test("render button", () => {
-            const wrapper = shallow(view(testing.noop, just(13)));
-            expect(wrapper.find('div > p').at(0).text()).toEqual('This is a random number :13');
-            expect(wrapper.find('div > button')).toHaveLength(1);
-            expect(wrapper.find('div > button').at(0).text()).toEqual('Randomize');
-        });
-
-        test("snapshot nothing", () => {
-            const wrapper = shallow(view(testing.noop, nothing))
-            expect(wrapper).toMatchSnapshot();
-        });
-
-        test("snapshot", () => {
-            const wrapper = shallow(view(testing.noop, just(13)))
-            expect(wrapper).toMatchSnapshot();
-        });
+    test('render something', () => {
+      const { container } = render(view(testing.noop, just(13)));
+      expect(container.querySelector('div > p')?.textContent).toEqual('This is a random number :13');
     });
 
-    describe("click generate message", () => {
-
-        test("clicked message", () => {
-            const wrapper = shallow(view(testing.dispatcher, nothing));
-            wrapper.find('div > button').at(0).simulate('click');
-            expect(testing.dispatched).toEqual({ type: "clicked" });
-        });
+    test('render button', () => {
+      const { container } = render(view(testing.noop, just(13)));
+      expect(container.querySelector('div > p')?.textContent).toEqual('This is a random number :13');
+      expect(container.querySelectorAll('div > button')).toHaveLength(1);
+      expect(container.querySelector('div > button')?.textContent).toEqual('Randomize');
     });
 
-    describe("message updates state", () => {
-
-        test("clicked", () => {
-            const [newState, cmd] = update({ type: "clicked" }, just(13));
-            expect(newState).toEqual(just(13));
-            expect(cmd).not.toEqual(Cmd.none());
-        });
-
-        test("random-received", () => {
-            const [newState, cmd] = update({ type: "random-received", value: 1313 }, just(13));
-            expect(newState).toEqual(just(1313));
-            expect(cmd).toEqual(Cmd.none());
-        });
-
+    test('snapshot nothing', () => {
+      const { container } = render(view(testing.noop, nothing));
+      expect(container).toMatchSnapshot();
     });
 
+    test('snapshot', () => {
+      const { container } = render(view(testing.noop, just(13)));
+      expect(container).toMatchSnapshot();
+    });
+  });
+
+  describe('click generate message', () => {
+    test('clicked message', () => {
+      const { container } = render(view(testing.dispatcher, nothing));
+      fireEvent.click(container.querySelectorAll('div > button').item(0));
+      expect(testing.dispatched).toEqual({ type: 'clicked' });
+    });
+  });
+
+  describe('message updates state', () => {
+    test('clicked', () => {
+      const [newState, cmd] = update({ type: 'clicked' }, just(13));
+      expect(newState).toEqual(just(13));
+      expect(cmd).not.toEqual(Cmd.none());
+    });
+
+    test('random-received', () => {
+      const [newState, cmd] = update({ type: 'random-received', value: 1313 }, just(13));
+      expect(newState).toEqual(just(1313));
+      expect(cmd).toEqual(Cmd.none());
+    });
+  });
 });
-

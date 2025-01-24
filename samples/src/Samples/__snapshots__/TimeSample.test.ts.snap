@@ -1,121 +1,105 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Test TimeSample > view state > render initial state > snapshot initial 1`] = `ReactWrapper {}`;
-
-exports[`Test TimeSample > view state > render some state > snapshot state1 1`] = `ReactWrapper {}`;
-
-exports[`Test TimeSample > view state > render some state > snapshot state2 1`] = `ReactWrapper {}`;
-
-exports[`Test TimeSample view state render initial state snapshot initial 1`] = `
-Array [
+exports[`Test TimeSample > view state > render initial state > snapshot initial 1`] = `
+<div>
   <div>
-    Current time : 
-    -1
-     
-    <button
-      onClick={[Function]}
-    >
+    <span>
+      Current time : 
+      -1
+    </span>
+    <button>
       Get current time
     </button>
-  </div>,
+  </div>
   <div>
-    In :
-    false
-     
-    <button
-      disabled={false}
-      onClick={[Function]}
-    >
+    <span>
+      In : 
+      false
+    </span>
+    <button>
       Trigger in
     </button>
-  </div>,
+  </div>
   <div>
-    Ticks1 : 
-    0
-    , ticks2 : 
-    0
-     
-    <button
-      onClick={[Function]}
-    >
+    <span>
+      Ticks1 : 
+      0
+      , ticks2 : 
+      0
+    </span>
+    <button>
       start ticking
     </button>
-  </div>,
-]
+  </div>
+</div>
 `;
 
-exports[`Test TimeSample view state render some state snapshot state1 1`] = `
-Array [
+exports[`Test TimeSample > view state > render some state > snapshot state1 1`] = `
+<div>
   <div>
-    Current time : 
-    1313
-     
-    <button
-      onClick={[Function]}
-    >
+    <span>
+      Current time : 
+      1313
+    </span>
+    <button>
       Get current time
     </button>
-  </div>,
+  </div>
   <div>
-    In :
-    true
-     
+    <span>
+      In : 
+      true
+    </span>
+    <button>
+      Trigger in
+    </button>
+  </div>
+  <div>
+    <span>
+      Ticks1 : 
+      13
+      , ticks2 : 
+      131313
+    </span>
+    <button>
+      stop ticking
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Test TimeSample > view state > render some state > snapshot state2 1`] = `
+<div>
+  <div>
+    <span>
+      Current time : 
+      1313
+    </span>
+    <button>
+      Get current time
+    </button>
+  </div>
+  <div>
+    <span>
+      In : 
+      ...
+    </span>
     <button
-      disabled={false}
-      onClick={[Function]}
+      disabled=""
     >
       Trigger in
     </button>
-  </div>,
+  </div>
   <div>
-    Ticks1 : 
-    13
-    , ticks2 : 
-    131313
-     
-    <button
-      onClick={[Function]}
-    >
+    <span>
+      Ticks1 : 
+      13
+      , ticks2 : 
+      131313
+    </span>
+    <button>
       stop ticking
     </button>
-  </div>,
-]
-`;
-
-exports[`Test TimeSample view state render some state snapshot state2 1`] = `
-Array [
-  <div>
-    Current time : 
-    1313
-     
-    <button
-      onClick={[Function]}
-    >
-      Get current time
-    </button>
-  </div>,
-  <div>
-    In :
-    ...
-     
-    <button
-      disabled={true}
-      onClick={[Function]}
-    >
-      Trigger in
-    </button>
-  </div>,
-  <div>
-    Ticks1 : 
-    13
-    , ticks2 : 
-    131313
-     
-    <button
-      onClick={[Function]}
-    >
-      stop ticking
-    </button>
-  </div>,
-]
+  </div>
+</div>
 `;

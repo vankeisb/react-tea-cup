@@ -23,65 +23,52 @@
  *
  */
 
-import { Program } from './Program';
+import { DispatchBridge, Program, ProgramInterop } from './Program';
 import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-core';
 import * as React from 'react';
-import { Component, createRef, ReactNode, RefObject } from 'react';
-import { DevTools } from './DevTools';
+import { useEffect, useRef, ReactNode } from 'react';
 
 /**
  * Props for the ProgramWithNav.
  */
-export interface NavProps<Model, Msg> {
+export interface NavProps<Model, Msg> extends ProgramInterop<Model, Msg> {
   readonly onUrlChange: (l: Location) => Msg;
   readonly init: (l: Location) => [Model, Cmd<Msg>];
   readonly view: (dispatch: Dispatcher<Msg>, m: Model) => ReactNode;
   readonly update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
   readonly subscriptions: (model: Model) => Sub<Msg>;
-  readonly devTools?: DevTools<Model, Msg>;
 }
 
-/**
- * Program that handles navigation (routing).
- */
-export class ProgramWithNav<Model, Msg> extends Component<NavProps<Model, Msg>, never> {
-  private listener: Maybe<EventListener>;
-  private readonly ref: RefObject<Program<Model, Msg>> = createRef();
+export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
+  const dispatchBridge = useRef<DispatchBridge<Msg>>(new DispatchBridge());
 
-  constructor(props: Readonly<NavProps<Model, Msg>>) {
-    super(props);
-    this.listener = nothing;
-  }
-
-  render(): React.ReactNode {
-    return (
-      <Program
-        init={() => this.props.init(window.location)}
-        view={this.props.view}
-        update={this.props.update}
-        subscriptions={this.props.subscriptions}
-        devTools={this.props.devTools}
-        ref={this.ref}
-      />
-    );
-  }
-
-  componentDidMount(): void {
+  useEffect(() => {
+    // use bridge to dispatch into program on URL change
     const l = () => {
-      if (this.ref.current) {
-        this.ref.current.dispatch(this.props.onUrlChange(window.location));
+      if (dispatchBridge.current) {
+        const msg = props.onUrlChange(window.location);
+        dispatchBridge.current.dispatch(msg);
       }
     };
-    this.listener = just(l);
     window.addEventListener('popstate', l);
-  }
+    // and cleanup when needed
+    return function cleanup() {
+      window.removeEventListener('popstate', l);
+    };
+  });
 
-  componentWillUnmount() {
-    if (this.listener.type === 'Just') {
-      window.removeEventListener('popstate', this.listener.value);
-      this.listener = nothing;
-    }
-  }
+  return (
+    <Program
+      init={() => props.init(window.location)}
+      view={props.view}
+      update={props.update}
+      subscriptions={props.subscriptions}
+      dispatchBridge={dispatchBridge.current}
+      listener={props.listener}
+      setModelBridge={props.setModelBridge}
+      paused={props.paused}
+    />
+  );
 }
 
 /**
