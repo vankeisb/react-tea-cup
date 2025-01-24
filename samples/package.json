@@ -6,8 +6,8 @@
   "dependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-tea-cup": "2.4.1",
-    "tea-cup-core": "2.4.1"
+    "react-tea-cup": "3.0.0",
+    "tea-cup-core": "3.0.0"
   },
   "scripts": {
     "dev": "vite",
