@@ -1,6 +1,6 @@
 {
-  "@types/react": "^16.7.22",
-  "tea-cup-core": "2.4.1",
-  "react-tea-cup": "2.4.1",
+  "@types/react": "^18.0.0",
+  "tea-cup-core": "3.0.0",
+  "react-tea-cup": "3.0.0",
   "bomlint": "1.2.3"
 }

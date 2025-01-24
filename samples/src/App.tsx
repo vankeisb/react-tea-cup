@@ -25,18 +25,7 @@
 
 import React from 'react';
 import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task } from 'tea-cup-core';
-import {
-  DevTools,
-  newUrl,
-  ProgramWithNav,
-  QueryParams,
-  route0,
-  route1,
-  route2,
-  Router,
-  str,
-  withReduxDevTools,
-} from 'react-tea-cup';
+import { DevTools, newUrl, ProgramWithNav, QueryParams, route0, route1, route2, Router, str } from 'react-tea-cup';
 import * as Counter from './Samples/Counter';
 import * as ParentChild from './Samples/ParentChild';
 import * as Raf from './Samples/Raf';
@@ -708,6 +697,8 @@ function onUrlChange(l: Location): Msg {
   };
 }
 
+const devTools = new DevTools<Model, Msg>().setVerbose(true).asGlobal();
+
 const App = () => (
   <React.StrictMode>
     <ProgramWithNav
@@ -716,7 +707,7 @@ const App = () => (
       update={update}
       subscriptions={subscriptions}
       onUrlChange={onUrlChange}
-      devTools={withReduxDevTools(DevTools.init<Model, Msg>(window))}
+      {...devTools.getProgramProps()}
     />
   </React.StrictMode>
 );

@@ -4,17 +4,16 @@
   "private": true,
   "proxy": "https://api.github.com",
   "dependencies": {
-    "@types/react": "^16.7.22",
-    "@types/react-dom": "16.0.11",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
-    "react-tea-cup": "2.4.1",
-    "tea-cup-core": "2.4.1"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-tea-cup": "3.0.0",
+    "tea-cup-core": "3.0.0"
   },
   "scripts": {
     "dev": "vite",
     "compile": "tsc",
     "build": "tsc -b && vite build",
+    "test:updatestanpshots": "vitest -u",
     "test": "vitest --run"
   },
   "eslintConfig": {
@@ -27,12 +26,10 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@types/enzyme": "^3.10.3",
-    "@types/enzyme-adapter-react-16": "^1.0.5",
-    "@vitejs/plugin-react": "^4.3.4",
-    "enzyme": "^3.10.0",
-    "enzyme-adapter-react-16": "^1.15.1",
-    "enzyme-to-json": "^3.4.2",
-    "jsdom-global": "^3.0.2"
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.2.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.3",
+    "@vitejs/plugin-react": "^4.3.4"
   }
 }

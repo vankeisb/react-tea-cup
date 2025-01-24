@@ -79,17 +79,19 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
   return (
     <>
       <div>
-        Current time : {model.currentTime}{' '}
+        <span>Current time : {model.currentTime}</span>
         <button onClick={() => dispatch({ tag: 'get-cur-time' })}>Get current time</button>
       </div>
       <div>
-        In :{model.inProgress ? '...' : model.inTime ? 'true' : 'false'}{' '}
+        <span>In : {model.inProgress ? '...' : model.inTime ? 'true' : 'false'}</span>
         <button onClick={() => dispatch({ tag: 'get-in' })} disabled={model.inProgress}>
           Trigger in
         </button>
       </div>
       <div>
-        Ticks1 : {model.ticks1}, ticks2 : {model.ticks2}{' '}
+        <span>
+          Ticks1 : {model.ticks1}, ticks2 : {model.ticks2}
+        </span>
         <button onClick={() => dispatch({ tag: 'toggle-tick' })}>
           {model.ticking ? 'stop ticking' : 'start ticking'}
         </button>

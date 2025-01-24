@@ -23,67 +23,57 @@
  *
  */
 
-import { view, Msg, update } from "./Counter";
-import { shallow } from 'enzyme';
-import { Testing } from "react-tea-cup";
-import { describe, test, expect } from "vitest";
-
-import { configure } from 'enzyme';
-import EnzymeAdapter from 'enzyme-adapter-react-16';
+import { view, Msg, update } from './Counter';
+import { render, fireEvent } from '@testing-library/react';
+import { Testing } from 'react-tea-cup';
+import { describe, test, expect } from 'vitest';
 
 const testing = new Testing<Msg>();
-configure({ adapter: new EnzymeAdapter() });
 
-describe("Test Counter", () => {
-
-    describe("view state", () => {
-
-        test("render counter", () => {
-            const wrapper = shallow(view(testing.noop, 13))
-            expect(wrapper.find('.counter')).toHaveLength(1);
-            expect(wrapper.find('.counter > span').text()).toEqual("13");
-        });
-
-        test("render buttons", () => {
-            const wrapper = shallow(view(testing.noop, 1));
-            expect(wrapper.find('.counter > button')).toHaveLength(2);
-            expect(wrapper.find('.counter > button').at(0).text()).toEqual('-');
-            expect(wrapper.find('.counter > button').at(1).text()).toEqual('+');
-        });
-
-        test("snapshot", () => {
-            const wrapper = shallow(view(testing.noop, 1313))
-            expect(wrapper).toMatchSnapshot();
-        });
+describe('Test Counter', () => {
+  describe('view state', () => {
+    test('render counter', () => {
+      const { container } = render(view(testing.noop, 13));
+      expect(container.querySelector('.counter')).not.toBeNull();
+      expect(container.querySelector('.counter > span')?.textContent).toEqual('13');
     });
 
-    describe("clicks generate messages", () => {
-
-        test("decrement", () => {
-            const wrapper = shallow(view(testing.dispatcher, 1));
-            wrapper.find('.counter > button').at(0).simulate('click');
-            expect(testing.dispatched).toEqual({ type: "dec" });
-        });
-
-        test("increment", () => {
-            const wrapper = shallow(view(testing.dispatcher, 1));
-            wrapper.find('.counter > button').at(1).simulate('click');
-            expect(testing.dispatched).toEqual({ type: "inc" });
-        });
-
+    test('render buttons', () => {
+      const { container } = render(view(testing.noop, 1));
+      expect(container.querySelectorAll('.counter > button')).toHaveLength(2);
+      expect(container.querySelectorAll('.counter > button').item(0).textContent).toEqual('-');
+      expect(container.querySelectorAll('.counter > button').item(1).textContent).toEqual('+');
     });
 
-    describe("messages update state", () => {
-        test("decrement", () => {
-            const [newState, _cmd] = update({ type: "dec" }, 13);
-            expect(newState).toBe(12);
-        });
+    test('snapshot', () => {
+      const { container } = render(view(testing.noop, 1313));
+      expect(container).toMatchSnapshot();
+    });
+  });
 
-        test("increment", () => {
-            const [newState, _cmd] = update({ type: "inc" }, 13);
-            expect(newState).toBe(14);
-        });
+  describe('clicks generate messages', () => {
+    test('decrement', () => {
+      const { container } = render(view(testing.dispatcher, 1));
+      fireEvent.click(container.querySelectorAll('.counter > button').item(0));
+      expect(testing.dispatched).toEqual({ type: 'dec' });
     });
 
+    test('increment', () => {
+      const { container } = render(view(testing.dispatcher, 1));
+      fireEvent.click(container.querySelectorAll('.counter > button').item(1));
+      expect(testing.dispatched).toEqual({ type: 'inc' });
+    });
+  });
+
+  describe('messages update state', () => {
+    test('decrement', () => {
+      const [newState, _cmd] = update({ type: 'dec' }, 13);
+      expect(newState).toBe(12);
+    });
+
+    test('increment', () => {
+      const [newState, _cmd] = update({ type: 'inc' }, 13);
+      expect(newState).toBe(14);
+    });
+  });
 });
-

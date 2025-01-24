@@ -24,16 +24,12 @@
  */
 
 import { view, Msg, update, init } from './TimeSample';
-import { mount } from 'enzyme';
 import { Testing } from 'react-tea-cup';
 import { Cmd } from 'tea-cup-core';
-import { describe, test, expect } from "vitest";
-import { configure } from 'enzyme';
-import EnzymeAdapter from 'enzyme-adapter-react-16';
-import 'jsdom-global/register';
+import { describe, test, expect } from 'vitest';
+import { render, fireEvent } from '@testing-library/react';
 
 const testing = new Testing<Msg>();
-configure({ adapter: new EnzymeAdapter() });
 
 describe('Test TimeSample', () => {
   describe('init state', () => {
@@ -44,34 +40,33 @@ describe('Test TimeSample', () => {
   });
 
   describe('view state', () => {
-    const [initialState, _cmd] = init();
+    const [initialState] = init();
 
     describe('render initial state', () => {
       test('current time', () => {
-        const wrapper = mount(view(testing.noop, initialState));
+        const { container } = render(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(0).text()).toContain('Current time :');
-        expect(wrapper.find('div > button').at(0).text()).toEqual('Get current time');
+        expect(container.querySelectorAll('div span').item(0).textContent).toEqual('Current time : -1');
+        expect(container.querySelectorAll('div > button').item(0).textContent).toEqual('Get current time');
       });
 
       test('trigger in', () => {
-        const wrapper = mount(view(testing.noop, initialState));
+        const { container } = render(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(1).text()).toContain('In :');
-        expect(wrapper.find('div > button').at(1).text()).toEqual('Trigger in');
+        expect(container.querySelectorAll('div span').item(1).textContent).toEqual('In : false');
+        expect(container.querySelectorAll('div > button').item(1).textContent).toEqual('Trigger in');
       });
 
       test('ticks', () => {
-        const wrapper = mount(view(testing.noop, initialState));
+        const { container } = render(view(testing.noop, initialState));
 
-        expect(wrapper.find('div').at(2).text()).toContain('Ticks1 :');
-        expect(wrapper.find('div').at(2).text()).toContain(', ticks2 :');
-        expect(wrapper.find('div > button').at(2).text()).toEqual('start ticking');
+        expect(container.querySelectorAll('div span').item(2).textContent).toEqual('Ticks1 : 0, ticks2 : 0');
+        expect(container.querySelectorAll('div > button').item(2).textContent).toEqual('start ticking');
       });
 
       test('snapshot initial', () => {
-        const wrapper = mount(view(testing.noop, initialState));
-        expect(wrapper).toMatchSnapshot();
+        const { container } = render(view(testing.noop, initialState));
+        expect(container).toMatchSnapshot();
       });
     });
 
@@ -92,63 +87,62 @@ describe('Test TimeSample', () => {
       };
 
       test('current time', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(0).text()).toContain('Current time : 1313');
+        const { container } = render(view(testing.noop, state1));
+        expect(container.querySelectorAll('div span').item(0).textContent).toEqual('Current time : 1313');
       });
 
       test('trigger in', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(1).text()).toContain('In :true');
+        const { container } = render(view(testing.noop, state1));
+        expect(container.querySelectorAll('div span').item(1).textContent).toEqual('In : true');
       });
 
       test('trigger in progress', () => {
-        const wrapper = mount(view(testing.noop, state2));
-        expect(wrapper.find('div').at(1).text()).toContain('In :...');
+        const { container } = render(view(testing.noop, state2));
+        expect(container.querySelectorAll('div span').item(1).textContent).toEqual('In : ...');
       });
 
       test('ticks', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper.find('div').at(2).text()).toContain('Ticks1 : 13');
-        expect(wrapper.find('div').at(2).text()).toContain('ticks2 : 131313');
-        expect(wrapper.find('div > button').at(2).text()).toContain('stop ticking');
+        const { container } = render(view(testing.noop, state1));
+        expect(container.querySelectorAll('div span').item(2).textContent).toEqual('Ticks1 : 13, ticks2 : 131313');
+        expect(container.querySelectorAll('div > button').item(2).textContent).toEqual('stop ticking');
       });
 
       test('snapshot state1', () => {
-        const wrapper = mount(view(testing.noop, state1));
-        expect(wrapper).toMatchSnapshot();
+        const { container } = render(view(testing.noop, state1));
+        expect(container).toMatchSnapshot();
       });
 
       test('snapshot state2', () => {
-        const wrapper = mount(view(testing.noop, state2));
-        expect(wrapper).toMatchSnapshot();
+        const { container } = render(view(testing.noop, state2));
+        expect(container).toMatchSnapshot();
       });
     });
   });
 
   describe('clicking generates messages', () => {
-    const [initialState, _cmd] = init();
+    const [initialState] = init();
 
     test('get current time', () => {
-      const wrapper = mount(view(testing.dispatcher, initialState));
-      wrapper.find('div > button').at(0).simulate('click');
+      const { container } = render(view(testing.dispatcher, initialState));
+      fireEvent.click(container.querySelectorAll('div > button').item(0));
       expect(testing.dispatched).toEqual({ tag: 'get-cur-time' });
     });
 
     test('get in', () => {
-      const wrapper = mount(view(testing.dispatcher, initialState));
-      wrapper.find('div > button').at(1).simulate('click');
+      const { container } = render(view(testing.dispatcher, initialState));
+      fireEvent.click(container.querySelectorAll('div > button').item(1));
       expect(testing.dispatched).toEqual({ tag: 'get-in' });
     });
 
     test('toggle tick', () => {
-      const wrapper = mount(view(testing.dispatcher, initialState));
-      wrapper.find('div > button').at(2).simulate('click');
+      const { container } = render(view(testing.dispatcher, initialState));
+      fireEvent.click(container.querySelectorAll('div > button').item(2));
       expect(testing.dispatched).toEqual({ tag: 'toggle-tick' });
     });
   });
 
   describe('message updates state', () => {
-    const [initialState, _cmd] = init();
+    const [initialState] = init();
 
     test('get-cur-time', () => {
       const [newState, cmd] = update({ tag: 'get-cur-time' }, initialState);
