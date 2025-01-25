@@ -79,16 +79,10 @@ The `view` function is invoked by tea-cup at every `update`, for every `Msg` tha
     
 ### Messages 
 
-Messages are the dynamic part of your application. They represent anything that happens, 
-and that requires to update the model, and render the app again. Messages are dispatched in order 
+Messages are the dynamic part of your application. They represent anything that happens outside your Program, 
+and requires to update the model, and render the app again. Messages are dispatched in order 
 to respond to DOM events (or to external side effects), and you have to implement their behaviour in the 
 `update` function. 
-
-Messages in tea-cup can be expressed in different ways, unlike in Elm where you'll always use 
-a union type. tea-cup offers several options for implementing Msgs, it is up to you to 
-choose the form that suits you best.
-
-#### Discriminated unions
 
 Using discriminated unions allows you to model your Messages as data, and have the update 
 logic somewhere else (in the `update` function) :
@@ -111,86 +105,16 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 }
 ```
 
-This is the more "Elm-like" way to model your Messages. Unfortunately, 
-discriminated unions are far from being as powerful and pleasant as 
-they are in Elm, and using them has drawbacks :
+This is the preferred, "Elm-like" way to model your Messages. Even if Discriminated Unions are far from being as powerful and pleasant as 
+they are in Elm.
 
-* boilerplate
-* no constructor functions
+You can also model your Messages as classes, or functions.
 
-#### Classes           
-    
-You may also use a more OOP approach, by defining an abstract class (or interface) for
-your `Msg` and have messages hold both data and behavior for this message :
-
-```typescript jsx
-// the base message class
-abstract class Msg {
-    abstract execute(model:Model): [Model, Cmd<Msg>] 
-} 
-
-// a concrete Msg
-class ButtonClicked extends Msg {
-    readonly userId: string
-    
-    execute(model:Model): [Model, Cmd<Msg>] {
-        ...
-    }
-}
-
-// update function gets very simple !
-function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
-    return msg.execute(model)
-}
-```
-    
-Drawbacks : 
-* boilerplate
-* messages are not sealed
-
-
-#### Functions
-
-A last variant is to use plain functions for encapsulating the data (via capture) and 
-the behaviour of the `Msg`s :
-
-```typescript jsx
-// Msg type : a function
-type Msg = (model:Model) => [Model, Cmd<Msg>]
-
-// a simple msg with no payload
-const btnClicked: Msg = model => {
-    ...
-}
-
-// msg with some payload : func returning a func
-function sendEmail(recipients: ReadonlyArray<string>): Msg {
-    return model => {
-        recipients.map...
-        ...
-    }
-} 
-
-// update just delegates to msg 
-function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
-    return msg(model)
-}
-```
-    
-> This variant is probably the one requiring the less boilerplate, as 
-you have no switch block, no class declaration, and a constructor function, all in one.
-
-Drawbacks:
-* a bit harder to debug (no msg type, only a func, and captured state)
-* messages are not sealed     
-
-#### Dispatching
+#### Dispatching Messages
 
 Unlike in Elm, where you always _return_ Messages, in tea-cup you need to 
 explicitly _dispatch_ the Messages. This is done using a so-called `Dispatcher<Msg>`, 
-which is passed to you by tea-cup.
-
-Example of a message dispatch using discriminated unions :
+which is passed to you by tea-cup :
 
 ```typescript jsx
 // somewhere in view
@@ -231,8 +155,8 @@ Let's say you want to send an HTTP request, and be notified when the response co
 
 In tea-cup, this goes like :
 1. create a `Cmd` object that describes the HTTP request (could be anything else of course)
-2. instruct tea-cup to actually do the job, and _execute_ your `Cmd` 
-3. get the result as a `Msg`, passed to your `update` function
+2. return the `Cmd` to tea-cup so that it _executes_ your `Cmd`, outside of your functions
+3. handle the result of `Cmd` execution as a `Msg`, passed to your `update` function
 
 It's part of the `update` function's job to return the commands, if any (along with 
 the new `Model`). Depending on what happened, at every update, you may return Commands
@@ -245,8 +169,8 @@ side effects, like sending HTTP requests, accessing the Local Storage etc.
 
 Like Commands, Tasks are declarative :  you don't execute them yourself, this is the runtime's job.
 
-In order to actually execute a Task, you need to turn it into a Command (and 
-return it from your update function) : 
+In order to actually execute a Task, you need to turn it into a `Cmd` (and 
+return it from your `update` function) : 
 
 ```typescript jsx
 // create a task that fetches 
@@ -269,8 +193,8 @@ function onFetchResult(r:Result<Error,Response>): Msg {
 ```
 
 Tasks are base building blocks that can be combined, with `map` and `andThen`. They
-are a good place to encapsulate some native, non-pure JS calls, and make those 
-cleanly available in your TEA loop. 
+are a good place to encapsulate some native JS calls, and make those 
+cleanly available in your TEA loop as Messages. 
     
 ### Subscriptions
 
@@ -341,17 +265,20 @@ function subscriptions(model:Model): Sub<Msg> {
 }
 
 // wire our functions with a tea-cup Program
-const program = ( 
+const App = () => (
+  <React.StrictMode>
     <Program
-        init={init}
-        view={view}
-        update={update}
-        subscriptions={subscriptions}
+      init={init}
+      view={view}
+      update={update}
+      subscriptions={subscriptions}
     />
+  </React.StrictMode>
 );
 
 // render this as a regular React component
-ReactDOM.render(program, document.getElementById('root'))
+const root = ReactDOM.createRoot(...);
+root.render(<App />)
 ```
 
 ## Performance
@@ -367,12 +294,12 @@ what has changed (again, in theory). They will render only components that are "
 to a subset of the whole state that has been updated.
 
 In tea-cup, just like in Elm, there's one single update loop. Updating anything in the model
-means that `Program.render()` is called, which in turns invokes the top-level 
+means that `Program` renders, which in turns invokes the top-level 
 `view` function, ending-up re-rendering the whole tree. This can lead to performance issues 
 much faster than one could expect.
 
 The solution to this problem is to use memoization explicity in your view functions when you
-see performance degrading in the rendering phase. Using a JS profiler will help you 
+see performance degrading in the rendering phase. Using a JS or React profiler will help you 
 find the hotspots.  
 
 Then, once you know which function takes too much to render, just memoize it :
@@ -389,22 +316,18 @@ function expensiveView(dispatcher: Dispatcher<Msg>, stuff:Stuff) {
 }
 ```
  
-> Of course this works only because you have immutable state...
-
 ## Mixing with Stateful Components
 
 TODO
 
 ## Utilities
 
-tea-cup includes a few useful stuff that we miss from Elm, such as Maybes, Decoders, etc.
+tea-cup relies on a few useful stuff that we used to have in Elm, such as `Maybe`, `Decoder`, etc. They are provided by the `tea-cup-core` package.
 
 ### Maybe
 
 A `Maybe` is either "just something", or "nothing" ! The concept is also known as an "Optional"
 in other languages. 
-
-It serves as a good replacement for optionals (`?`) in TS, which are not very functional and practical.
 
 ```typescript jsx
 // TS optionals
@@ -500,28 +423,21 @@ const user: User = o as User
 
 A safer way is to use a `Decoder` for the type `User` :
 
+
 ```typescript jsx
-const userDecoder: Decoder<User> =
-    // map a 3-field object
-    Decoder.map3(
-        // values have been decoded, return our typed object 
-        (name:string, age:number, roles: ReadonlyArray<string>) => {
-            return {
-                name: name,
-                age: age,
-                roles: roles
-            }
-        },
-        Decode.field("name", Decode.str), // decoder for string field "name"
-        Decode.field("age", Decode.num), // decoder for number field "age"
-        // decoder for string[] field "roles"
-        Decode.field(
-            "roles",
-            Decode.array(Decode.str)           
-        )
-    )
+import { Decoder, Decode as D } from "tea-cup-core";
+
+const userDecoder: Decoder<User> = D.mapObject({
+    ...D.mapRequiredFields({
+        name: D.str,
+        age: D.num,
+        roles: D.array(D.str)
+    })
+});
     
-// decoding yields a Result : it may have failed (with a message) !
+// decoding yields a Result : it may have 
+// failed (with a message), or safely 
+// decoded a User instance
 const user: Result<string,User> = userDecoder.decodeValue(o)    
 ```
 
@@ -567,11 +483,6 @@ const fetchUserCmd: Cmd<Msg> =
         }
     )
 ```
-
-### Animation
-
-tea-cup ships with an `Animation` Effect Manager that allows to use `requestAnimationFrame`
-in your TEA loop.
 
 ## Dev Tools
 

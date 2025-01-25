@@ -11,15 +11,8 @@ Have a look at `build.sh` for more info..
 We follow `git-flow`, so to release :
 
     git flow release start a.b.c
-    // bump version(s), commit
+    // bump version(s), commit, make sure it's ok
     git flow release finish a.b.c
     // push develop, master, and tag
 
-Travis should deploy to npm on tag builds.
-
-## Gren
-
-GH releases and CHANGELOG.md are generated using `gren` :
-
-    yarn release:gh
-    yarn release:changelog
+The package is deployed to npm on tag builds.
