@@ -2,7 +2,6 @@
   "name": "tea-cup-parent",
   "private": true,
   "workspaces": [
-    "core",
     "tea-cup",
     "samples"
   ],

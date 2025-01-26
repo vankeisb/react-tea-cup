@@ -1,6 +1,5 @@
 {
   "@types/react": "^18.0.0",
-  "tea-cup-core": "3.0.3",
   "react-tea-cup": "3.0.3",
   "bomlint": "1.2.3"
 }

@@ -11,10 +11,6 @@ function withJsonFile(name, callback) {
   fs.writeFileSync(name, JSON.stringify(json, null, '  '));
 }
 
-withJsonFile('./core/package.json', (j) => {
-  j.version = VERSION;
-});
-
 withJsonFile('./tea-cup/package.json', (j) => {
   j.version = VERSION;
   j.peerDependencies['tea-cup-core'] = VERSION;
