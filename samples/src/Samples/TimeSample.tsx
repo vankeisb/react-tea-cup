@@ -24,7 +24,7 @@
  */
 
 import * as React from 'react';
-import { Cmd, Dispatcher, noCmd, Sub, Task, Time } from 'tea-cup-core';
+import { Cmd, Dispatcher, noCmd, Sub, Task, Time } from 'tea-cup-fp';
 
 export interface Model {
   readonly currentTime: number;

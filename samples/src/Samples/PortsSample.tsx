@@ -24,7 +24,7 @@
  */
 
 import * as React from 'react';
-import { Cmd, Dispatcher, noCmd, Port, Sub } from 'tea-cup-core';
+import { Cmd, Dispatcher, noCmd, Port, Sub } from 'tea-cup-fp';
 
 export type Model = number;
 

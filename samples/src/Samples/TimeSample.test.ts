@@ -25,7 +25,7 @@
 
 import { view, Msg, update, init } from './TimeSample';
 import { Testing } from 'react-tea-cup';
-import { Cmd } from 'tea-cup-core';
+import { Cmd } from 'tea-cup-fp';
 import { describe, test, expect } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
 

@@ -23,7 +23,7 @@
  *
  */
 
-import { Dispatcher, Cmd, Sub } from 'tea-cup-core';
+import { Dispatcher, Cmd, Sub } from 'tea-cup-fp';
 import { ReactElement } from 'react';
 import { ProgramProps, Program } from '.';
 import React from 'react';

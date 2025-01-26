@@ -2,7 +2,6 @@
   "name": "tea-cup-parent",
   "private": true,
   "workspaces": [
-    "core",
     "tea-cup",
     "samples"
   ],
@@ -20,6 +19,6 @@
   "scripts": {
     "release:gh": "gren release",
     "release:changelog": "gren changelog --tags all --generate --override",
-    "bomlint": "bomlint package.json ./core/package.json ./tea-cup/package.json ./samples/package.json"
+    "bomlint": "bomlint package.json ./tea-cup/package.json ./samples/package.json"
   }
 }

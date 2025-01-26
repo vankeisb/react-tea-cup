@@ -3,9 +3,7 @@ node -v
 
 npm install &&     \
 npm run bomlint &&     \
-cd core &&          \
-./build.sh &&       \
-cd ../tea-cup &&    \
+cd ./tea-cup &&    \
 ./build.sh &&       \
 cd ../samples &&    \
 npm run test && \

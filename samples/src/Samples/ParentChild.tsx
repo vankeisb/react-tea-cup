@@ -24,7 +24,7 @@
  */
 
 import * as Counter from './Counter';
-import { Dispatcher, map, Cmd, Sub } from 'tea-cup-core';
+import { Dispatcher, map, Cmd, Sub } from 'tea-cup-fp';
 import * as React from 'react';
 
 export type Model = ReadonlyArray<Counter.Model>;
