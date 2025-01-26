@@ -24,7 +24,7 @@
  */
 
 import React from 'react';
-import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task } from 'tea-cup-core';
+import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task } from 'tea-cup-fp';
 import { DevTools, newUrl, ProgramWithNav, QueryParams, route0, route1, route2, Router, str } from 'react-tea-cup';
 import * as Counter from './Samples/Counter';
 import * as ParentChild from './Samples/ParentChild';

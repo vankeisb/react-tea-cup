@@ -23,7 +23,7 @@
  *
  */
 
-import { Sub } from 'tea-cup-core';
+import { Sub } from 'tea-cup-fp';
 
 type Listener<E> = (ev: E) => any;
 type ListenerOptions = boolean | AddEventListenerOptions;

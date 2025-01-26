@@ -38,7 +38,7 @@ favourite editor, and replace its contents with this :
 import React from 'react';
 // bare minimum to use tea-cup
 import { Program } from 'react-tea-cup';
-import { Cmd, Dispatcher, Sub } from 'tea-cup-core';
+import { Cmd, Dispatcher, Sub } from "tea-cup-fp";
 
 // a Model can be anything. Here, it's simply a number...
 type Model = number;

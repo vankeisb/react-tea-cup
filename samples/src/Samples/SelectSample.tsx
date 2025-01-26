@@ -24,81 +24,85 @@
  */
 
 import * as React from 'react';
-import {Cmd, Dispatcher, just, Maybe, noCmd, nothing, Sub} from 'tea-cup-core';
-import {DocumentEvents} from "react-tea-cup";
+import { Cmd, Dispatcher, just, Maybe, noCmd, nothing, Sub } from 'tea-cup-fp';
+import { DocumentEvents } from 'react-tea-cup';
 
 export type Model = {
-    selected: Maybe<string>
-    mouseUpCounter: number
+  selected: Maybe<string>;
+  mouseUpCounter: number;
 };
 
-export type Msg = {
-        type: 'selected',
-        value: string
+export type Msg =
+  | {
+      type: 'selected';
+      value: string;
     }
-    | { type: 'mouse-up' };
+  | { type: 'mouse-up' };
 
 export function init(): [Model, Cmd<Msg>] {
-    return noCmd({
-        selected: nothing,
-        mouseUpCounter: 0
-    });
+  return noCmd({
+    selected: nothing,
+    mouseUpCounter: 0,
+  });
 }
 
 export function view(dispatch: Dispatcher<Msg>, model: Model) {
-    const value = model.selected.withDefault("select me");
-    return (
-        <div className="select">
-            <p><em>(Use me with Firefox, too.)</em></p>
-            <select value={value}
-                    onChange={e => {
-                        console.log("FW onChange", e.target.value)
-                        dispatch({type: 'selected', value: e.target.value});
-                    }}
-            >
-                <option value={"select me"}>Select me...</option>
-                {Array.of(1, 2, 3, 4, 5)
-                    .map(i =>
-                        <option
-                            key={i}
-                            value={i}>
-                            {`Option ${i}`}
-                        </option>)
-                }
-            </select>
-            <br/>
-            <p>{`Saw ${model.mouseUpCounter} mouse up events.`}</p>
-        </div>
-    );
+  const value = model.selected.withDefault('select me');
+  return (
+    <div className="select">
+      <p>
+        <em>(Use me with Firefox, too.)</em>
+      </p>
+      <select
+        value={value}
+        onChange={(e) => {
+          console.log('FW onChange', e.target.value);
+          dispatch({ type: 'selected', value: e.target.value });
+        }}
+      >
+        <option value={'select me'}>Select me...</option>
+        {Array.of(1, 2, 3, 4, 5).map((i) => (
+          <option key={i} value={i}>
+            {`Option ${i}`}
+          </option>
+        ))}
+      </select>
+      <br />
+      <p>{`Saw ${model.mouseUpCounter} mouse up events.`}</p>
+    </div>
+  );
 }
 
 export function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
-    switch (msg.type) {
-        case 'selected': {
-            const model1: Model = {
-                ...model,
-                selected: msg.value !== 'select me' ? just(msg.value) : nothing
-            };
-            return [model1, Cmd.none()];
-        }
-        case "mouse-up": {
-            const model1: Model = {
-                ...model,
-                mouseUpCounter: model.mouseUpCounter + 1
-            };
-            return [model1, Cmd.none()];
-        }
+  switch (msg.type) {
+    case 'selected': {
+      const model1: Model = {
+        ...model,
+        selected: msg.value !== 'select me' ? just(msg.value) : nothing,
+      };
+      return [model1, Cmd.none()];
     }
+    case 'mouse-up': {
+      const model1: Model = {
+        ...model,
+        mouseUpCounter: model.mouseUpCounter + 1,
+      };
+      return [model1, Cmd.none()];
+    }
+  }
 }
 
 const documentEvents = new DocumentEvents<Msg>();
 
 export function subscriptions(_model: Model): Sub<Msg> {
-    return Sub.batch([
-        documentEvents.on('mouseup', () => (
-            {
-                type: 'mouse-up',
-            } as Msg
-        ), {passive: true, capture: false}),
-    ]);
+  return Sub.batch([
+    documentEvents.on(
+      'mouseup',
+      () =>
+        ({
+          type: 'mouse-up',
+        } as Msg),
+      { passive: true, capture: false },
+    ),
+  ]);
 }
