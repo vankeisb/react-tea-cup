@@ -1,1 +1,1 @@
-cd ../tea-cup && npm publish
+cd ./tea-cup && npm publish
