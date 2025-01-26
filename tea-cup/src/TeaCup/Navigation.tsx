@@ -24,7 +24,7 @@
  */
 
 import { DispatchBridge, Program, ProgramInterop } from './Program';
-import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-core';
+import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-fp';
 import * as React from 'react';
 import { useEffect, useRef, ReactNode, useState } from 'react';
 

@@ -25,7 +25,7 @@
 
 import * as React from 'react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import { Cmd, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-core';
+import { Cmd, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-fp';
 
 export class DispatchBridge<Msg> {
   private d?: Dispatcher<Msg>;

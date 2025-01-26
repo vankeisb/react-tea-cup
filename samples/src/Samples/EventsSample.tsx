@@ -24,7 +24,7 @@
  */
 
 import * as React from 'react';
-import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe } from 'tea-cup-core';
+import { Dispatcher, Cmd, Sub, noCmd, nothing, just, Maybe } from 'tea-cup-fp';
 import { DocumentEvents, WindowEvents } from 'react-tea-cup';
 
 export type Model = {
