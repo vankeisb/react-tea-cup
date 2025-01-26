@@ -13,10 +13,8 @@ function withJsonFile(name, callback) {
 
 withJsonFile('./tea-cup/package.json', (j) => {
   j.version = VERSION;
-  j.peerDependencies['tea-cup-core'] = VERSION;
 });
 
 withJsonFile('./samples/package.json', (j) => {
-  j.dependencies['tea-cup-core'] = VERSION;
   j.dependencies['react-tea-cup'] = VERSION;
 });

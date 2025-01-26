@@ -17,7 +17,7 @@ In order to keep things simple, we'll use the infamous `create-react-app` :
     
 ### Add tea-cup to your dependencies
 
-    yarn add -D react-tea-cup tea-cup-core
+    yarn add -D react-tea-cup tea-cup-fp
     
 ### Run the dev server
 
@@ -116,7 +116,7 @@ and Cmds.
 Replace the contents of `App.tsx` with the following, code :
 
 ```typescript jsx
-import {Http, Cmd, Task, Result, Dispatcher, Decode, Decoder, Maybe, nothing, Sub, just} from "tea-cup-core";
+import {Http, Cmd, Task, Result, Dispatcher, Decode, Decoder, Maybe, nothing, Sub, just} from "tea-cup-fp";
 import {Program} from "react-tea-cup";
 import * as React from 'react'
 

@@ -322,7 +322,7 @@ TODO
 
 ## Utilities
 
-tea-cup relies on a few useful stuff that we used to have in Elm, such as `Maybe`, `Decoder`, etc. They are provided by the `tea-cup-core` package.
+tea-cup relies on a few useful stuff that we used to have in Elm, such as `Maybe`, `Decoder`, etc. They are provided by the `tea-cup-fp` package.
 
 ### Maybe
 
@@ -425,7 +425,7 @@ A safer way is to use a `Decoder` for the type `User` :
 
 
 ```typescript jsx
-import { Decoder, Decode as D } from "tea-cup-core";
+import { Decoder, Decode as D } from "tea-cup-fp";
 
 const userDecoder: Decoder<User> = D.mapObject({
     ...D.mapRequiredFields({
