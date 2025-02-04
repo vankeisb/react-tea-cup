@@ -123,6 +123,7 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       // sub to bridges if any
       props.setModelBridge?.subscribe((model) => {
         setModel(just(model));
+        modelRef.current = just(model);
       });
       props.dispatchBridge?.subscribe(dispatch);
 
