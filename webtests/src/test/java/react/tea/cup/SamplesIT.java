@@ -5,6 +5,7 @@ import com.pojosontheweb.selenium.ManagedDriverJunit4TestBase;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
 import java.util.function.Consumer;
@@ -14,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SamplesIT extends ManagedDriverJunit4TestBase {
 
-    private String baseUrl = System.getProperty("webtests.base.url", "http://localhost:3000");
+    private String baseUrl = System.getProperty("webtests.base.url", "http://localhost:5173");
 
     @Before
     public void navigateToSamples() {
@@ -22,9 +23,11 @@ public class SamplesIT extends ManagedDriverJunit4TestBase {
         $$("a").where(textEquals("samples")).expectOne().click();
     }
 
+    private final Consumer<Integer> assertCounter = i -> $("#counter-value").where(textEquals(Integer.toString(i)))
+            .eval();
+
     @Test
     public void testCounter() {
-        Consumer<Integer> assertCounter = i -> $("#counter-value").where(textEquals(Integer.toString(i))).eval();
         Findr buttonSub = $("#counter-sub");
         Findr buttonAdd = $("#counter-add");
 
@@ -36,6 +39,36 @@ public class SamplesIT extends ManagedDriverJunit4TestBase {
         assertCounter.accept(3);
         buttonSub.click();
         assertCounter.accept(2);
+    }
+
+    @Test
+    public void testDevToolsSetModel() {
+        assertCounter.accept(0);
+
+        String script = """
+                const m = teaCupDevTools.lastModel;
+                const m2 = { ...m, samples: { ...m.samples, counter: 123 }};
+                teaCupDevTools.setModel(m2);
+                """;
+        ((JavascriptExecutor) getWebDriver()).executeScript(script);
+        assertCounter.accept(123);
+    }
+
+    @Test
+    public void testDevToolsDispatch() {
+        assertCounter.accept(0);
+
+        String script = """
+                const msg = {
+                    "type": "counter",
+                    "child": {
+                        "type": "dec"
+                    }
+                };
+                teaCupDevTools.dispatch(msg);
+                """;
+        ((JavascriptExecutor) getWebDriver()).executeScript(script);
+        assertCounter.accept(-1);
     }
 
     @Test
@@ -54,7 +87,7 @@ public class SamplesIT extends ManagedDriverJunit4TestBase {
         // sleep to let RAF do its magic for some time...
         try {
             Thread.sleep(1000);
-        }catch (Exception e) {
+        } catch (Exception e) {
         }
 
         button.click();

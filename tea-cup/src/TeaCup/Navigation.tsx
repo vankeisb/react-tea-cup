@@ -23,10 +23,10 @@
  *
  */
 
-import { DispatchBridge, Program, ProgramInterop } from './Program';
+import { Program, ProgramInterop } from './Program';
 import { List, Cmd, Dispatcher, Sub, Task, Ok, Result, just, Maybe, maybeOf, nothing } from 'tea-cup-fp';
 import * as React from 'react';
-import { useEffect, useRef, ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 
 /**
  * Props for the ProgramWithNav.
@@ -40,23 +40,6 @@ export interface NavProps<Model, Msg> extends ProgramInterop<Model, Msg> {
 }
 
 export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
-  const dispatchBridge = useRef<DispatchBridge<Msg>>(new DispatchBridge());
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    // use bridge to dispatch into program on URL change
-    const l = () => {
-      const msg = props.onUrlChange(window.location);
-      dispatchBridge.current.dispatch(msg);
-      setCount(count + 1);
-    };
-    window.addEventListener('popstate', l);
-    // and cleanup when needed
-    return function cleanup() {
-      window.removeEventListener('popstate', l);
-    };
-  });
-
   return (
     <Program
       init={() => props.init(window.location)}
@@ -64,13 +47,44 @@ export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
       update={(msg, model) => {
         return props.update(msg, model);
       }}
-      subscriptions={props.subscriptions}
-      dispatchBridge={dispatchBridge.current}
+      subscriptions={(m) => addNavSub(props.subscriptions(m), props.onUrlChange)}
+      dispatchBridge={props.dispatchBridge}
       listener={props.listener}
       setModelBridge={props.setModelBridge}
       paused={props.paused}
     />
   );
+}
+
+function addNavSub<M>(sub: Sub<M>, toMsg: (l: Location) => M): Sub<M> {
+  return Sub.batch([sub, onPopState(toMsg)]);
+}
+
+export function onPopState<M>(toMsg: (l: Location) => M): Sub<M> {
+  return new NavSub(toMsg);
+}
+
+class NavSub<M> extends Sub<M> {
+  constructor(readonly toMsg: (l: Location) => M) {
+    super();
+  }
+
+  private l = () => {
+    setTimeout(() => {
+      const m = this.toMsg(window.location);
+      this.dispatch(m);
+    });
+  };
+
+  protected onInit(): void {
+    super.onInit();
+    window.addEventListener('popstate', this.l);
+  }
+
+  protected onRelease(): void {
+    super.onRelease();
+    window.removeEventListener('popstate', this.l);
+  }
 }
 
 /**

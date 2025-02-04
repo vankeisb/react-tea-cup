@@ -23,7 +23,7 @@
  *
  */
 
-import { ProgramEvent, ProgramInterop, SetModelBridge } from './Program';
+import { DispatchBridge, ProgramEvent, ProgramInterop, SetModelBridge } from './Program';
 
 // @ts-ignore
 import * as pkg from '../package.json';
@@ -36,6 +36,7 @@ export class DevTools<Model, Msg> {
   private _verbose: boolean = true;
 
   private _setModelBridge: SetModelBridge<Model> = new SetModelBridge();
+  private _dispatchBridge: DispatchBridge<Msg> = new DispatchBridge();
 
   asGlobal(name?: string): DevTools<Model, Msg> {
     const varName = name ?? 'teaCupDevTools';
@@ -59,6 +60,7 @@ devTools available as '${varName}'`);
   getProgramProps(): ProgramInterop<Model, Msg> {
     return {
       setModelBridge: this._setModelBridge,
+      dispatchBridge: this._dispatchBridge,
       listener: this.onEvent.bind(this),
       paused: () => {
         return this.isPaused();
@@ -122,7 +124,7 @@ devTools available as '${varName}'`);
   resume() {
     if (this._events.length > 0 && this._pausedOnEvent !== undefined) {
       console.log('🍵 resuming (paused on ' + this._pausedOnEvent + ')');
-      const lastEvent = this.lastEvent();
+      const lastEvent = this.lastEvent;
       if (lastEvent) {
         const model = this.getEventModel(lastEvent);
         this._setModelBridge.setModel(model);
@@ -156,12 +158,12 @@ devTools available as '${varName}'`);
     }
   }
 
-  lastEvent(): ProgramEvent<Model, Msg> {
+  get lastEvent(): ProgramEvent<Model, Msg> {
     return this._events[this._events.length - 1];
   }
 
-  lastModel(): Model {
-    const e = this.lastEvent();
+  get lastModel(): Model {
+    const e = this.lastEvent;
     return this.getEventModel(e);
   }
 
@@ -181,5 +183,13 @@ devTools available as '${varName}'`);
         this._events = newEvents;
       }
     }
+  }
+
+  setModel(model: Model): void {
+    this._setModelBridge.setModel(model);
+  }
+
+  dispatch(msg: Msg): void {
+    this._dispatchBridge.dispatch(msg);
   }
 }
