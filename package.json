@@ -9,7 +9,6 @@
     "@types/node": "^22.10.1",
     "@vitejs/plugin-react": "^4.3.4",
     "bomlint": "1.2.3",
-    "github-release-notes": "0.17.2",
     "prettier": "2.0.5",
     "rimraf": "^6.0.1",
     "typescript": "~5.6.2",
@@ -17,8 +16,6 @@
     "vitest": "^2.1.8"
   },
   "scripts": {
-    "release:gh": "gren release",
-    "release:changelog": "gren changelog --tags all --generate --override",
     "bomlint": "bomlint package.json ./tea-cup/package.json ./samples/package.json"
   }
 }
