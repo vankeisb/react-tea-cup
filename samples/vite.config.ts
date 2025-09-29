@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     manifest: true,
     commonjsOptions: {
-      include: [/react-tea-cup/, /node_modules/],
+      include: [/tea-cup/, /node_modules/],
     },
   },
   optimizeDeps: {
