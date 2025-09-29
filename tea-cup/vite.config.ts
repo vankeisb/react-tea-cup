@@ -6,11 +6,5 @@ export default defineConfig({
   plugins: [react({ jsxRuntime: 'classic' })],
   build: {
     manifest: true,
-    commonjsOptions: {
-      include: [/tea-cup/, /node_modules/],
-    },
-  },
-  optimizeDeps: {
-    include: ['react-tea-cup'],
   },
 });
