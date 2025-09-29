@@ -1,5 +1,6 @@
 {
   "@types/react": ">= 18.0.0 < 20",
   "react-tea-cup": "5.0.0",
+  "tea-cup-fp": "^1.0.2",
   "bomlint": "1.2.3"
 }
