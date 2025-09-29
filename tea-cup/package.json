@@ -1,6 +1,6 @@
 {
   "name": "react-tea-cup",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Put some TEA in your React.",
   "author": "Rémi Van Keisbelck <remi@rvkb.com>",
   "license": "MIT",
@@ -20,7 +20,7 @@
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "tea-cup-fp": "^1.0.0"
+    "tea-cup-fp": "^1.0.2"
   },
   "devDependencies": {
     "@types/jsdom": "^21.1.7",

@@ -27,7 +27,7 @@ import { DispatchBridge, ProgramEvent, ProgramInterop, SetModelBridge } from './
 
 // @ts-ignore
 import * as pkg from '../package.json';
-import React from 'react';
+import * as React from 'react';
 
 export class DevTools<Model, Msg> {
   private _pausedOnEvent?: number;
