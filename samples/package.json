@@ -5,13 +5,13 @@
   "proxy": "https://api.github.com",
   "type": "module",
   "dependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-tea-cup": "5.0.1",
     "tea-cup-fp": "^1.0.2"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --force",
     "compile": "tsc",
     "build": "tsc -b && vite build",
     "test:updatestanpshots": "vitest -u",
@@ -29,8 +29,8 @@
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
-    "@types/react": ">= 18.0.0 < 20",
-    "@types/react-dom": ">= 18.0.3 < 20",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4"
   }
 }
