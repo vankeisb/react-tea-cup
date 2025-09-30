@@ -1,7 +1,7 @@
 {
   "@types/react": "^19.0.0",
   "react": "^19.0.0",
-  "react-tea-cup": "5.0.1",
+  "react-tea-cup": "5.0.2",
   "tea-cup-fp": "^1.0.2",
   "bomlint": "1.2.3"
 }
