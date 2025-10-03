@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { Cmd, Dispatcher, Maybe, noCmd, nothing, Result, Sub, Task } from 'tea-cup-fp';
-import { Program, updateUntilIdle } from 'react-tea-cup';
-import { render } from '@testing-library/react';
+import { Program } from 'react-tea-cup';
+import { render, screen, waitFor } from '@testing-library/react';
 import * as React from 'react';
 
 interface Model {
@@ -71,43 +71,42 @@ function subscriptions(): Sub<Msg> {
 }
 
 describe('program test', () => {
-  test('view should be called after each update', () =>
-    new Promise<void>((done) => {
-      let initCount = 0;
-      let viewCount = 0;
-      let updateCount = 0;
-      let subsCount = 0;
-      const myInit = () => {
-        initCount++;
-        return init();
-      };
-      const myView = (_d: Dispatcher<Msg>, m: Model) => {
-        viewCount++;
-        return view(m);
-      };
-      const myUpdate = (msg: Msg, model: Model) => {
-        updateCount++;
-        return update(msg, model);
-      };
-      const mySubs = (_model: Model) => {
-        subsCount++;
-        return subscriptions();
-      };
+  test('view should be called after each update', async () => {
+    let initCount = 0;
+    let viewCount = 0;
+    let updateCount = 0;
+    let subsCount = 0;
+    const myInit = () => {
+      initCount++;
+      return init();
+    };
+    const myView = (_d: Dispatcher<Msg>, m: Model) => {
+      viewCount++;
+      return view(m);
+    };
+    const myUpdate = (msg: Msg, model: Model) => {
+      updateCount++;
+      return update(msg, model);
+    };
+    const mySubs = (_model: Model) => {
+      subsCount++;
+      return subscriptions();
+    };
 
-      const p = <Program init={myInit} view={myView} update={myUpdate} subscriptions={mySubs} />;
-      const { container } = render(p);
-      expect(container.querySelector('#tmpid')?.textContent).toEqual('tmpid,false');
-      expect(initCount).toBe(1);
-      expect(viewCount).toBe(1);
-      expect(updateCount).toBe(0);
-      expect(subsCount).toBe(1);
-      setTimeout(() => {
-        expect(container.querySelector('#myid')?.textContent).toEqual('myid,true');
-        expect(initCount).toBe(1);
-        expect(viewCount).toBe(3);
-        expect(updateCount).toBe(2);
-        expect(subsCount).toBe(3);
-        done();
-      }, 3000);
-    }));
+    const p = <Program init={myInit} view={myView} update={myUpdate} subscriptions={mySubs} />;
+    const { container } = render(p);
+    expect(container.querySelector('#tmpid')?.textContent).toEqual('tmpid,false');
+    expect(initCount).toBe(1);
+    expect(viewCount).toBe(1);
+    expect(updateCount).toBe(0);
+    expect(subsCount).toBe(1);
+    await expect
+      .poll(() => container.querySelector('#myid')?.textContent, { timeout: 2000, interval: 500 })
+      .toEqual('myid,true');
+    expect(container.querySelector('#myid')?.textContent).toEqual('myid,true');
+    expect(initCount).toBe(1);
+    expect(viewCount).toBe(3);
+    expect(updateCount).toBe(2);
+    expect(subsCount).toBe(3);
+  });
 });
