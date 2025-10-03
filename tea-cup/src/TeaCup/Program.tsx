@@ -129,6 +129,7 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       const [uModel, uCmd] = mac;
       setModel(() => {
         setTimeout(() => {
+          console.log('exec cmd');
           uCmd.execute(dispatch);
         });
         const newSub = props.subscriptions(uModel);
@@ -139,6 +140,7 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       });
     }
     return () => {
+      console.log('cleanup effect');
       if (sub.current) {
         sub.current.release();
       }

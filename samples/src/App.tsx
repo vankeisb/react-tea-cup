@@ -700,16 +700,14 @@ function onUrlChange(l: Location): Msg {
 const devTools = new DevTools<Model, Msg>().setVerbose(true).asGlobal();
 
 const App = () => (
-  <React.StrictMode>
-    <ProgramWithNav
-      init={init}
-      view={view}
-      update={update}
-      subscriptions={subscriptions}
-      onUrlChange={onUrlChange}
-      {...devTools.getProgramProps()}
-    />
-  </React.StrictMode>
+  <ProgramWithNav
+    init={init}
+    view={view}
+    update={update}
+    subscriptions={subscriptions}
+    onUrlChange={onUrlChange}
+    {...devTools.getProgramProps()}
+  />
 );
 
 export default App;
