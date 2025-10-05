@@ -11,13 +11,12 @@
         "jsx": "react",
         "inlineSourceMap": true,
         "inlineSources": true,
-        "esModuleInterop": false
+        "esModuleInterop": false,
+        "skipLibCheck": true
     },
     "compileOnSave": true,
     "exclude": [
         "node_modules",
-        "dist",
-        "**/*.test.ts",
-        "**/*.test.tsx"
+        "dist"
     ]
 }

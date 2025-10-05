@@ -25,7 +25,7 @@
 
 import * as React from 'react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import { Cmd, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-fp';
+import { Cmd, CmdNone, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-fp';
 
 export class DispatchBridge<Msg> {
   private d?: Dispatcher<Msg>;
@@ -84,8 +84,11 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const [model, setModel] = useState<Maybe<Model>>(nothing);
   const sub = useRef<Sub<Msg>>(Sub.none());
   const count = useRef(0);
+  const modelRef = useRef<Maybe<Model>>(nothing);
 
   const dispatch = (msg: Msg) => {
+    const model = modelRef.current;
+
     if (props.paused?.() === true) {
       // do not process messages if we are paused
       return;
@@ -94,27 +97,28 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
     const c = count.current + 1;
     count.current = c;
 
-    setModel((prevModel) => {
-      if (prevModel.type === 'Just') {
-        const m = prevModel.value;
-        const [uModel, uCmd] = props.update(msg, m);
-        setTimeout(() => {
-          uCmd.execute(dispatch);
-        });
-        const newSub = props.subscriptions(uModel);
-        newSub.init(dispatch);
-        sub.current.release();
-        sub.current = newSub;
-        props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
-        return just(uModel);
-      } else {
-        return nothing;
-      }
-    });
+    if (model.type === 'Just') {
+      const m = model.value;
+      const [uModel, uCmd] = props.update(msg, m);
+      const newSub = props.subscriptions(uModel);
+      newSub.init(dispatch);
+      sub.current.release();
+      sub.current = newSub;
+      props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
+      const m2 = just(uModel);
+      setModel(m2);
+      modelRef.current = m2;
+      setTimeout(() => {
+        uCmd.execute(dispatch);
+      });
+    } else {
+      return nothing;
+    }
   };
 
   // init : run once (good old componentDidMount)
   useEffect(() => {
+    let initialized = false;
     if (model.isNothing()) {
       // sub to bridges if any
       props.setModelBridge?.subscribe((model) => {
@@ -127,23 +131,27 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
 
       // and start the MVU
       const [uModel, uCmd] = mac;
-      setModel(() => {
-        setTimeout(() => {
-          console.log('exec cmd');
+
+      const m2 = just(uModel);
+      setModel(m2);
+      modelRef.current = m2;
+      const newSub = props.subscriptions(uModel);
+      sub.current = newSub;
+      props.listener?.({ tag: 'init', count: count.current, mac });
+      initialized = true;
+
+      setTimeout(() => {
+        if (initialized) {
+          newSub.init(dispatch);
           uCmd.execute(dispatch);
-        });
-        const newSub = props.subscriptions(uModel);
-        sub.current = newSub;
-        newSub.init(dispatch);
-        props.listener?.({ tag: 'init', count: count.current, mac });
-        return just(uModel);
+        }
       });
     }
     return () => {
-      console.log('cleanup effect');
       if (sub.current) {
         sub.current.release();
       }
+      initialized = false;
     };
   }, []);
 

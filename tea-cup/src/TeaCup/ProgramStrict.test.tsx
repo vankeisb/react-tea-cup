@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { Cmd, Dispatcher, Sub, Task, Time } from 'tea-cup-fp';
-import { Program } from 'react-tea-cup';
-import { render, screen } from '@testing-library/react';
+import { Program } from './Program';
+import { render } from '@testing-library/react';
 import * as React from 'react';
 
 interface Model {
@@ -42,42 +42,53 @@ const NowCmd: Cmd<Msg> = Task.perform(Time.now(), () => {
   return m;
 });
 
-describe('program test', () => {
-  test('init should not be called twice', async () => {
+describe('program strict test', () => {
+  test('init should be called twice', async () => {
     let initCount = 0;
     const myInit = () => {
       initCount++;
       return init();
     };
-    const p = (
-      <React.StrictMode>
-        <Program init={myInit} view={(d, m) => view(m)} update={update} subscriptions={subscriptions} />
-      </React.StrictMode>
-    );
-    const { container } = render(p);
-    expect(initCount).toBe(1);
+    render(<Program init={myInit} view={(_d, m) => view(m)} update={update} subscriptions={subscriptions} />, {
+      reactStrictMode: true,
+    });
+    expect(initCount).toBe(2);
     await delayed(2000, () => {
-      expect(initCount).toBe(1);
+      expect(initCount).toBe(2);
     });
   });
 
-  test('init should not be called twice with initial cmd', async () => {
+  test('init cmd should not be called twice', async () => {
+    let cmdCount = 0;
+    class MyCmd extends Cmd<Msg> {
+      execute(dispatch: Dispatcher<Msg>): void {
+        cmdCount++;
+      }
+    }
+    const cmd: Cmd<Msg> = new MyCmd();
+    const myInit: () => [Model, Cmd<Msg>] = () => {
+      return [{ value: 'initial' }, cmd];
+    };
+    render(<Program init={myInit} view={(_d, m) => view(m)} update={update} subscriptions={subscriptions} />, {
+      reactStrictMode: true,
+    });
+    await delayed(0, () => {
+      expect(cmdCount).toBe(1);
+    });
+  });
+
+  test('init should be called twice with initial cmd', async () => {
     let initCount = 0;
     const myInit = (): [Model, Cmd<Msg>] => {
       initCount++;
       return [{ value: 'a' }, NowCmd];
     };
-    const p = (
-      <React.StrictMode>
-        <Program init={myInit} view={(_d, m) => view(m)} update={update} subscriptions={subscriptions} />
-      </React.StrictMode>
-    );
-    const { container } = render(p);
-    screen.debug();
-
-    expect(initCount).toBe(1);
+    render(<Program init={myInit} view={(_d, m) => view(m)} update={update} subscriptions={subscriptions} />, {
+      reactStrictMode: true,
+    });
+    expect(initCount).toBe(2);
     await delayed(2000, () => {
-      expect(initCount).toBe(1);
+      expect(initCount).toBe(2);
     });
   });
 
@@ -87,12 +98,9 @@ describe('program test', () => {
       viewCount++;
       return view(m);
     };
-    const p = (
-      <React.StrictMode>
-        <Program init={init} view={myView} update={update} subscriptions={subscriptions} />
-      </React.StrictMode>
-    );
-    render(p);
+    render(<Program init={init} view={myView} update={update} subscriptions={subscriptions} />, {
+      reactStrictMode: true,
+    });
     expect(viewCount).toBe(2);
     await delayed(2000, () => {
       expect(viewCount).toBe(2);
@@ -105,97 +113,113 @@ describe('program test', () => {
       updateCount++;
       return update(msg, model);
     };
-    const p = (
-      <React.StrictMode>
-        <Program init={init} view={(_d, m) => view(m)} update={myUpdate} subscriptions={subscriptions} />
-      </React.StrictMode>
-    );
-    render(p);
+    render(<Program init={init} view={(_d, m) => view(m)} update={myUpdate} subscriptions={subscriptions} />, {
+      reactStrictMode: true,
+    });
     expect(updateCount).toBe(0);
     await delayed(2000, () => {
       expect(updateCount).toBe(0);
     });
   });
-});
 
-test('update should be called once with initial cmd', async () => {
-  let initCount = 0;
-  const myInit = (): [Model, Cmd<Msg>] => {
-    initCount++;
-    return [{ value: 'a' }, NowCmd];
-  };
-  let updateCount = 0;
-  const myUpdate = (msg: Msg, model: Model) => {
-    updateCount++;
-    return update(msg, model);
-  };
-  const p = (
-    <React.StrictMode>
-      <Program init={myInit} view={(_d, m) => view(m)} update={myUpdate} subscriptions={subscriptions} />
-    </React.StrictMode>
-  );
-  const { container } = render(p);
-  await expect
-    .poll(
-      () => {
-        return container.querySelector('#foo')?.textContent;
-      },
-      { timeout: 2000, interval: 500 },
-    )
-    .toEqual('now');
-  expect(initCount).toBe(1);
-  expect(updateCount).toBe(1);
-  await delayed(2000, () => {
+  test('update should be called once with initial cmd', async () => {
+    const myInit = (): [Model, Cmd<Msg>] => {
+      console.log('init()');
+      return [{ value: 'a' }, NowCmd];
+    };
+    let updateCount = 0;
+    const myUpdate = (msg: Msg, model: Model) => {
+      console.log('udpate', msg, model);
+      updateCount++;
+      return update(msg, model);
+    };
+    const { container } = render(
+      <Program init={myInit} view={(_d, m) => view(m)} update={myUpdate} subscriptions={subscriptions} />,
+      { reactStrictMode: true },
+    );
+    await expect
+      .poll(
+        () => {
+          return container.querySelector('#foo')?.textContent;
+        },
+        { timeout: 2000, interval: 500 },
+      )
+      .toEqual('now');
     expect(updateCount).toBe(1);
+    await delayed(2000, () => {
+      expect(updateCount).toBe(1);
+    });
   });
-});
 
-test('subs should be called once without initial cmd', async () => {
-  let subsCount = 0;
-  const mySubs = (_model: Model) => {
-    subsCount++;
-    return subscriptions();
-  };
-  const p = (
-    <React.StrictMode>
-      <Program init={init} view={(_d, m) => view(m)} update={update} subscriptions={mySubs} />
-    </React.StrictMode>
-  );
-  render(p);
-  expect(subsCount).toBe(1);
-  await delayed(2000, () => {
-    expect(subsCount).toBe(1);
+  test('subs should be called twice without initial cmd', async () => {
+    let subsCount = 0;
+    const mySubs = (_model: Model) => {
+      console.log('subscriptions()');
+      subsCount++;
+      return subscriptions();
+    };
+    render(<Program init={init} view={(_d, m) => view(m)} update={update} subscriptions={mySubs} />, {
+      reactStrictMode: true,
+    });
+    expect(subsCount).toBe(2);
+    await delayed(2000, () => {
+      expect(subsCount).toBe(2);
+    });
   });
-});
 
-test('subs should be called once with initial cmd', async () => {
-  const myInit = (): [Model, Cmd<Msg>] => {
-    return [{ value: 'a' }, NowCmd];
-  };
-  let subsCount = 0;
-  const mySubs = (_model: Model) => {
-    subsCount++;
-    return subscriptions();
-  };
-  const p = (
-    <React.StrictMode>
-      <Program init={myInit} view={(_d, m) => view(m)} update={update} subscriptions={mySubs} />
-    </React.StrictMode>
-  );
-  const { container } = render(p);
-  screen.debug();
-  await expect
-    .poll(
-      () => {
-        screen.debug();
-        return container.querySelector('#foo')?.textContent;
-      },
-      { timeout: 2000, interval: 500 },
-    )
-    .toEqual('now');
-  expect(subsCount).toBe(1);
-  await delayed(2000, () => {
-    expect(subsCount).toBe(1);
+  test('subs should be initialized once without initial cmd', async () => {
+    class MySub extends Sub<Msg> {
+      initCount: number = 0;
+
+      protected onInit(): void {
+        this.initCount++;
+      }
+    }
+    const s = new MySub();
+    let subsCount = 0;
+    const mySubs = (_model: Model) => {
+      console.log('subscriptions()');
+      subsCount++;
+      return s;
+    };
+    const p = <React.StrictMode></React.StrictMode>;
+    render(<Program init={init} view={(_d, m) => view(m)} update={update} subscriptions={mySubs} />, {
+      reactStrictMode: true,
+    });
+    expect(subsCount).toBe(2);
+    expect(s.initCount).toBe(0);
+    await delayed(2000, () => {
+      expect(subsCount).toBe(2);
+      expect(s.initCount).toBe(1);
+    });
+  });
+
+  test('subs should be called 3 times with initial cmd', async () => {
+    const myInit = (): [Model, Cmd<Msg>] => {
+      return [{ value: 'a' }, NowCmd];
+    };
+    let subsCount = 0;
+    const mySubs = (_model: Model) => {
+      subsCount++;
+      return subscriptions();
+    };
+    const p = <React.StrictMode></React.StrictMode>;
+    const { container } = render(
+      <Program init={myInit} view={(_d, m) => view(m)} update={update} subscriptions={mySubs} />,
+      { reactStrictMode: true },
+    );
+    await expect
+      .poll(
+        () => {
+          return container.querySelector('#foo')?.textContent;
+        },
+        { timeout: 2000, interval: 500 },
+      )
+      .toEqual('now');
+    expect(subsCount).toBe(3);
+    await delayed(2000, () => {
+      expect(subsCount).toBe(3);
+    });
   });
 });
 
