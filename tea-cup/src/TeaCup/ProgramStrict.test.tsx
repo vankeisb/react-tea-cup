@@ -129,7 +129,7 @@ describe('program strict test', () => {
     };
     let updateCount = 0;
     const myUpdate = (msg: Msg, model: Model) => {
-      console.log('udpate', msg, model);
+      console.log('update()', msg, model);
       updateCount++;
       return update(msg, model);
     };
