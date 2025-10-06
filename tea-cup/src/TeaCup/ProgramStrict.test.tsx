@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { Cmd, Dispatcher, Sub, Task, Time } from 'tea-cup-fp';
 import { Program } from './Program';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import * as React from 'react';
 
 interface Model {
@@ -140,6 +140,7 @@ describe('program strict test', () => {
     await expect
       .poll(
         () => {
+          screen.debug();
           return container.querySelector('#foo')?.textContent;
         },
         { timeout: 2000, interval: 500 },
@@ -167,12 +168,17 @@ describe('program strict test', () => {
     });
   });
 
-  test('subs should be initialized once without initial cmd', async () => {
+  test('subs should be initialized twice with initial cmd', async () => {
     class MySub extends Sub<Msg> {
       initCount: number = 0;
+      releaseCount: number = 0;
 
       protected onInit(): void {
         this.initCount++;
+      }
+
+      protected onRelease(): void {
+        this.releaseCount++;
       }
     }
     const s = new MySub();
@@ -187,10 +193,12 @@ describe('program strict test', () => {
       reactStrictMode: true,
     });
     expect(subsCount).toBe(2);
-    expect(s.initCount).toBe(0);
+    expect(s.initCount).toBe(2);
+    expect(s.releaseCount).toBe(1);
     await delayed(2000, () => {
       expect(subsCount).toBe(2);
-      expect(s.initCount).toBe(1);
+      expect(s.initCount).toBe(2);
+      expect(s.releaseCount).toBe(1);
     });
   });
 

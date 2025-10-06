@@ -20,7 +20,6 @@ function gotDimensions(r: Result<Error, Dimensions>): Msg {
 }
 
 function init(): [Model, Cmd<Msg>] {
-  debugger;
   const cmd: Cmd<Msg> = Task.attempt(
     Task.fromPromise(
       () => new Promise<string>((res) => setTimeout(() => res('myid'), 1000)),
@@ -31,7 +30,6 @@ function init(): [Model, Cmd<Msg>] {
 }
 
 function view(model: Model) {
-  debugger;
   const id = model.id.withDefault('tmpid');
   return (
     <div id={id} style={{ backgroundColor: 'red', height: '30px', width: '200px' }}>
@@ -41,7 +39,6 @@ function view(model: Model) {
 }
 
 function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
-  debugger;
   switch (msg.tag) {
     case 'got-load': {
       const newModel: Model = {
@@ -68,7 +65,7 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
       );
 
       const cmd: Cmd<Msg> = t2.map((task) => Task.attempt(task, gotDimensions)).withDefaultSupply(() => Cmd.none());
-      return [newModel, cmd];
+      return [newModel, Cmd.batch([cmd, Cmd.none()])];
     }
     case 'got-dimensions': {
       const newModel: Model = {
@@ -98,9 +95,9 @@ const App = () => (
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  //   <React.StrictMode>
+  <App />,
+  //   </React.StrictMode>,
 );
 
 // @ts-ignore

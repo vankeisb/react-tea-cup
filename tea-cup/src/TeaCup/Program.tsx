@@ -77,83 +77,105 @@ export interface ProgramProps<Model, Msg> extends ProgramInterop<Model, Msg> {
   subscriptions: (model: Model) => Sub<Msg>;
 }
 
+const createNewObject = (): Record<string, never> => ({});
+
+export default function useForceUpdate(): VoidFunction {
+  const [, setValue] = useState<Record<string, never>>(createNewObject);
+
+  return React.useCallback((): void => {
+    setValue(createNewObject());
+  }, []);
+}
+
+interface State<Model, Msg> {
+  model: Model;
+  cmds: Cmd<Msg>[];
+  sub: Sub<Msg>;
+}
+
 /**
  * A React component that holds a TEA "program", implementing the MVU loop.
  */
 export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
-  const [model, setModel] = useState<Maybe<Model>>(nothing);
-  const sub = useRef<Sub<Msg>>(Sub.none());
   const count = useRef(0);
-  const modelRef = useRef<Maybe<Model>>(nothing);
+  const [state, setState] = useState<State<Model, Msg> | null>(null);
 
   const dispatch = (msg: Msg) => {
-    const model = modelRef.current;
-
+    debugger;
     if (props.paused?.() === true) {
       // do not process messages if we are paused
       return;
     }
-
-    const c = count.current + 1;
-    count.current = c;
-
-    if (model.type === 'Just') {
-      const m = model.value;
-      const [uModel, uCmd] = props.update(msg, m);
-      const newSub = props.subscriptions(uModel);
-      newSub.init(dispatch);
-      sub.current.release();
-      sub.current = newSub;
-      props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
-      const m2 = just(uModel);
-      setModel(m2);
-      modelRef.current = m2;
-      setTimeout(() => {
-        uCmd.execute(dispatch);
-      });
-    } else {
-      return nothing;
-    }
+    setState((prev) => {
+      if (prev) {
+        const { cmds, model, sub } = prev;
+        const [uModel, uCmd] = props.update(msg, model);
+        const newSub = props.subscriptions(uModel);
+        newSub.init(dispatch);
+        sub.release();
+        props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
+        count.current = count.current + 1;
+        return { model: uModel, cmds: [...cmds, uCmd], sub: newSub };
+      } else {
+        return null;
+      }
+    });
   };
+
+  useEffect(() => {
+    debugger;
+    let c = null;
+    if (state && state.cmds.length > 0) {
+      const [cmd, ...rest] = state.cmds;
+      setState({
+        ...state,
+        cmds: rest,
+      });
+      cmd.execute(dispatch);
+    }
+  }, [state]);
 
   // init : run once (good old componentDidMount)
   useEffect(() => {
-    let initialized = false;
-    if (model.isNothing()) {
-      // sub to bridges if any
-      props.setModelBridge?.subscribe((model) => {
-        setModel(just(model));
-      });
-      props.dispatchBridge?.subscribe(dispatch);
-
-      // init
-      const mac = props.init();
-
-      // and start the MVU
-      const [uModel, uCmd] = mac;
-
-      const m2 = just(uModel);
-      setModel(m2);
-      modelRef.current = m2;
-      const newSub = props.subscriptions(uModel);
-      sub.current = newSub;
-      props.listener?.({ tag: 'init', count: count.current, mac });
-      initialized = true;
-
-      setTimeout(() => {
-        if (initialized) {
-          newSub.init(dispatch);
-          uCmd.execute(dispatch);
+    debugger;
+    // sub to bridges if any
+    props.setModelBridge?.subscribe((model) => {
+      setState((state) => {
+        if (state) {
+          return {
+            ...state,
+            model,
+          };
+        } else {
+          return null;
         }
       });
-    }
+    });
+    props.dispatchBridge?.subscribe(dispatch);
+
+    // init
+    const mac = props.init();
+
+    // and start the MVU
+    const [uModel, uCmd] = mac;
+
+    // const m2 = just(uModel);
+    // modelRef.current = m2;
+    const newSub = props.subscriptions(uModel);
+    // sub.current = newSub;
+    props.listener?.({ tag: 'init', count: count.current, mac });
+    newSub.init(dispatch);
+    setState({ model: uModel, cmds: [uCmd], sub: newSub });
+    count.current = count.current + 1;
+    // forceUpdate();
     return () => {
-      if (sub.current) {
-        sub.current.release();
-      }
-      initialized = false;
+      newSub.release();
     };
   }, []);
 
-  return model.map((m) => props.view(dispatch, m)).withDefault(<></>);
+  if (state) {
+    return props.view(dispatch, state.model);
+  } else {
+    return <></>;
+  }
 }
