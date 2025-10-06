@@ -110,7 +110,7 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       modelRef.current = m2;
       setTimeout(() => {
         uCmd.execute(dispatch);
-      });
+      },1);
     } else {
       return nothing;
     }
