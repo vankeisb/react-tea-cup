@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { Cmd, Dispatcher, Maybe, noCmd, nothing, Result, Sub, Task } from 'tea-cup-fp';
-import { Program, updateUntilIdle } from 'react-tea-cup';
+import { Program } from './Program';
 import { render } from '@testing-library/react';
 import * as React from 'react';
 

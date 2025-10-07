@@ -25,7 +25,7 @@
 
 import * as React from 'react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import { Cmd, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-fp';
+import { Cmd, CmdNone, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-fp';
 
 export class DispatchBridge<Msg> {
   private d?: Dispatcher<Msg>;
@@ -77,10 +77,148 @@ export interface ProgramProps<Model, Msg> extends ProgramInterop<Model, Msg> {
   subscriptions: (model: Model) => Sub<Msg>;
 }
 
+export class Program<Model, Msg> extends React.Component<ProgramProps<Model, Msg>, never> {
+  private readonly bd: Dispatcher<Msg>;
+  private count: number = 0;
+  private initialCmd?: Cmd<any>;
+  private currentModel?: Model;
+  private currentSub?: Sub<Msg>;
+
+  constructor(props: Readonly<ProgramProps<Model, Msg>>) {
+    super(props);
+    this.bd = this.dispatch.bind(this);
+  }
+
+  //   private fireEvent(e: DevToolsEvent<Model, Msg>) {
+  //     if (this.props.devTools) {
+  //       this.props.devTools.onEvent(e);
+  //     }
+  //   }
+
+  dispatch(msg: Msg) {
+    if (this.currentSub === undefined) {
+      return;
+    }
+    // if (this.props.devTools && this.props.devTools.isPaused()) {
+    //   // do not process messages if we are paused
+    //   return;
+    // }
+
+    this.count++;
+    const count = this.count;
+    const currentModel = this.currentModel;
+    if (currentModel !== undefined) {
+      const updated = this.props.update(msg, currentModel);
+      //   if (this.props.devTools) {
+      //     this.fireEvent({
+      //       tag: 'updated',
+      //       msgNum: count,
+      //       time: new Date().getTime(),
+      //       msg: msg,
+      //       modelBefore: currentModel,
+      //       modelAfter: updated[0],
+      //       cmd: updated[1],
+      //     });
+      //   }
+      const newSub = this.props.subscriptions(updated[0]);
+      const prevSub = this.currentSub;
+
+      const d = this.dispatch.bind(this);
+
+      newSub.init(d);
+      prevSub?.release();
+
+      // perform commands in a separate timout, to
+      // make sure that this dispatch is done
+      const cmd = updated[1];
+      if (!(cmd instanceof CmdNone)) {
+        setTimeout(() => {
+          // console.log("dispatch: processing commands");
+          // debug("performing command", updated[1]);
+          updated[1].execute(d);
+          // debug("<<<  done");
+        }, 0);
+      }
+
+      const needsUpdate = this.currentModel !== updated[0];
+
+      this.currentModel = updated[0];
+      this.currentSub = newSub;
+
+      // trigger rendering
+      if (needsUpdate) {
+        this.forceUpdate();
+      }
+    }
+  }
+
+  shouldComponentUpdate(nextProps: Readonly<ProgramProps<Model, Msg>>, nextState: never, nextContext: any): boolean {
+    return true;
+  }
+
+  componentWillUnmount() {
+    this.currentSub?.release();
+    this.currentSub = undefined;
+  }
+
+  componentDidMount() {
+    // const { devTools } = this.props;
+    // if (devTools) {
+    //   devTools.connected(this);
+    // }
+    // const mac = (devTools && devTools.initFromSnapshot()) || this.props.init();
+    // if (devTools) {
+    //   this.fireEvent({
+    //     tag: 'init',
+    //     time: new Date().getTime(),
+    //     model: mac[0],
+    //   });
+    // }
+    const mac = this.props.init();
+    const sub = this.props.subscriptions(mac[0]);
+    this.currentModel = mac[0];
+    this.currentSub = sub;
+    // connect to sub
+    sub.init(this.bd);
+    this.initialCmd = mac[1];
+
+    // trigger initial command
+    setTimeout(() => {
+      this.initialCmd && this.initialCmd.execute(this.bd);
+    }, 0);
+
+    // trigger rendering after mount
+    this.forceUpdate();
+  }
+
+  render(): ReactNode {
+    if (this.currentModel !== undefined && this.bd) {
+      return this.props.view(this.bd, this.currentModel);
+    }
+    return null;
+  }
+
+  setModel(model: Model, withSubs: boolean) {
+    if (this.bd) {
+      let newSub: Sub<Msg>;
+      if (withSubs) {
+        newSub = this.props.subscriptions(model);
+      } else {
+        newSub = Sub.none();
+      }
+      newSub.init(this.bd);
+      this.currentSub && this.currentSub.release();
+      this.currentModel = model;
+      this.currentSub = newSub;
+      this.forceUpdate();
+    }
+  }
+}
+
 /**
  * A React component that holds a TEA "program", implementing the MVU loop.
  */
-export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
+export function ProgramFunc<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const [model, setModel] = useState<Maybe<Model>>(nothing);
   const sub = useRef<Sub<Msg>>(Sub.none());
   const count = useRef(0);
