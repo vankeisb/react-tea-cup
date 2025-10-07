@@ -95,7 +95,6 @@ describe('program test batch', () => {
     await expect
       .poll(
         () => {
-          screen.debug();
           return container.querySelector('#foo')?.textContent;
         },
         { timeout: 2000, interval: 500 },
@@ -120,25 +119,16 @@ describe('program test batch', () => {
     });
   });
 
-  test.skip('init/update/view/subs count strict', async () => {
+  test('init/update/view/subs count strict', async () => {
     await doTest(true, {
-      initCount1: 2,
+      initCount1: 1,
       viewCount1: 2,
       updateCount1: 0,
-      subsCount1: 2,
-      initCount2: 2,
-      viewCount2: 6,
-      updateCount2: 2,
-      subsCount2: 4,
+      subsCount1: 1,
+      initCount2: 1,
+      viewCount2: 10,
+      updateCount2: 4,
+      subsCount2: 5,
     });
   });
 });
-
-function delayed(ms: number, f: () => void): Promise<void> {
-  return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      f();
-      resolve();
-    }, ms);
-  });
-}
