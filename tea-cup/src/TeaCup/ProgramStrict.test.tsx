@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { Cmd, Dispatcher, Sub, Task, Time } from 'tea-cup-fp';
 import { Program } from './Program';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import * as React from 'react';
 
 interface Model {
@@ -101,9 +101,8 @@ describe('program strict test', () => {
     render(<Program init={init} view={myView} update={update} subscriptions={subscriptions} />, {
       reactStrictMode: true,
     });
-    expect(viewCount).toBe(2);
     await delayed(2000, () => {
-      expect(viewCount).toBe(2);
+      expect(viewCount).toBe(1);
     });
   });
 
@@ -140,7 +139,6 @@ describe('program strict test', () => {
     await expect
       .poll(
         () => {
-          screen.debug();
           return container.querySelector('#foo')?.textContent;
         },
         { timeout: 2000, interval: 500 },

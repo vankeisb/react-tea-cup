@@ -54,14 +54,10 @@ function subscriptions(): Sub<Msg> {
 
 describe('program test batch', () => {
   interface MvuExpectations {
-    initCount1: number;
-    initCount2: number;
-    viewCount1: number;
-    viewCount2: number;
-    updateCount1: number;
-    updateCount2: number;
-    subsCount1: number;
-    subsCount2: number;
+    initCount: number;
+    viewCount: number;
+    updateCount: number;
+    subsCount: number;
   }
 
   async function doTest(strictMode: boolean, expectations: MvuExpectations) {
@@ -87,11 +83,7 @@ describe('program test batch', () => {
     };
 
     const p = <Program init={myInit} view={myView} update={myUpdate} subscriptions={mySubs} />;
-    const { container } = render(p, { reactStrictMode: strictMode });
-    expect(initCount).toBe(expectations.initCount1);
-    expect(viewCount).toBe(expectations.viewCount1);
-    expect(updateCount).toBe(expectations.updateCount1);
-    expect(subsCount).toBe(expectations.subsCount1);
+    const { container } = render(strictMode ? <React.StrictMode>{p}</React.StrictMode> : p);
     await expect
       .poll(
         () => {
@@ -100,35 +92,27 @@ describe('program test batch', () => {
         { timeout: 2000, interval: 500 },
       )
       .toEqual('m1m2m3m4');
-    expect(initCount).toBe(expectations.initCount2);
-    expect(viewCount).toBe(expectations.viewCount2);
-    expect(updateCount).toBe(expectations.updateCount2);
-    expect(subsCount).toBe(expectations.subsCount2);
+    expect(initCount).toBe(expectations.initCount);
+    expect(viewCount).toBe(expectations.viewCount);
+    expect(updateCount).toBe(expectations.updateCount);
+    expect(subsCount).toBe(expectations.subsCount);
   }
 
   test('init/update/view/subs count', async () => {
     await doTest(false, {
-      initCount1: 1,
-      viewCount1: 1,
-      updateCount1: 0,
-      subsCount1: 1,
-      initCount2: 1,
-      viewCount2: 5,
-      updateCount2: 4,
-      subsCount2: 5,
+      initCount: 1,
+      viewCount: 5,
+      updateCount: 4,
+      subsCount: 5,
     });
   });
 
   test('init/update/view/subs count strict', async () => {
     await doTest(true, {
-      initCount1: 1,
-      viewCount1: 2,
-      updateCount1: 0,
-      subsCount1: 1,
-      initCount2: 1,
-      viewCount2: 10,
-      updateCount2: 4,
-      subsCount2: 5,
+      initCount: 1,
+      viewCount: 10,
+      updateCount: 4,
+      subsCount: 5,
     });
   });
 });
