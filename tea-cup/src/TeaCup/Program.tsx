@@ -26,6 +26,7 @@
 import * as React from 'react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { Cmd, Dispatcher, just, Maybe, nothing, Sub } from 'tea-cup-fp';
+import { flushSync } from 'react-dom';
 
 export class DispatchBridge<Msg> {
   private d?: Dispatcher<Msg>;
@@ -82,6 +83,10 @@ export interface ProgramProps<Model, Msg> extends ProgramInterop<Model, Msg> {
  */
 export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const [model, setModel] = useState<Maybe<Model>>(nothing);
+
+  const cmd = useRef<Cmd<Msg>>(Cmd.none());
+  // this could go in state only but as we need it effects it's easier with a ref
+  const modelRef = useRef(model);
   const sub = useRef<Sub<Msg>>(Sub.none());
   const count = useRef(0);
 
@@ -94,31 +99,32 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
     const c = count.current + 1;
     count.current = c;
 
-    setModel((prevModel) => {
-      if (prevModel.type === 'Just') {
-        const m = prevModel.value;
-        const [uModel, uCmd] = props.update(msg, m);
-        setTimeout(() => {
-          uCmd.execute(dispatch);
-        });
-        const newSub = props.subscriptions(uModel);
-        newSub.init(dispatch);
-        sub.current.release();
-        sub.current = newSub;
-        props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
-        return just(uModel);
-      } else {
-        return nothing;
-      }
-    });
+    if (modelRef.current.type === 'Just') {
+      const m = modelRef.current.value;
+      const [uModel, uCmd] = props.update(msg, m);
+      modelRef.current = just(uModel);
+      cmd.current = uCmd;
+      const newSub = props.subscriptions(uModel);
+      newSub.init(dispatch);
+      sub.current.release();
+      sub.current = newSub;
+      props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
+      setTimeout(() => {
+        uCmd.execute(dispatch);
+      });
+      flushSync(() => {
+        setModel(just(uModel));
+      });
+    }
   };
 
   // init : run once (good old componentDidMount)
   useEffect(() => {
-    if (model.isNothing()) {
+    if (modelRef.current.isNothing()) {
       // sub to bridges if any
       props.setModelBridge?.subscribe((model) => {
         setModel(just(model));
+        modelRef.current = just(model);
       });
       props.dispatchBridge?.subscribe(dispatch);
 
@@ -127,23 +133,19 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
 
       // and start the MVU
       const [uModel, uCmd] = mac;
-      setModel(() => {
-        setTimeout(() => {
-          uCmd.execute(dispatch);
-        });
-        const newSub = props.subscriptions(uModel);
-        sub.current = newSub;
-        newSub.init(dispatch);
-        props.listener?.({ tag: 'init', count: count.current, mac });
-        return just(uModel);
+      setModel(just(uModel));
+      modelRef.current = just(uModel);
+      cmd.current = uCmd;
+      const newSub = props.subscriptions(uModel);
+      sub.current = newSub;
+      newSub.init(dispatch);
+      props.listener?.({ tag: 'init', count: count.current, mac });
+
+      setTimeout(() => {
+        uCmd.execute(dispatch);
       });
     }
-    return () => {
-      if (sub.current) {
-        sub.current.release();
-      }
-    };
-  }, []);
+  });
 
   return model.map((m) => props.view(dispatch, m)).withDefault(<></>);
 }
