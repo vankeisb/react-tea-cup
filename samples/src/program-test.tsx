@@ -84,13 +84,15 @@ function subscriptions(): Sub<Msg> {
 const devTools = new DevTools<Model, Msg>().setVerbose(true).asGlobal();
 
 const App = () => (
-  <Program
-    init={init}
-    view={(_d, model) => view(model)}
-    update={update}
-    subscriptions={subscriptions}
-    {...devTools.getProgramProps()}
-  />
+  <React.StrictMode>
+    <Program
+      init={init}
+      view={(_d, model) => view(model)}
+      update={update}
+      subscriptions={subscriptions}
+      {...devTools.getProgramProps()}
+    />
+  </React.StrictMode>
 );
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);

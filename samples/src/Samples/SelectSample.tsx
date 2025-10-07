@@ -56,7 +56,6 @@ export function view(dispatch: Dispatcher<Msg>, model: Model) {
       <select
         value={value}
         onChange={(e) => {
-          console.log('FW onChange', e.target.value);
           dispatch({ type: 'selected', value: e.target.value });
         }}
       >
