@@ -7,7 +7,7 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-tea-cup": "5.0.2",
+    "react-tea-cup": "5.0.3",
     "tea-cup-fp": "^1.0.2"
   },
   "scripts": {
