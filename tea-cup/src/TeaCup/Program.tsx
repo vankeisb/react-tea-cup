@@ -109,11 +109,11 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       sub.current.release();
       sub.current = newSub;
       props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
-      setTimeout(() => {
-        uCmd.execute(dispatch);
-      });
       flushSync(() => {
         setModel(just(uModel));
+      });
+      setTimeout(() => {
+        uCmd.execute(dispatch);
       });
     }
   };

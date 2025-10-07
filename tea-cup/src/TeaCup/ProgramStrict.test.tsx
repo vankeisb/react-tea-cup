@@ -123,12 +123,10 @@ describe('program strict test', () => {
 
   test('update should be called once with initial cmd', async () => {
     const myInit = (): [Model, Cmd<Msg>] => {
-      console.log('init()');
       return [{ value: 'a' }, NowCmd];
     };
     let updateCount = 0;
     const myUpdate = (msg: Msg, model: Model) => {
-      console.log('udpate', msg, model);
       updateCount++;
       return update(msg, model);
     };
@@ -153,7 +151,6 @@ describe('program strict test', () => {
   test('subs should be called once without initial cmd', async () => {
     let subsCount = 0;
     const mySubs = (_model: Model) => {
-      console.log('subscriptions()');
       subsCount++;
       return subscriptions();
     };
