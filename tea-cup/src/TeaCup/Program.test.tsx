@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { Cmd, Dispatcher, Maybe, noCmd, nothing, Result, Sub, Task } from 'tea-cup-fp';
-import { Program, updateUntilIdle } from 'react-tea-cup';
-import { render } from '@testing-library/react';
+import { Cmd, Dispatcher, just, Maybe, noCmd, nothing, Result, Sub, Task } from 'tea-cup-fp';
+import { Program } from './Program';
+import { updateUntilCondition, updateUntilIdle } from './Testing';
+import { render, RenderResult } from '@testing-library/react';
 import * as React from 'react';
 
 interface Model {
@@ -110,4 +111,15 @@ describe('program test', () => {
         done();
       }, 3000);
     }));
+
+  test('update until condition', () => {
+    return updateUntilCondition(
+      { init: init, view: (_d, model) => view(model), update: update, subscriptions: subscriptions },
+      (node) => render(node),
+      (model) => model.other,
+    ).then(([model, { container }]) => {
+      expect(model).toEqual({ id: just('myid'), other: true });
+      expect(container.querySelector('#myid')?.textContent).toEqual('myid,true');
+    });
+  });
 });

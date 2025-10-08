@@ -23,7 +23,10 @@
  *
  */
 
-import { Dispatcher, Cmd } from 'tea-cup-fp';
+import { Dispatcher, Cmd, Sub, Maybe, nothing, just } from 'tea-cup-fp';
+import { ReactElement } from 'react';
+import { ProgramProps, Program, DispatchBridge } from './Program';
+import * as React from 'react';
 
 export class Testing<M> {
   private _dispatched: M | undefined;
@@ -44,11 +47,48 @@ export class Testing<M> {
   }
 
   public dispatchFrom(cmd: Cmd<M>): Promise<M> {
-    return new Promise<M>((resolve) => {
+    return new Promise<M>((resolve, reject) => {
       const dispatchedMsg = (msg: M) => {
         resolve(msg);
       };
       cmd.execute(dispatchedMsg);
     });
   }
+}
+
+type RenderFun<Model, Msg, T> = (node: ReactElement<ProgramProps<Model, Msg>>) => T;
+type Condition<Model, T> = (m: Model, t: T) => boolean;
+
+export function updateUntilCondition<Model, Msg, T>(
+  props: ProgramProps<Model, Msg>,
+  render: RenderFun<Model, Msg, T>,
+  condition: Condition<Model, T>,
+): Promise<[Model, T]> {
+  return new Promise((resolve) => {
+    let wrapper: Maybe<T> = nothing;
+    wrapper = just(
+      render(
+        <Program
+          init={props.init}
+          view={(d, model) => {
+            const r = props.view(d, model);
+            switch (wrapper.type) {
+              case 'Just': {
+                if (condition(model, wrapper.value)) {
+                  resolve([model, wrapper.value]);
+                }
+                break;
+              }
+              default: {
+                break;
+              }
+            }
+            return r;
+          }}
+          update={props.update}
+          subscriptions={props.subscriptions}
+        />,
+      ),
+    );
+  });
 }
