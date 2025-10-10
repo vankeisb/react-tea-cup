@@ -90,7 +90,7 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const sub = useRef<Sub<Msg>>(Sub.none());
   const count = useRef(0);
 
-  const dispatch = (msg: Msg) => {
+  const dispatch: Dispatcher<Msg> = (msg: Msg, flush?: boolean) => {
     if (props.paused?.() === true) {
       // do not process messages if we are paused
       return;
@@ -109,9 +109,13 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       sub.current.release();
       sub.current = newSub;
       props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
-      flushSync(() => {
+      if (flush === false) {
         setModel(just(uModel));
-      });
+      } else {
+        flushSync(() => {
+          setModel(just(uModel));
+        });
+      }
       setTimeout(() => {
         uCmd.execute(dispatch);
       });
