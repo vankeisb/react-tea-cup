@@ -76,6 +76,7 @@ export interface ProgramProps<Model, Msg> extends ProgramInterop<Model, Msg> {
   view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode;
   update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
   subscriptions: (model: Model) => Sub<Msg>;
+  flushSyncDefault?: boolean;
 }
 
 /**
@@ -109,7 +110,8 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       sub.current.release();
       sub.current = newSub;
       props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
-      if (flush === false) {
+      const doFlush = needsFlush(props.flushSyncDefault, flush);
+      if (doFlush === false) {
         setModel(just(uModel));
       } else {
         flushSync(() => {
@@ -152,4 +154,15 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   });
 
   return model.map((m) => props.view(dispatch, m)).withDefault(<></>);
+}
+
+export function needsFlush(defaultValue: boolean | undefined, flush: boolean | undefined): boolean {
+  if (flush === false) {
+    return false;
+  } else if (flush === undefined) {
+    if (defaultValue !== undefined) {
+      return defaultValue;
+    }
+  }
+  return true;
 }
