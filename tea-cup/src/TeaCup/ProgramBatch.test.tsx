@@ -115,4 +115,54 @@ describe('program test batch', () => {
       subsCount: 5,
     });
   });
+
+  test('dispatch no flush', async () => {
+    class MyCmd extends Cmd<Msg> {
+      constructor(readonly flush: boolean) {
+        super();
+      }
+
+      execute(dispatch: Dispatcher<Msg>): void {
+        for (let i = 0; i < 10; i++) {
+          dispatch({ tag: 'm1' }, this.flush);
+        }
+      }
+    }
+
+    const doTest = async (
+      flush: boolean,
+      expectedText: string,
+      expectedViewCount: number,
+      expectedUpdateCount: number,
+    ) => {
+      let viewCount = 0;
+      let updateCount = 0;
+      const myView = (_d: Dispatcher<Msg>, m: Model) => {
+        viewCount++;
+        return view(m);
+      };
+      const myUpdate = (msg: Msg, model: Model) => {
+        updateCount++;
+        return update(msg, model);
+      };
+
+      const init: () => [Model, Cmd<Msg>] = () => [{ value: '' }, new MyCmd(flush)];
+      const p = <Program init={init} view={myView} update={myUpdate} subscriptions={subscriptions} />;
+      const { container } = render(p);
+      await expect
+        .poll(
+          () => {
+            // screen.debug();
+            return container.querySelector('#foo')?.textContent;
+          },
+          { timeout: 2000, interval: 500 },
+        )
+        .toEqual(expectedText);
+      expect(viewCount).toBe(expectedViewCount);
+      expect(updateCount).toBe(expectedUpdateCount);
+    };
+
+    await doTest(true, 'm1m1m1m1m1m1m1m1m1m1m3m3m3m3m3m3m3m3m3m3', 21, 20);
+    await doTest(false, 'm1m1m1m1m1m1m1m1m1m1m3m3m3m3m3m3m3m3m3m3', 12, 20);
+  });
 });

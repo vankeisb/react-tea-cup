@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import { Cmd, Dispatcher, Maybe, noCmd, nothing, Result, Sub, Task } from 'tea-cup-fp';
-import { Program, updateUntilIdle } from 'react-tea-cup';
 import { render } from '@testing-library/react';
 import * as React from 'react';
+import { needsFlush, Program } from './Program';
 
 interface Model {
   readonly id: Maybe<string>;
@@ -110,4 +110,16 @@ describe('program test', () => {
         done();
       }, 3000);
     }));
+
+  test('needs to flush default', () => {
+    expect(needsFlush(undefined, undefined)).toBe(true);
+    expect(needsFlush(undefined, true)).toBe(true);
+    expect(needsFlush(undefined, false)).toBe(false);
+    expect(needsFlush(true, undefined)).toBe(true);
+    expect(needsFlush(true, true)).toBe(true);
+    expect(needsFlush(true, false)).toBe(false);
+    expect(needsFlush(false, undefined)).toBe(false);
+    expect(needsFlush(false, true)).toBe(true);
+    expect(needsFlush(false, false)).toBe(false);
+  });
 });

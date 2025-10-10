@@ -76,6 +76,7 @@ export interface ProgramProps<Model, Msg> extends ProgramInterop<Model, Msg> {
   view: (dispatch: Dispatcher<Msg>, model: Model) => ReactNode;
   update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
   subscriptions: (model: Model) => Sub<Msg>;
+  flushSyncDefault?: boolean;
 }
 
 /**
@@ -90,7 +91,7 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   const sub = useRef<Sub<Msg>>(Sub.none());
   const count = useRef(0);
 
-  const dispatch = (msg: Msg) => {
+  const dispatch: Dispatcher<Msg> = (msg: Msg, flush?: boolean) => {
     if (props.paused?.() === true) {
       // do not process messages if we are paused
       return;
@@ -109,9 +110,14 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
       sub.current.release();
       sub.current = newSub;
       props.listener?.({ tag: 'update', count: count.current, msg, mac: [uModel, uCmd] });
-      flushSync(() => {
+      const doFlush = needsFlush(props.flushSyncDefault, flush);
+      if (doFlush === false) {
         setModel(just(uModel));
-      });
+      } else {
+        flushSync(() => {
+          setModel(just(uModel));
+        });
+      }
       setTimeout(() => {
         uCmd.execute(dispatch);
       });
@@ -148,4 +154,15 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   });
 
   return model.map((m) => props.view(dispatch, m)).withDefault(<></>);
+}
+
+export function needsFlush(defaultValue: boolean | undefined, flush: boolean | undefined): boolean {
+  if (flush === false) {
+    return false;
+  } else if (flush === undefined) {
+    if (defaultValue !== undefined) {
+      return defaultValue;
+    }
+  }
+  return true;
 }
