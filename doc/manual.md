@@ -126,7 +126,19 @@ which is passed to you by tea-cup :
     Add user
 </button>
 ```
-         
+
+The Dispatcher is managed by the tea-cup `Program`, and passed to participants where needed. 
+
+It's a function accepting the following arguments :
+* `msg` : the `Msg` to dispatch (will call `update` with this `msg` and the current `Model`)
+* `flushSync` (introduced in 5.1.0) : an optional `boolean` that allows the user to allow state update batching or not. `Program` will call React's `flushSync()` by default, in order to make sure that `view()` is called after every `update()`. The defaults can be changed in `Program` props, and overriden at every call to dispatch.
+
+```typescript
+// make sure DOM has been rendered after update(msg, model)
+dispatch(msg, true); 
+```
+
+> You can also `dispatch()` messages from custom `Cmd`s and `Sub`s.        
 
 ### Update
     
