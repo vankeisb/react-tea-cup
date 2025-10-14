@@ -37,7 +37,7 @@ export interface NavProps<Model, Msg> extends ProgramInterop<Model, Msg> {
   readonly view: (dispatch: Dispatcher<Msg>, m: Model) => ReactNode;
   readonly update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
   readonly subscriptions: (model: Model) => Sub<Msg>;
-  flushSyncDefault?: boolean;
+  readonly flushSyncDefault?: boolean;
 }
 
 export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
