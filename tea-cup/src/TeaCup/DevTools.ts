@@ -65,6 +65,9 @@ devTools available as '${varName}'`);
       paused: () => {
         return this.isPaused();
       },
+      shutdownHook: () => {
+        console.log('🍵 program shutdown');
+      },
     };
   }
 

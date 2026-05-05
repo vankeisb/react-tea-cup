@@ -112,7 +112,7 @@ describe('program test batch', () => {
       initCount: 1,
       viewCount: 10,
       updateCount: 4,
-      subsCount: 5,
+      subsCount: 6,
     });
   });
 
