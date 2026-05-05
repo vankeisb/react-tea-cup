@@ -54,6 +54,7 @@ export function ProgramWithNav<Model, Msg>(props: NavProps<Model, Msg>) {
       setModelBridge={props.setModelBridge}
       paused={props.paused}
       flushSyncDefault={props.flushSyncDefault}
+      shutdownHook={props.shutdownHook}
     />
   );
 }

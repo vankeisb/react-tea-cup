@@ -65,6 +65,7 @@ export interface ProgramInterop<Model, Msg> {
   setModelBridge?: SetModelBridge<Model>;
   listener?: ProgramListener<Model, Msg>;
   paused?: () => boolean;
+  shutdownHook?: () => void;
 }
 
 /**
@@ -126,32 +127,49 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
 
   // init : run once (good old componentDidMount)
   useEffect(() => {
-    if (modelRef.current.isNothing()) {
-      // sub to bridges if any
-      props.setModelBridge?.subscribe((model) => {
-        setModel(just(model));
-        modelRef.current = just(model);
-      });
-      props.dispatchBridge?.subscribe(dispatch);
+    const current = modelRef.current;
+    switch (current.type) {
+      case 'Nothing': {
+        // sub to bridges if any
+        props.setModelBridge?.subscribe((model) => {
+          setModel(just(model));
+          modelRef.current = just(model);
+        });
+        props.dispatchBridge?.subscribe(dispatch);
 
-      // init
-      const mac = props.init();
+        // init
+        const mac = props.init();
 
-      // and start the MVU
-      const [uModel, uCmd] = mac;
-      setModel(just(uModel));
-      modelRef.current = just(uModel);
-      cmd.current = uCmd;
-      const newSub = props.subscriptions(uModel);
-      sub.current = newSub;
-      newSub.init(dispatch);
-      props.listener?.({ tag: 'init', count: count.current, mac });
+        // and start the MVU
+        const [uModel, uCmd] = mac;
+        setModel(just(uModel));
+        modelRef.current = just(uModel);
+        cmd.current = uCmd;
+        const newSub = props.subscriptions(uModel);
+        sub.current = newSub;
+        newSub.init(dispatch);
+        props.listener?.({ tag: 'init', count: count.current, mac });
 
-      setTimeout(() => {
-        uCmd.execute(dispatch);
-      });
+        setTimeout(() => {
+          uCmd.execute(dispatch);
+        });
+        break;
+      }
+      case 'Just': {
+        const newSub = props.subscriptions(current.value);
+        sub.current = newSub;
+        newSub.init(dispatch);
+        break;
+      }
     }
-  });
+
+    return () => {
+      if (sub.current) {
+        sub.current.release();
+      }
+      props.shutdownHook?.();
+    };
+  }, []);
 
   return model.map((m) => props.view(dispatch, m)).withDefault(<></>);
 }

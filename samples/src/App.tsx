@@ -24,7 +24,7 @@
  */
 
 import React from 'react';
-import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task } from 'tea-cup-fp';
+import { Cmd, Dispatcher, just, map, Maybe, maybeOf, noCmd, nothing, Sub, Task, Time } from 'tea-cup-fp';
 import { DevTools, newUrl, ProgramWithNav, QueryParams, route0, route1, route2, Router, str } from 'react-tea-cup';
 import * as Counter from './Samples/Counter';
 import * as ParentChild from './Samples/ParentChild';
@@ -165,7 +165,8 @@ type Msg =
   | { type: 'urlChange'; location: Location }
   | { type: 'newUrl'; url: string }
   | { type: 'noop' }
-  | { type: 'tabClicked'; tab: Tab };
+  | { type: 'tabClicked'; tab: Tab }
+  | { type: 'tick' };
 
 const NoOp: Msg = { type: 'noop' };
 
@@ -667,6 +668,15 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
       return [model, Task.perform(newUrl(msg.url), (_: Location) => NoOp)];
     case 'tabClicked':
       return [model, Task.perform(newUrl(routeToUrl(todosRoute(msg.tab))), (_: Location) => NoOp)];
+    case 'tick': {
+      // @ts-ignore
+      let t = window.tick || 0;
+      t = t + 1;
+      console.log('tick', t);
+      // @ts-ignore
+      window.tick = t;
+      return noCmd(model);
+    }
     case 'noop':
       return noCmd(model);
   }
@@ -686,7 +696,7 @@ function subscriptions(model: Model): Sub<Msg> {
         PortsSample.subscriptions().map(mapPortsSample),
       ]);
     default:
-      return Sub.none();
+      return Time.every<Msg>(1000, () => ({ type: 'tick' }));
   }
 }
 
@@ -699,17 +709,28 @@ function onUrlChange(l: Location): Msg {
 
 const devTools = new DevTools<Model, Msg>().setVerbose(true).asGlobal();
 
-const App = () => (
-  <React.StrictMode>
-    <ProgramWithNav
-      init={init}
-      view={view}
-      update={update}
-      subscriptions={subscriptions}
-      onUrlChange={onUrlChange}
-      {...devTools.getProgramProps()}
-    />
-  </React.StrictMode>
-);
+const App = () => {
+  const [mounted, setMounted] = React.useState(true);
+
+  return (
+    <React.StrictMode>
+      {mounted ? (
+        <>
+          <ProgramWithNav
+            init={init}
+            view={view}
+            update={update}
+            subscriptions={subscriptions}
+            onUrlChange={onUrlChange}
+            {...devTools.getProgramProps()}
+          />
+          <button onClick={() => setMounted(false)}>Unmount</button>
+        </>
+      ) : (
+        <p>Unmounted program</p>
+      )}
+    </React.StrictMode>
+  );
+};
 
 export default App;
