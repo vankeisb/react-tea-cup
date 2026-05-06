@@ -128,46 +128,46 @@ export function Program<Model, Msg>(props: ProgramProps<Model, Msg>) {
   // init : run once (good old componentDidMount)
   useEffect(() => {
     const current = modelRef.current;
-    switch (current.type) {
-      case 'Nothing': {
-        // sub to bridges if any
-        props.setModelBridge?.subscribe((model) => {
-          setModel(just(model));
-          modelRef.current = just(model);
-        });
-        props.dispatchBridge?.subscribe(dispatch);
 
-        // init
-        const mac = props.init();
+    // strict mode will shutdown before the init timeout executes
+    let initTimeout: any;
 
-        // and start the MVU
-        const [uModel, uCmd] = mac;
-        setModel(just(uModel));
-        modelRef.current = just(uModel);
-        cmd.current = uCmd;
-        const newSub = props.subscriptions(uModel);
-        sub.current = newSub;
-        newSub.init(dispatch);
-        props.listener?.({ tag: 'init', count: count.current, mac });
+    if (modelRef.current.type === 'Nothing') {
+      // sub to bridges if any
+      props.setModelBridge?.subscribe((model) => {
+        setModel(just(model));
+        modelRef.current = just(model);
+      });
+      props.dispatchBridge?.subscribe(dispatch);
 
-        setTimeout(() => {
-          uCmd.execute(dispatch);
-        });
-        break;
-      }
-      case 'Just': {
-        const newSub = props.subscriptions(current.value);
-        sub.current = newSub;
-        newSub.init(dispatch);
-        break;
-      }
+      // init
+      const mac = props.init();
+
+      // and start the MVU
+      const [uModel, uCmd] = mac;
+      setModel(just(uModel));
+      modelRef.current = just(uModel);
+      cmd.current = uCmd;
+      const newSub = props.subscriptions(uModel);
+      sub.current = newSub;
+      newSub.init(dispatch);
+      props.listener?.({ tag: 'init', count: count.current, mac });
+
+      initTimeout = setTimeout(() => {
+        initTimeout = undefined;
+        uCmd.execute(dispatch);
+      });
     }
 
     return () => {
-      if (sub.current) {
-        sub.current.release();
+      if (initTimeout) {
+        clearTimeout(initTimeout);
+        initTimeout = undefined;
+      } else {
+        props.shutdownHook?.();
       }
-      props.shutdownHook?.();
+      sub.current.release();
+      modelRef.current = nothing;
     };
   }, []);
 
