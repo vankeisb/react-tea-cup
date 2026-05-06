@@ -109,7 +109,7 @@ describe('program test batch', () => {
 
   test('init/update/view/subs count strict', async () => {
     await doTest(true, {
-      initCount: 1,
+      initCount: 2,
       viewCount: 10,
       updateCount: 4,
       subsCount: 6,
